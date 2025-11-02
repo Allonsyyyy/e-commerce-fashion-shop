@@ -1,36 +1,38 @@
 import { Link } from 'react-router-dom'
 import { Heart, Eye } from 'lucide-react'
 import { useState } from 'react'
+import type {ProductCardProps} from "../types/product.ts";
 
-type ProductCardProps = {
-	to?: string
-	title: string
-	price: string
-	originalPrice?: string
-	badge?: string
-	image?: string
-}
-
-export default function ProductCard({ 
-	to = '/product/1', 
-	title, 
-	price, 
-	originalPrice,
-	badge,
-}: ProductCardProps) {
+export default function ProductCard({
+		to = '/product/1',
+		title,
+		price,
+		discount,
+		image,
+	}: ProductCardProps) {
 	const [isWishlisted, setIsWishlisted] = useState(false)
-	
+
+	const finalPrice = Number(price).toLocaleString('vi-VN') + '₫';
+
+	const originalPrice =
+		discount && discount !== '0.00'
+			? (Number(price) / (1 - Number(discount) / 100)).toLocaleString('vi-VN') + '₫'
+			: null;
+
+	const badge = discount && discount !== '0.00' ? `-${Number(discount)}%` : null;
+
 	return (
 		<div className="group relative">
 			<Link to={to} className="block">
 				<div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-neutral-100 shadow-sm transition-all duration-300 group-hover:shadow-lg">
+
 					{/* Badge */}
 					{badge && (
 						<span className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-neutral-900 text-white text-xs font-semibold rounded-md">
 							{badge}
 						</span>
 					)}
-					
+
 					{/* Quick actions */}
 					<div className="absolute top-3 right-3 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
 						<button
@@ -39,8 +41,8 @@ export default function ProductCard({
 								setIsWishlisted(!isWishlisted)
 							}}
 							className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
-								isWishlisted 
-									? 'bg-red-500 text-white' 
+								isWishlisted
+									? 'bg-red-500 text-white'
 									: 'bg-white/90 text-neutral-700 hover:bg-white'
 							}`}
 						>
@@ -50,12 +52,20 @@ export default function ProductCard({
 							<Eye className="h-4 w-4" />
 						</button>
 					</div>
-					
-					{/* Image placeholder */}
-					<div className="h-full w-full transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-neutral-200 to-neutral-300" />
+
+					{/* Image */}
+					{image ? (
+						<img
+							src={image}
+							alt={title}
+							className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+						/>
+					) : (
+						<div className="h-full w-full bg-gradient-to-br from-neutral-200 to-neutral-300" />
+					)}
 				</div>
 			</Link>
-			
+
 			{/* Product info */}
 			<div className="mt-4">
 				<Link to={to}>
@@ -64,7 +74,7 @@ export default function ProductCard({
 					</h3>
 				</Link>
 				<div className="flex items-center gap-2">
-					<span className="text-sm font-semibold text-neutral-900">{price}</span>
+					<span className="text-sm font-semibold text-neutral-900">{finalPrice}</span>
 					{originalPrice && (
 						<span className="text-sm text-neutral-500 line-through">{originalPrice}</span>
 					)}
@@ -73,5 +83,3 @@ export default function ProductCard({
 		</div>
 	)
 }
-
-

@@ -8,6 +8,8 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import About from './pages/About'
 import Contact from './pages/Contact'
+import CategoryPage from "./pages/CategoryPage.tsx";
+import LoginPage from "./pages/LoginPage.tsx";
 
 function App() {
 	return (
@@ -22,6 +24,8 @@ function App() {
 					<Route path="/checkout" element={<Checkout />} />
 					<Route path="/about" element={<About />} />
 					<Route path="/contact" element={<Contact />} />
+					<Route path="/category/:id" element={<CategoryPage />} />
+					<Route path="/login" element={<LoginPage />} />
 				</Routes>
 			</div>
 			<Footer />

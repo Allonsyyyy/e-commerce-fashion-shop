@@ -1,10 +1,31 @@
-import { Link, NavLink } from 'react-router-dom'
+import {Link, NavLink, useNavigate} from 'react-router-dom'
 import { ShoppingCart, Search, Menu, X, User, Heart } from 'lucide-react'
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
 import Container from './Container'
 
 export default function Header() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+	const [user, setUser] = useState<any>(null)
+	const navigate = useNavigate()
+
+	useEffect(() => {
+		const token = localStorage.getItem("token")
+		if (!token) return
+
+		fetch("http://localhost:3000/api/v1/auth/profile", {
+			headers: { Authorization: `Bearer ${token}` }
+		})
+			.then(res => res.json())
+			.then(data => setUser(data))
+			.catch(() => setUser(null))
+	}, [])
+
+	const handleLogout = () => {
+		localStorage.removeItem("token")
+		setUser(null)
+		alert("Đã đăng xuất!")
+		navigate("/")
+	}
 	
 	return (
 		<header className="sticky top-0 z-50 bg-white border-b border-neutral-200 shadow-sm">
@@ -49,13 +70,26 @@ export default function Header() {
 							<button className="md:hidden p-2 text-neutral-700 hover:text-neutral-900">
 								<Search className="h-5 w-5" />
 							</button>
-							
-							{/* User account */}
-							<Link to="/account" className="hidden sm:flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors">
-								<User className="h-5 w-5" />
-								<span>Account</span>
-							</Link>
-							
+
+							{user ? (
+								<div className="hidden sm:flex items-center gap-3 text-sm font-medium text-neutral-700">
+									<User className="h-5 w-5" />
+									<span>Hi, {user?.name || user?.email}</span>
+									<button onClick={handleLogout} className="text-red-600 hover:underline text-sm">
+										Logout
+									</button>
+								</div>
+							) : (
+								<Link
+									to="/login"
+									className="hidden sm:flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors"
+								>
+									<User className="h-5 w-5" />
+									<span>Login</span>
+								</Link>
+							)}
+
+
 							{/* Wishlist */}
 							<Link to="/wishlist" className="hidden sm:flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors relative">
 								<Heart className="h-5 w-5" />
