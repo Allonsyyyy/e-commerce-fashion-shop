@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getCart, removeCartItem, updateCartItem, clearCart } from "../api/cartApi";
+import { checkoutFromCart } from "../api/ordersApi";
 import Container from "../components/Container";
 
 export default function Cart() {
@@ -16,6 +17,33 @@ export default function Cart() {
 	}, []);
 
 	if (!cart) return <div className="py-20 text-center">Loading...</div>;
+
+	const handleCheckout = async () => {
+		const token = localStorage.getItem("token");
+		if (!token) {
+			alert("Bạn cần đăng nhập!");
+			return;
+		}
+		if (!cart.items.length) {
+			alert("Giỏ hàng trống.");
+			return;
+		}
+		try {
+			const resp = await checkoutFromCart(token, {
+				paymentMethod: "vnpay", // hoặc "cod"
+				shippingAddress: "Địa chỉ mặc định",
+			});
+			if (resp.payUrl) {
+				window.location.href = resp.payUrl; // redirect VNPay
+			} else {
+				alert("Tạo đơn thành công!");
+				await loadCart();
+			}
+		} catch (e) {
+			console.error(e);
+			alert("Thanh toán thất bại!");
+		}
+	};
 
 	return (
 		<main className="py-12">
@@ -46,7 +74,11 @@ export default function Cart() {
 										value={item.quantity}
 										onChange={async (e) => {
 											const token = localStorage.getItem("token");
-											const updated = await updateCartItem(token!, item.id, Number(e.target.value));
+											const updated = await updateCartItem(
+												token!,
+												item.id,
+												Number(e.target.value)
+											);
 											setCart(updated);
 										}}
 										className="mt-2 w-16 border rounded px-2"
@@ -73,7 +105,7 @@ export default function Cart() {
 							Total: {Number(cart.totalPrice).toLocaleString()}₫
 						</p>
 
-						<button className="btn-primary mt-6 w-full">
+						<button className="btn-primary mt-6 w-full" onClick={handleCheckout}>
 							Thanh toán
 						</button>
 

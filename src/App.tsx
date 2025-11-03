@@ -10,6 +10,7 @@ import About from './pages/About'
 import Contact from './pages/Contact'
 import CategoryPage from "./pages/CategoryPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
+import OrderSuccess from "./pages/OrderSuccess.tsx";
 
 function App() {
 	return (
@@ -26,6 +27,7 @@ function App() {
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/category/:id" element={<CategoryPage />} />
 					<Route path="/login" element={<LoginPage />} />
+					<Route path="/order-success" element={<OrderSuccess />} />
 				</Routes>
 			</div>
 			<Footer />
