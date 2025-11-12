@@ -1,32 +1,26 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { login } from "../api/authApi";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
 
         try {
-            const res = await fetch("http://localhost:3000/api/v1/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            }).then(res => res.json());
-
-            if (!res.access_token) {
-                alert(res.message || "Đăng nhập thất bại!");
-                return;
-            }
-
+            const res = await login({ email, password });
             localStorage.setItem("token", res.access_token);
             alert("Đăng nhập thành công!");
             navigate("/");
-        } catch (err) {
-            console.error(err);
-            alert("Lỗi server!");
+        } catch (err: any) {
+            alert(err.message || "Đăng nhập thất bại!");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -55,10 +49,18 @@ export default function LoginPage() {
 
                 <button
                     type="submit"
-                    className="w-full bg-black text-white py-2 rounded hover:bg-neutral-800"
+                    disabled={loading}
+                    className="w-full bg-black text-white py-2 rounded hover:bg-neutral-800 disabled:opacity-50"
                 >
-                    Đăng nhập
+                    {loading ? "Đang đăng nhập..." : "Đăng nhập"}
                 </button>
+
+                <p className="text-center text-sm text-neutral-600">
+                    Chưa có tài khoản?{" "}
+                    <Link to="/register" className="text-blue-600 hover:underline">
+                        Đăng ký
+                    </Link>
+                </p>
             </form>
         </main>
     );

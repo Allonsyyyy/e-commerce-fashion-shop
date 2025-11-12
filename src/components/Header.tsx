@@ -88,6 +88,11 @@ export default function Header() {
 								<div className="hidden sm:flex items-center gap-3 text-sm font-medium text-neutral-700">
 									<User className="h-5 w-5" />
 									<span>Hi, {user?.name || user?.email}</span>
+									{(user?.role === "admin" || user?.role === "staff") && (
+										<Link to="/admin" className="text-blue-600 hover:underline text-sm">
+											{user?.role === "admin" ? "Admin" : "Staff"}
+										</Link>
+									)}
 									<button onClick={handleLogout} className="text-red-600 hover:underline text-sm">
 										Logout
 									</button>
