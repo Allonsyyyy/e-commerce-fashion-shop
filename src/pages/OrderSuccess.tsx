@@ -5,11 +5,9 @@ import Container from "../components/Container";
 export default function OrderSuccess() {
     const [params] = useSearchParams();
 
-    const txnRef = params.get("vnp_TxnRef");
-    const orderId = txnRef ? txnRef.split("_")[0] : null;
-
-    const statusCode = params.get("vnp_ResponseCode");
-    const isSuccess = statusCode === "00";
+    const orderId = params.get("orderId");
+    const status = params.get("status");
+    const isSuccess = status === "success";
 
     const [order, setOrder] = useState<any>(null);
 
@@ -26,6 +24,7 @@ export default function OrderSuccess() {
             .then(data => setOrder(data))
             .catch(err => console.error(err));
     }, [orderId, isSuccess]);
+
 
     if (!isSuccess) {
         return (
@@ -47,7 +46,7 @@ export default function OrderSuccess() {
                 <h1 className="heading-3 mb-6 text-green-600">Thanh toán thành công 🎉</h1>
                 <p>Mã đơn hàng: <strong>#{order.id}</strong></p>
                 <p>Tổng tiền: <strong>{Number(order.totalAmount).toLocaleString()}₫</strong></p>
-                <p>Trạng thái: <strong>{order.orderStatus}</strong></p>
+                {/*<p>Trạng thái: <strong>{order.orderStatus}</strong></p>*/}
 
                 <div className="mt-6">
                     <h2 className="heading-4 mb-2">Sản phẩm</h2>

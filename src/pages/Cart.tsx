@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getCart, removeCartItem, updateCartItem, clearCart } from "../api/cartApi";
-import { checkoutFromCart } from "../api/ordersApi";
 import Container from "../components/Container";
 
 export default function Cart() {
 	const [cart, setCart] = useState<any>(null);
+	const navigate = useNavigate();
 
 	const loadCart = async () => {
 		const token = localStorage.getItem("token");
@@ -18,31 +19,18 @@ export default function Cart() {
 
 	if (!cart) return <div className="py-20 text-center">Loading...</div>;
 
-	const handleCheckout = async () => {
+	const handleCheckout = () => {
 		const token = localStorage.getItem("token");
 		if (!token) {
-			alert("Bạn cần đăng nhập!");
+			alert("Bạn chưa đăng nhập!");
+			navigate("/login");
 			return;
 		}
 		if (!cart.items.length) {
 			alert("Giỏ hàng trống.");
 			return;
 		}
-		try {
-			const resp = await checkoutFromCart(token, {
-				paymentMethod: "vnpay", // hoặc "cod"
-				shippingAddress: "Địa chỉ mặc định",
-			});
-			if (resp.payUrl) {
-				window.location.href = resp.payUrl; // redirect VNPay
-			} else {
-				alert("Tạo đơn thành công!");
-				await loadCart();
-			}
-		} catch (e) {
-			console.error(e);
-			alert("Thanh toán thất bại!");
-		}
+		navigate("/checkout");
 	};
 
 	return (
@@ -65,7 +53,7 @@ export default function Cart() {
 								<div className="flex-1">
 									<p className="font-medium">{item.variant.product.name}</p>
 									<p className="font-semibold mt-1">
-										{Number(item.price).toLocaleString()}₫
+										{Number(item.price).toLocaleString()}
 									</p>
 
 									<input
@@ -74,13 +62,19 @@ export default function Cart() {
 										value={item.quantity}
 										onChange={async (e) => {
 											const token = localStorage.getItem("token");
-											const updated = await updateCartItem(
-												token!,
-												item.id,
-												Number(e.target.value)
+											const quantity = Number(e.target.value);
+
+											const updated = await updateCartItem(token!, item.id, quantity);
+
+											// Tính toán totalPrice
+											const newTotal = updated.items.reduce(
+												(sum: number, it: any) => sum + it.price * it.quantity,
+												0
 											);
-											setCart(updated);
+
+											setCart({ ...updated, totalPrice: newTotal });
 										}}
+
 										className="mt-2 w-16 border rounded px-2"
 									/>
 								</div>
@@ -100,9 +94,9 @@ export default function Cart() {
 					</div>
 
 					<div className="card h-fit">
-						<h2 className="heading-4">Tổng kết</h2>
+						<h2 className="heading-4">Tổng tiền</h2>
 						<p className="mt-4 font-bold text-lg text-neutral-900">
-							Total: {Number(cart.totalPrice).toLocaleString()}₫
+							Total: {Number(cart.totalPrice).toLocaleString()}
 						</p>
 
 						<button className="btn-primary mt-6 w-full" onClick={handleCheckout}>
