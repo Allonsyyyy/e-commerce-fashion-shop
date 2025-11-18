@@ -1,47 +1,63 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Search, Menu, X, User, Heart } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Container from './Container'
 
 export default function Header() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 	const [user, setUser] = useState<any>(null)
+	const [profileOpen, setProfileOpen] = useState(false)
 	const navigate = useNavigate()
+	const profileRef = useRef<HTMLDivElement | null>(null)
 
 	const loadUser = () => {
-		const token = localStorage.getItem("token")
+		const token = localStorage.getItem('token')
 		if (!token) {
 			setUser(null)
 			return
 		}
 
-		fetch("http://localhost:3000/api/v1/auth/profile", {
+		fetch('http://localhost:3000/api/v1/auth/profile', {
 			headers: { Authorization: `Bearer ${token}` }
 		})
-			.then(res => res.json())
-			.then(data => setUser(data))
+			.then((res) => res.json())
+			.then((data) => setUser(data))
 			.catch(() => setUser(null))
 	}
 
 	useEffect(() => {
-		loadUser()
-		window.addEventListener("storage", loadUser)
+		const handleAuthChanged = () => loadUser()
 
-		return () => window.removeEventListener("storage", loadUser)
+		loadUser()
+		window.addEventListener('storage', handleAuthChanged)
+		window.addEventListener('auth-changed', handleAuthChanged as EventListener)
+
+		const handleClickOutside = (event: MouseEvent) => {
+			if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+				setProfileOpen(false)
+			}
+		}
+
+		document.addEventListener('mousedown', handleClickOutside)
+
+		return () => {
+			window.removeEventListener('storage', handleAuthChanged)
+			window.removeEventListener('auth-changed', handleAuthChanged as EventListener)
+			document.removeEventListener('mousedown', handleClickOutside)
+		}
 	}, [])
 
 	const handleLogout = () => {
-		localStorage.removeItem("token")
+		setProfileOpen(false)
+		localStorage.removeItem('token')
 		setUser(null)
-
-		window.dispatchEvent(new Event("storage"))
-
-		navigate("/")
+		window.dispatchEvent(new Event('storage'))
+		window.dispatchEvent(new Event('auth-changed'))
+		navigate('/')
 	}
 
 	return (
 		<header className="sticky top-0 z-50 bg-white border-b border-neutral-200 shadow-sm">
-			{/* Top bar */}
 			<div className="bg-neutral-900 text-white text-xs py-2">
 				<Container>
 					<div className="flex items-center justify-between">
@@ -55,16 +71,13 @@ export default function Header() {
 				</Container>
 			</div>
 
-			{/* Main header */}
 			<div className="bg-white">
 				<Container>
 					<div className="flex items-center gap-4 lg:gap-8 py-4">
-						{/* Logo */}
 						<Link to="/" className="font-display text-2xl font-bold tracking-tight text-neutral-900 hover:text-neutral-700 transition-colors flex-shrink-0">
 							Shop
 						</Link>
 
-						{/* Search bar */}
 						<div className="hidden md:flex flex-1 max-w-2xl">
 							<div className="relative w-full">
 								<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
@@ -76,83 +89,100 @@ export default function Header() {
 							</div>
 						</div>
 
-						{/* Right side */}
 						<div className="flex items-center gap-4 ml-auto">
-
-							{/* Search icon mobile */}
 							<button className="md:hidden p-2 text-neutral-700 hover:text-neutral-900">
 								<Search className="h-5 w-5" />
 							</button>
 
-							{user ? (
-								<div className="hidden sm:flex items-center gap-3 text-sm font-medium text-neutral-700">
-									<User className="h-5 w-5" />
-									<span>Hi, {user?.name || user?.email}</span>
-									{(user?.role === "admin" || user?.role === "staff") && (
-										<Link to="/admin" className="text-blue-600 hover:underline text-sm">
-											{user?.role === "admin" ? "Admin" : "Staff"}
-										</Link>
-									)}
-									<button onClick={handleLogout} className="text-red-600 hover:underline text-sm">
-										Logout
-									</button>
-								</div>
-							) : (
-								/* 🔹 Chưa login */
-								<Link
-									to="/login"
-									className="hidden sm:flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors"
+							<div className="relative" ref={profileRef}>
+								<button
+									className="p-2 rounded-full border border-neutral-200 text-neutral-700 hover:text-neutral-900 hover:border-neutral-400 transition-colors"
+									onClick={() => setProfileOpen((prev) => !prev)}
 								>
 									<User className="h-5 w-5" />
-									<span>Login</span>
-								</Link>
-							)}
+								</button>
+								{profileOpen && (
+									<div className="absolute right-0 mt-2 w-48 rounded-lg border border-neutral-200 bg-white shadow-lg py-2 text-sm z-50">
+										{user ? (
+											<>
+												<div className="px-4 pb-2 text-xs uppercase text-neutral-500">
+													Xin chào, {user?.name || user?.email}
+												</div>
+												<button className="w-full text-left px-4 py-2 hover:bg-neutral-50" onClick={() => { setProfileOpen(false); navigate('/profile') }}>
+													Thông tin cá nhân
+												</button>
+												<button className="w-full text-left px-4 py-2 hover:bg-neutral-50" onClick={() => { setProfileOpen(false); navigate('/orders') }}>
+													Đơn hàng của tôi
+												</button>
+												{user?.role === 'admin' && (
+													<button
+														className="w-full text-left px-4 py-2 hover:bg-neutral-50"
+														onClick={() => {
+															setProfileOpen(false)
+															navigate('/admin')
+														}}
+													>
+														Bảng quản trị
+													</button>
+												)}
+												{user?.role === 'staff' && (
+													<button
+														className="w-full text-left px-4 py-2 hover:bg-neutral-50"
+														onClick={() => {
+															setProfileOpen(false)
+															navigate('/staff/fulfillment')
+														}}
+													>
+														Trang nhân viên
+													</button>
+												)}
+												<button className="w-full text-left px-4 py-2 text-red-600 hover:bg-neutral-50" onClick={handleLogout}>
+													Đăng xuất
+												</button>
+											</>
+										) : (
+											<button className="w-full text-left px-4 py-2 hover:bg-neutral-50" onClick={() => { setProfileOpen(false); navigate('/login') }}>
+												Đăng nhập
+											</button>
+										)}
+									</div>
+								)}
+							</div>
 
-							{/* Wishlist */}
 							<Link to="/wishlist" className="hidden sm:flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors relative">
 								<Heart className="h-5 w-5" />
 								<span className="absolute -right-1 -top-1 h-4 min-w-4 px-1 rounded-full bg-neutral-900 text-white text-[10px] font-semibold flex items-center justify-center">0</span>
 							</Link>
 
-							{/* Cart */}
 							<Link to="/cart" className="relative inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors">
 								<ShoppingCart className="h-5 w-5" />
 								<span className="hidden sm:inline">Cart</span>
 								<span className="absolute -right-2 -top-2 h-5 min-w-5 px-1.5 rounded-full bg-neutral-900 text-white text-[10px] font-semibold flex items-center justify-center">0</span>
 							</Link>
 
-							{/* Mobile menu */}
-							<button
-								onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-								className="md:hidden p-2 text-neutral-700 hover:text-neutral-900"
-							>
+							<button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-neutral-700 hover:text-neutral-900">
 								{mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
 							</button>
 						</div>
 					</div>
 
-					{/* Navigation */}
 					<nav className="hidden md:flex items-center gap-8 pb-4 border-t border-neutral-100 pt-4">
 						<NavLink to="/shop" className={({ isActive }) =>
 							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
 								'text-neutral-600 hover:text-neutral-900 transition-colors'
 						}>Shop</NavLink>
-
 						<NavLink to="/shop?category=men" className={({ isActive }) =>
 							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
 								'text-neutral-600 hover:text-neutral-900 transition-colors'
 						}>Men</NavLink>
-
 						<NavLink to="/shop?category=women" className={({ isActive }) =>
 							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
 								'text-neutral-600 hover:text-neutral-900 transition-colors'
 						}>Women</NavLink>
-
 						<NavLink to="/about" className={({ isActive }) =>
 							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
 								'text-neutral-600 hover:text-neutral-900 transition-colors'
 						}>About</NavLink>
-
 						<NavLink to="/contact" className={({ isActive }) =>
 							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
 								'text-neutral-600 hover:text-neutral-900 transition-colors'
@@ -161,7 +191,6 @@ export default function Header() {
 				</Container>
 			</div>
 
-			{/* Mobile menu */}
 			{mobileMenuOpen && (
 				<div className="md:hidden border-t border-neutral-200 bg-white">
 					<Container>

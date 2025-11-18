@@ -12,6 +12,9 @@ import CategoryPage from "./pages/CategoryPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import OrderSuccess from "./pages/OrderSuccess.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
+import MyOrdersPage from "./pages/MyOrdersPage.tsx";
+import OrderDetailPage from "./pages/OrderDetailPage.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import AdminProducts from "./pages/admin/AdminProducts.tsx";
 import AdminVariants from "./pages/admin/AdminVariants.tsx";
@@ -26,9 +29,12 @@ import AdminInventory from "./pages/admin/AdminInventory.tsx";
 import AdminShipping from "./pages/admin/AdminShipping.tsx";
 import AdminBestSelling from "./pages/admin/AdminBestSelling.tsx";
 import AdminRevenue from "./pages/admin/AdminRevenue.tsx";
+import StaffFulfillment from "./pages/StaffFulfillment.tsx";
+import ChatbotWidget from "./components/ChatbotWidget.tsx";
 
 function App() {
 	return (
+		<>
 		<Routes>
 			{/* Public routes with Header/Footer */}
 			<Route path="/" element={
@@ -108,6 +114,27 @@ function App() {
 					<Footer />
 				</div>
 			} />
+			<Route path="/profile" element={
+				<div className="min-h-full flex flex-col">
+					<Header />
+					<div className="flex-1"><ProfilePage /></div>
+					<Footer />
+				</div>
+			} />
+			<Route path="/orders" element={
+				<div className="min-h-full flex flex-col">
+					<Header />
+					<div className="flex-1"><MyOrdersPage /></div>
+					<Footer />
+				</div>
+			} />
+			<Route path="/orders/:id" element={
+				<div className="min-h-full flex flex-col">
+					<Header />
+					<div className="flex-1"><OrderDetailPage /></div>
+					<Footer />
+				</div>
+			} />
 			{/* Admin/Staff routes without Header/Footer */}
 			<Route path="/admin" element={<AdminDashboard />} />
 			<Route path="/admin/categories" element={<AdminCategories />} />
@@ -118,6 +145,7 @@ function App() {
 			<Route path="/admin/shipping" element={<AdminShipping />} />
 			<Route path="/admin/best-selling" element={<AdminBestSelling />} />
 			<Route path="/admin/revenue" element={<AdminRevenue />} />
+			<Route path="/staff/fulfillment" element={<StaffFulfillment />} />
 			{/* Legacy routes - can be removed if not needed */}
 			<Route path="/admin/variants" element={<AdminVariants />} />
 			<Route path="/admin/colors" element={<AdminColors />} />
@@ -125,6 +153,8 @@ function App() {
 			<Route path="/admin/images" element={<AdminImages />} />
 			<Route path="/admin/orders" element={<AdminOrders />} />
 		</Routes>
+		<ChatbotWidget />
+		</>
 	);
 }
 

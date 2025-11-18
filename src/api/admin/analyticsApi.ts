@@ -8,35 +8,32 @@ export type RevenueStats = {
     totalRevenue: number;
     totalOrders: number;
     averageOrderValue: number;
-    revenueByMonth: Array<{
-        month: string;
-        revenue: number;
-        orders: number;
-    }>;
-    revenueByCategory: Array<{
-        categoryName: string;
-        revenue: number;
-        quantity: number;
-    }>;
+    productsSold: number;
 };
 
 export type BestSellingProduct = {
     productId: number;
-    productName: string;
+    name: string;
+    imageUrl: string;
     totalSold: number;
     revenue: number;
-    imageUrl: string;
 };
+
+function buildQuery(params?: Record<string, string | number | undefined>) {
+    const query = new URLSearchParams();
+    if (!params) return "";
+    Object.entries(params).forEach(([key, value]) => {
+        if (value) query.append(key, String(value));
+    });
+    const str = query.toString();
+    return str ? `?${str}` : "";
+}
 
 export async function getRevenueStats(token: string, params?: {
     startDate?: string;
     endDate?: string;
 }): Promise<RevenueStats> {
-    const queryParams = new URLSearchParams();
-    if (params?.startDate) queryParams.append("startDate", params.startDate);
-    if (params?.endDate) queryParams.append("endDate", params.endDate);
-
-    const url = `${API_BASE}/analytics/revenue${queryParams.toString() ? `?${queryParams}` : ""}`;
+    const url = `${API_BASE}/reports/overview${buildQuery(params)}`;
     const res = await fetch(url, {
         headers: authHeaders(token),
     });
@@ -49,12 +46,7 @@ export async function getBestSellingProducts(token: string, params?: {
     startDate?: string;
     endDate?: string;
 }): Promise<BestSellingProduct[]> {
-    const queryParams = new URLSearchParams();
-    if (params?.limit) queryParams.append("limit", params.limit.toString());
-    if (params?.startDate) queryParams.append("startDate", params.startDate);
-    if (params?.endDate) queryParams.append("endDate", params.endDate);
-
-    const url = `${API_BASE}/analytics/best-selling${queryParams.toString() ? `?${queryParams}` : ""}`;
+    const url = `${API_BASE}/reports/best-sellers${buildQuery(params)}`;
     const res = await fetch(url, {
         headers: authHeaders(token),
     });

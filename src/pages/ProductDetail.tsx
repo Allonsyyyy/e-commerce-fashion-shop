@@ -1,13 +1,13 @@
 // src/pages/ProductDetail.tsx
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Breadcrumbs from "../components/Breadcrumbs";
 import Container from "../components/Container";
 import type { Product } from "../types/product";
-import { buyNow } from "../api/ordersApi";
 
 export default function ProductDetail() {
 	const { id } = useParams();
+	const navigate = useNavigate();
 	const [product, setProduct] = useState<Product | null>(null);
 	const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -42,33 +42,33 @@ export default function ProductDetail() {
 		product.images?.[0]?.imageUrl ||
 		"/placeholder.png";
 
-	const handleBuyNow = async () => {
+	const handleBuyNow = () => {
 		if (!selectedVariant) {
-			alert("Vui lòng chọn màu / size!");
+			alert("Vui l�ng ch?n m�u / size!");
 			return;
 		}
 		const token = localStorage.getItem("token");
 		if (!token) {
-			alert("Bạn cần đăng nhập!");
-			// option: window.location.href = "/login";
+			alert("B?n c?n dang nh?p!");
+			navigate("/login");
 			return;
 		}
-		try {
-			const resp = await buyNow(token, {
-				variantId: selectedVariant,
-				quantity: quantity || 1,
-				paymentMethod: "vnpay", // hoặc "cod" nếu bạn muốn
-				shippingAddress: "Địa chỉ mặc định",
-			});
-			if (resp.payUrl) {
-				window.location.href = resp.payUrl; // redirect VNPay
-			} else {
-				alert("Tạo đơn thành công!");
-			}
-		} catch (err) {
-			console.error(err);
-			alert("Thanh toán thất bại!");
-		}
+
+		const buyNowPayload = {
+			variantId: selectedVariant,
+			quantity: quantity || 1,
+			price: Number(activeVariant?.price ?? product.price),
+			productName: product.name,
+			imageUrl:
+				activeVariant?.imageUrl ||
+				product.mainImageUrl ||
+				product.images?.[0]?.imageUrl ||
+				"/placeholder.png",
+			weight: 200,
+		};
+
+		sessionStorage.setItem("buyNowItem", JSON.stringify(buyNowPayload));
+		navigate("/checkout?mode=buy-now");
 	};
 
 	return (
@@ -238,3 +238,4 @@ export default function ProductDetail() {
 		</main>
 	);
 }
+

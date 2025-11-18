@@ -15,6 +15,7 @@ export default function LoginPage() {
         try {
             const res = await login({ email, password });
             localStorage.setItem("token", res.access_token);
+            window.dispatchEvent(new Event("auth-changed"));
             alert("Đăng nhập thành công!");
             navigate("/");
         } catch (err: any) {
@@ -65,3 +66,4 @@ export default function LoginPage() {
         </main>
     );
 }
+

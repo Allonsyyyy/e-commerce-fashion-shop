@@ -33,6 +33,7 @@ export type Order = {
     paymentMethod: string;
     paymentStatus: string;
     shipmentStatus: string;
+    ghnOrderCode?: string | null;
     shippingAddress: string;
     vnpTransDate: string | null;
     vnpTxnRef: string | null;

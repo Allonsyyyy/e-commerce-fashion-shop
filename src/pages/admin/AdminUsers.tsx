@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { getUsers, updateUser, deleteUser } from "../../api/admin/usersApi";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 
 export default function AdminUsers() {
     const [users, setUsers] = useState<any[]>([]);

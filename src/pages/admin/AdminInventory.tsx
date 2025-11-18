@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { getInventory, updateInventory } from "../../api/admin/inventoryApi";
-import { getProducts } from "../../api/productsApi";
-import { Plus, Edit } from "lucide-react";
+import { Edit } from "lucide-react";
 
 export default function AdminInventory() {
     const [inventory, setInventory] = useState<any[]>([]);
-    const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingItem, setEditingItem] = useState<any | null>(null);
@@ -26,13 +24,9 @@ export default function AdminInventory() {
         if (!token) return;
 
         try {
-            const [inventoryRes, productsRes] = await Promise.all([
-                getInventory(token, { page, limit: 10 }),
-                getProducts({ page: 1, limit: 100 }),
-            ]);
+            const inventoryRes = await getInventory(token, { page, limit: 10 });
             setInventory(inventoryRes.data);
             setTotal(inventoryRes.total);
-            setProducts(productsRes.data);
         } catch (err) {
             console.error("Failed to load data:", err);
         } finally {
