@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { ShoppingCart, Search, Menu, X, User, Heart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Container from './Container'
@@ -7,6 +7,7 @@ export default function Header() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 	const [user, setUser] = useState<any>(null)
 	const navigate = useNavigate()
+	const location = useLocation()
 
 	const loadUser = () => {
 		const token = localStorage.getItem("token")
@@ -133,20 +134,47 @@ export default function Header() {
 
 					{/* Navigation */}
 					<nav className="hidden md:flex items-center gap-8 pb-4 border-t border-neutral-100 pt-4">
-						<NavLink to="/shop" className={({ isActive }) =>
-							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
-								'text-neutral-600 hover:text-neutral-900 transition-colors'
-						}>Shop</NavLink>
+						{(() => {
+							const searchParams = new URLSearchParams(location.search)
+							const category = searchParams.get('category')
+							const isShopActive = location.pathname === '/shop' && !category
+							const isMenActive = location.pathname === '/shop' && category === 'men'
+							const isWomenActive = location.pathname === '/shop' && category === 'women'
+							
+							return (
+								<>
+									<Link
+										to="/shop"
+										className={isShopActive
+											? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium'
+											: 'text-neutral-600 hover:text-neutral-900 transition-colors'
+										}
+									>
+										Shop
+									</Link>
 
-						<NavLink to="/shop?category=men" className={({ isActive }) =>
-							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
-								'text-neutral-600 hover:text-neutral-900 transition-colors'
-						}>Men</NavLink>
+									<Link
+										to="/shop?category=men"
+										className={isMenActive
+											? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium'
+											: 'text-neutral-600 hover:text-neutral-900 transition-colors'
+										}
+									>
+										Men
+									</Link>
 
-						<NavLink to="/shop?category=women" className={({ isActive }) =>
-							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
-								'text-neutral-600 hover:text-neutral-900 transition-colors'
-						}>Women</NavLink>
+									<Link
+										to="/shop?category=women"
+										className={isWomenActive
+											? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium'
+											: 'text-neutral-600 hover:text-neutral-900 transition-colors'
+										}
+									>
+										Women
+									</Link>
+								</>
+							)
+						})()}
 
 						<NavLink to="/about" className={({ isActive }) =>
 							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
@@ -166,9 +194,36 @@ export default function Header() {
 				<div className="md:hidden border-t border-neutral-200 bg-white">
 					<Container>
 						<div className="py-4 space-y-4">
-							<NavLink to="/shop" className="block py-2 text-neutral-600 hover:text-neutral-900">Shop</NavLink>
-							<NavLink to="/shop?category=men" className="block py-2 text-neutral-600 hover:text-neutral-900">Men</NavLink>
-							<NavLink to="/shop?category=women" className="block py-2 text-neutral-600 hover:text-neutral-900">Women</NavLink>
+							{(() => {
+								const searchParams = new URLSearchParams(location.search)
+								const category = searchParams.get('category')
+								const isShopActive = location.pathname === '/shop' && !category
+								const isMenActive = location.pathname === '/shop' && category === 'men'
+								const isWomenActive = location.pathname === '/shop' && category === 'women'
+								
+								return (
+									<>
+										<Link
+											to="/shop"
+											className={`block py-2 ${isShopActive ? 'text-neutral-900 font-medium' : 'text-neutral-600 hover:text-neutral-900'}`}
+										>
+											Shop
+										</Link>
+										<Link
+											to="/shop?category=men"
+											className={`block py-2 ${isMenActive ? 'text-neutral-900 font-medium' : 'text-neutral-600 hover:text-neutral-900'}`}
+										>
+											Men
+										</Link>
+										<Link
+											to="/shop?category=women"
+											className={`block py-2 ${isWomenActive ? 'text-neutral-900 font-medium' : 'text-neutral-600 hover:text-neutral-900'}`}
+										>
+											Women
+										</Link>
+									</>
+								)
+							})()}
 							<NavLink to="/about" className="block py-2 text-neutral-600 hover:text-neutral-900">About</NavLink>
 							<NavLink to="/contact" className="block py-2 text-neutral-600 hover:text-neutral-900">Contact</NavLink>
 						</div>

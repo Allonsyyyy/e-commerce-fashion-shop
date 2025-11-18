@@ -31,9 +31,9 @@ export default function OrderSuccess() {
         return (
             <main className="py-12">
                 <Container>
-                    <h1 className="heading-3 mb-4 text-red-600">Thanh toán thất bại </h1>
-                    <p className="mb-4">Có lỗi xảy ra trong quá trình thanh toán.</p>
-                    <a href="/cart" className="btn-primary">Thử lại</a>
+                    <h1 className="heading-3 mb-4 text-red-600">Payment Failed</h1>
+                    <p className="mb-4">An error occurred during payment processing.</p>
+                    <a href="/cart" className="btn-primary">Try Again</a>
                 </Container>
             </main>
         );
@@ -44,13 +44,13 @@ export default function OrderSuccess() {
     return (
         <main className="py-12">
             <Container>
-                <h1 className="heading-3 mb-6 text-green-600">Thanh toán thành công 🎉</h1>
-                <p>Mã đơn hàng: <strong>#{order.id}</strong></p>
-                <p>Tổng tiền: <strong>{Number(order.totalAmount).toLocaleString()}₫</strong></p>
-                <p>Trạng thái: <strong>{order.orderStatus}</strong></p>
+                <h1 className="heading-3 mb-6 text-green-600">Payment Successful 🎉</h1>
+                <p>Order ID: <strong>#{order.id}</strong></p>
+                <p>Total Amount: <strong>{Number(order.totalAmount).toLocaleString()}₫</strong></p>
+                <p>Status: <strong>{order.orderStatus}</strong></p>
 
                 <div className="mt-6">
-                    <h2 className="heading-4 mb-2">Sản phẩm</h2>
+                    <h2 className="heading-4 mb-2">Products</h2>
                     <ul className="space-y-3">
                         {order.items.map((item: any) => (
                             <li key={item.id} className="border p-3 rounded-md">
@@ -61,7 +61,7 @@ export default function OrderSuccess() {
                 </div>
 
                 <a href="/shop" className="btn-primary mt-8 inline-block">
-                    Tiếp tục mua sắm
+                    Continue Shopping
                 </a>
             </Container>
         </main>

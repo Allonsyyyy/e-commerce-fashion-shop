@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import ChatBot from './components/ChatBot'
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import ProductDetail from './pages/ProductDetail'
@@ -12,6 +13,8 @@ import CategoryPage from "./pages/CategoryPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import OrderSuccess from "./pages/OrderSuccess.tsx";
+import Orders from "./pages/Orders.tsx";
+import OrderDetail from "./pages/OrderDetail.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import AdminProducts from "./pages/admin/AdminProducts.tsx";
 import AdminVariants from "./pages/admin/AdminVariants.tsx";
@@ -36,6 +39,7 @@ function App() {
 					<Header />
 					<div className="flex-1"><Home /></div>
 					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			<Route path="/shop" element={
@@ -43,6 +47,7 @@ function App() {
 					<Header />
 					<div className="flex-1"><Shop /></div>
 					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			<Route path="/product/:id" element={
@@ -50,6 +55,7 @@ function App() {
 					<Header />
 					<div className="flex-1"><ProductDetail /></div>
 					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			<Route path="/cart" element={
@@ -57,6 +63,7 @@ function App() {
 					<Header />
 					<div className="flex-1"><Cart /></div>
 					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			<Route path="/checkout" element={
@@ -64,6 +71,7 @@ function App() {
 					<Header />
 					<div className="flex-1"><Checkout /></div>
 					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			<Route path="/about" element={
@@ -71,6 +79,7 @@ function App() {
 					<Header />
 					<div className="flex-1"><About /></div>
 					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			<Route path="/contact" element={
@@ -78,6 +87,7 @@ function App() {
 					<Header />
 					<div className="flex-1"><Contact /></div>
 					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			<Route path="/category/:id" element={
@@ -85,6 +95,7 @@ function App() {
 					<Header />
 					<div className="flex-1"><CategoryPage /></div>
 					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			<Route path="/login" element={
@@ -92,6 +103,7 @@ function App() {
 					<Header />
 					<div className="flex-1"><LoginPage /></div>
 					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			<Route path="/register" element={
@@ -99,6 +111,7 @@ function App() {
 					<Header />
 					<div className="flex-1"><RegisterPage /></div>
 					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			<Route path="/order-success" element={
@@ -106,6 +119,23 @@ function App() {
 					<Header />
 					<div className="flex-1"><OrderSuccess /></div>
 					<Footer />
+					<ChatBot />
+				</div>
+			} />
+			<Route path="/orders" element={
+				<div className="min-h-full flex flex-col">
+					<Header />
+					<div className="flex-1"><Orders /></div>
+					<Footer />
+					<ChatBot />
+				</div>
+			} />
+			<Route path="/orders/:id" element={
+				<div className="min-h-full flex flex-col">
+					<Header />
+					<div className="flex-1"><OrderDetail /></div>
+					<Footer />
+					<ChatBot />
 				</div>
 			} />
 			{/* Admin/Staff routes without Header/Footer */}

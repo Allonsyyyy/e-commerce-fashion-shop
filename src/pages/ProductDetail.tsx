@@ -44,12 +44,12 @@ export default function ProductDetail() {
 
 	const handleBuyNow = async () => {
 		if (!selectedVariant) {
-			alert("Vui lòng chọn màu / size!");
+			alert("Please select color / size!");
 			return;
 		}
 		const token = localStorage.getItem("token");
 		if (!token) {
-			alert("Bạn cần đăng nhập!");
+			alert("You need to sign in!");
 			// option: window.location.href = "/login";
 			return;
 		}
@@ -57,17 +57,17 @@ export default function ProductDetail() {
 			const resp = await buyNow(token, {
 				variantId: selectedVariant,
 				quantity: quantity || 1,
-				paymentMethod: "vnpay", // hoặc "cod" nếu bạn muốn
-				shippingAddress: "Địa chỉ mặc định",
+				paymentMethod: "vnpay", // or "cod" if you want
+				shippingAddress: "Default address",
 			});
 			if (resp.payUrl) {
 				window.location.href = resp.payUrl; // redirect VNPay
 			} else {
-				alert("Tạo đơn thành công!");
+				alert("Order created successfully!");
 			}
 		} catch (err) {
 			console.error(err);
-			alert("Thanh toán thất bại!");
+			alert("Checkout failed!");
 		}
 	};
 
@@ -137,7 +137,7 @@ export default function ProductDetail() {
 							<div className="mt-8 space-y-4">
 								{/* Color */}
 								<div>
-									<h4 className="mb-2 font-medium">Màu sắc</h4>
+									<h4 className="mb-2 font-medium">Color</h4>
 									<div className="flex gap-2">
 										{product.variants.map((v) => (
 											<button
@@ -155,7 +155,7 @@ export default function ProductDetail() {
 
 								{/* Size */}
 								<div>
-									<h4 className="mb-2 font-medium">Kích cỡ</h4>
+									<h4 className="mb-2 font-medium">Size</h4>
 									<div className="flex gap-2">
 										{product.variants.map((v) => (
 											<button
@@ -173,9 +173,9 @@ export default function ProductDetail() {
 							</div>
 						)}
 
-						{/* SỐ LƯỢNG */}
+						{/* QUANTITY */}
 						<div className="mt-4">
-							<label className="block text-sm text-neutral-700 mb-1">Số lượng</label>
+							<label className="block text-sm text-neutral-700 mb-1">Quantity</label>
 							<input
 								type="number"
 								min={1}
@@ -187,7 +187,7 @@ export default function ProductDetail() {
 
 						{/* STOCK */}
 						<div className="mt-4 text-sm text-neutral-600">
-							Stock: {activeVariant?.stock ?? product.stock} sản phẩm
+							Stock: {activeVariant?.stock ?? product.stock} {activeVariant?.stock === 1 || product.stock === 1 ? 'item' : 'items'}
 						</div>
 
 						{/* ACTION BUTTONS */}
@@ -196,9 +196,9 @@ export default function ProductDetail() {
 							<button
 								className="btn-primary flex-1 px-8 py-3"
 								onClick={async () => {
-									if (!selectedVariant) return alert("Vui lòng chọn màu / size!");
+									if (!selectedVariant) return alert("Please select color / size!");
 									const token = localStorage.getItem("token");
-									if (!token) return alert("Bạn cần đăng nhập!");
+									if (!token) return alert("You need to sign in!");
 
 									try {
 										const res = await fetch("http://localhost:3000/api/v1/cart/add", {
@@ -214,22 +214,22 @@ export default function ProductDetail() {
 										}).then((res) => res.json());
 
 										console.log("Added to cart:", res);
-										alert("Đã thêm vào giỏ hàng!");
+										alert("Added to cart!");
 									} catch (error) {
 										console.error(error);
-										alert("Lỗi khi thêm vào giỏ hàng!");
+										alert("Error adding to cart!");
 									}
 								}}
 							>
-								Thêm vào giỏ hàng
+								Add to Cart
 							</button>
 
-							{/* Mua ngay */}
+							{/* Buy Now */}
 							<button
 								className="btn-secondary px-8 py-3"
 								onClick={handleBuyNow}
 							>
-								Mua ngay
+								Buy Now
 							</button>
 						</div>
 					</div>

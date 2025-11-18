@@ -22,11 +22,8 @@ export default function AdminDiscounts() {
     }, []);
 
     const loadData = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
         try {
-            const data = await getDiscounts(token);
+            const data = await getDiscounts();
             setDiscounts(data);
         } catch (err) {
             console.error("Failed to load discounts:", err);

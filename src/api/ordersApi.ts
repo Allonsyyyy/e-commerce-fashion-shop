@@ -17,6 +17,83 @@ const authHeaders = (token: string) => ({
     Authorization: `Bearer ${token}`,
 });
 
+export type OrderItem = {
+    id: number;
+    quantity: number;
+    price: string;
+    variant: {
+        id: number;
+        sku: string;
+        price: string;
+        stock: number;
+        imageUrl: string;
+        product: {
+            id: number;
+            name: string;
+            description: string;
+            price: string;
+            discount: string;
+            stock: number;
+            mainImageUrl: string;
+        };
+    };
+};
+
+export type Order = {
+    id: number;
+    totalAmount: string;
+    orderStatus: string;
+    paymentMethod: string;
+    paymentStatus: string;
+    shipmentStatus: string;
+    shippingAddress: string;
+    vnpTransDate: string | null;
+    vnpTxnRef: string | null;
+    createdAt: string;
+    updatedAt: string;
+    items: OrderItem[];
+};
+
+export type OrdersResponse = {
+    data: Order[];
+    total: number;
+    page: number;
+    limit: number;
+};
+
+export async function getUserOrders(
+    token: string,
+    params?: {
+        page?: number;
+        limit?: number;
+        sort?: string;
+    }
+): Promise<OrdersResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.sort) queryParams.append("sort", params.sort);
+
+    const url = `${API_BASE}/orders${queryParams.toString() ? `?${queryParams}` : ""}`;
+    const res = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
+export async function getUserOrder(token: string, id: number): Promise<Order> {
+    const res = await fetch(`${API_BASE}/orders/${id}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
 export async function buyNow(
     token: string,
     payload: BuyNowPayload

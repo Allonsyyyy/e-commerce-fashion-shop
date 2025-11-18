@@ -64,24 +64,26 @@ export default function CategoryPage() {
         <main className="py-12">
             <Container>
 
-                {/* ROOT NAV */}
-                <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b">
-                    {rootCategories.map((root) => (
-                        <Link
-                            key={root.id}
-                            to={`/category/${root.id}`}
-                            className={`px-4 py-2 rounded-md border text-sm whitespace-nowrap transition
-                                ${root.id == (category.parent?.id ?? category.id)
-                                ? "bg-neutral-900 text-white border-neutral-900"
-                                : "border-neutral-300 hover:border-neutral-900"
-                            }`}
-                        >
-                            {root.name}
-                        </Link>
-                    ))}
-                </div>
+                {/* ROOT NAV - Only show if we're in a child category or if there are multiple root categories */}
+                {category.parent && rootCategories.length > 1 && (
+                    <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b">
+                        {rootCategories.map((root) => (
+                            <Link
+                                key={root.id}
+                                to={`/category/${root.id}`}
+                                className={`px-4 py-2 rounded-md border text-sm whitespace-nowrap transition
+                                    ${root.id === category.parent?.id
+                                    ? "bg-neutral-900 text-white border-neutral-900"
+                                    : "border-neutral-300 hover:border-neutral-900"
+                                }`}
+                            >
+                                {root.name}
+                            </Link>
+                        ))}
+                    </div>
+                )}
 
-                {/* ALWAYS SHOW SAME-LEVEL TABS */}
+                {/* CHILD CATEGORIES TABS - Only show if current category has children or is a child itself */}
                 {tabCategories.length > 0 && (
                     <div className="flex gap-2 mb-10 overflow-x-auto pb-2 border-b">
                         {tabCategories.map((cat) => (
@@ -89,7 +91,7 @@ export default function CategoryPage() {
                                 key={cat.id}
                                 to={`/category/${cat.id}`}
                                 className={`px-4 py-2 rounded-md border text-sm whitespace-nowrap transition
-                                    ${cat.id == category.id
+                                    ${cat.id === category.id
                                     ? "bg-neutral-900 text-white border-neutral-900"
                                     : "border-neutral-300 hover:border-neutral-900"
                                 }`}
