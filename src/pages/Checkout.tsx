@@ -334,20 +334,114 @@ export default function Checkout() {
 		<main className="py-12">
 			<Container>
 				<h1 className="heading-3">Checkout</h1>
+				{globalError && (
+					<div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+						{globalError}
+					</div>
+				)}
 				<div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-					<form className="lg:col-span-2 space-y-5">
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-							<input className="input" placeholder="First name" required />
-							<input className="input" placeholder="Last name" required />
+					<form
+						className="lg:col-span-2 space-y-6"
+						onSubmit={(e) => {
+							e.preventDefault();
+							handlePlaceOrder();
+						}}
+					>
+						<div className="card space-y-5 p-6">
+							<h2 className="heading-4">Shipping information</h2>
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+								<input
+									className="input"
+									placeholder="Full name"
+									value={form.fullName}
+									onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))}
+									required
+								/>
+								<input
+									className="input"
+									placeholder="Phone number"
+									value={form.phone}
+									onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+									required
+								/>
+							</div>
+							<div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+								<select
+									className="input"
+									value={provinceId}
+									onChange={(e) => setProvinceId(e.target.value)}
+									required
+								>
+									<option value="">Select province</option>
+									{provinces.map((province) => (
+										<option key={province.ProvinceID} value={province.ProvinceID}>
+											{province.ProvinceName}
+										</option>
+									))}
+								</select>
+								<select
+									className="input"
+									value={districtId}
+									onChange={(e) => setDistrictId(e.target.value)}
+									disabled={!provinceId}
+									required
+								>
+									<option value="">Select district</option>
+									{districts.map((district) => (
+										<option key={district.DistrictID} value={district.DistrictID}>
+											{district.DistrictName}
+										</option>
+									))}
+								</select>
+								<select
+									className="input"
+									value={wardCode}
+									onChange={(e) => setWardCode(e.target.value)}
+									disabled={!districtId}
+									required
+								>
+									<option value="">Select ward</option>
+									{wards.map((ward) => (
+										<option key={ward.WardCode} value={ward.WardCode}>
+											{ward.WardName}
+										</option>
+									))}
+								</select>
+							</div>
+							<input
+								className="input"
+								placeholder="Street address"
+								value={form.street}
+								onChange={(e) => setForm((prev) => ({ ...prev, street: e.target.value }))}
+								required
+							/>
+							{shippingError && <p className="text-sm text-red-600">{shippingError}</p>}
 						</div>
-						<input className="input" type="email" placeholder="Email" required />
-						<input className="input" placeholder="Address" required />
-						<div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-							<input className="input" placeholder="City" required />
-							<input className="input" placeholder="State" required />
-							<input className="input" placeholder="ZIP" required />
+
+						<div className="card space-y-4 p-6">
+							<h2 className="heading-4">Payment method</h2>
+							<label className="flex items-center gap-3 rounded border border-neutral-200 px-4 py-3 text-sm font-medium">
+								<input
+									type="radio"
+									name="payment"
+									value="cod"
+									checked={paymentMethod === "cod"}
+									onChange={() => setPaymentMethod("cod")}
+								/>
+								<span>Cash on delivery</span>
+							</label>
+							<label className="flex items-center gap-3 rounded border border-neutral-200 px-4 py-3 text-sm font-medium">
+								<input
+									type="radio"
+									name="payment"
+									value="vnpay"
+									checked={paymentMethod === "vnpay"}
+									onChange={() => setPaymentMethod("vnpay")}
+								/>
+								<span>VNPay</span>
+							</label>
 						</div>
-					</section>
+					</form>
 
 					<aside className="card h-fit">
 						<h2 className="heading-4">Order summary</h2>

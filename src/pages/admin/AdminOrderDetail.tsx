@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "./AdminLayout";
 import { getOrder, updateOrder } from "../../api/admin/ordersApi";
 import type { Order, UpdateOrderPayload } from "../../api/admin/ordersApi";
-import { Edit, Save, X, Package, User, MapPin, CreditCard, Truck } from "lucide-react";
+import { Edit, Save, X, Package, User, MapPin, CreditCard } from "lucide-react";
 
 export default function AdminOrderDetail() {
     const { id } = useParams<{ id: string }>();

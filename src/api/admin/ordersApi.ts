@@ -73,3 +73,31 @@ export async function getOrders(token: string, params?: {
     return res.json();
 }
 
+export type UpdateOrderPayload = {
+    orderStatus?: string;
+    paymentStatus?: string;
+    shipmentStatus?: string;
+    ghnOrderCode?: string | null;
+};
+
+export async function getOrder(token: string, id: number): Promise<Order> {
+    const res = await fetch(`${API_BASE}/orders/${id}`, {
+        headers: authHeaders(token),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
+export async function updateOrder(token: string, id: number, payload: UpdateOrderPayload): Promise<Order> {
+    const res = await fetch(`${API_BASE}/orders/${id}`, {
+        method: "PATCH",
+        headers: {
+            ...authHeaders(token),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+

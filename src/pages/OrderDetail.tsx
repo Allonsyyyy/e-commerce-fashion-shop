@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { getUserOrder } from "../api/ordersApi";
 import type { Order } from "../api/ordersApi";
 import Container from "../components/Container";
-import { Package, Calendar, MapPin, CreditCard, Truck, ArrowLeft, CheckCircle } from "lucide-react";
+import { Package, CreditCard, Truck, ArrowLeft } from "lucide-react";
 
 export default function OrderDetail() {
     const { id } = useParams<{ id: string }>();
