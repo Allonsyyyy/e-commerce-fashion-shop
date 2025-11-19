@@ -48,19 +48,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     // Menu items for Staff
     const staffMenuItems = [
         { path: "/admin", icon: LayoutDashboard, label: "Dashboard" },
-        { path: "/admin/categories", icon: FolderTree, label: "Quản lý danh mục" },
-        { path: "/admin/products", icon: Package, label: "Quản lý sản phẩm" },
-        { path: "/admin/users", icon: Users, label: "Quản lý user" },
-        { path: "/admin/inventory", icon: Warehouse, label: "Quản lý kho" },
-        { path: "/admin/discounts", icon: Tag, label: "Mã giảm giá" },
-        { path: "/admin/shipping", icon: Truck, label: "Quản lý giao hàng" },
-        { path: "/admin/best-selling", icon: TrendingUp, label: "Sản phẩm bán chạy" },
+        { path: "/admin/categories", icon: FolderTree, label: "Categories" },
+        { path: "/admin/products", icon: Package, label: "Products" },
+        { path: "/admin/users", icon: Users, label: "Users" },
+        { path: "/admin/inventory", icon: Warehouse, label: "Inventory" },
+        { path: "/admin/discounts", icon: Tag, label: "Discounts" },
+        { path: "/admin/shipping", icon: Truck, label: "Shipping" },
+        { path: "/admin/best-selling", icon: TrendingUp, label: "Best Selling" },
     ];
 
     // Menu items for Admin (includes all staff items + revenue)
     const adminMenuItems = [
         ...staffMenuItems,
-        { path: "/admin/revenue", icon: DollarSign, label: "Thống kê doanh thu" },
+        { path: "/admin/revenue", icon: DollarSign, label: "Revenue" },
     ];
 
     const menuItems = userRole === "admin" ? adminMenuItems : staffMenuItems;
@@ -74,7 +74,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         {userRole === "admin" ? "Admin Panel" : "Staff Panel"}
                     </h1>
                     <p className="text-sm text-neutral-400 mt-1">
-                        {userRole === "admin" ? "Quản trị viên" : "Nhân viên"}
+                        {userRole === "admin" ? "Administrator" : "Staff"}
                     </p>
                 </div>
                 <nav className="px-4">
@@ -101,7 +101,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-neutral-800 w-full text-left"
                     >
                         <LogOut size={20} />
-                        <span>Đăng xuất</span>
+                        <span>Logout</span>
                     </button>
                 </div>
             </aside>

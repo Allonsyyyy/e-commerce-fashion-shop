@@ -35,14 +35,9 @@ export type UpdateDiscountPayload = {
     usageLimit?: number;
 };
 
-export async function getDiscounts(token?: string): Promise<Discount[]> {
-    const headers: HeadersInit = { "Content-Type": "application/json" };
-    if (token) {
-        headers.Authorization = `Bearer ${token}`;
-    }
-    
+export async function getDiscounts(): Promise<Discount[]> {
     const res = await fetch(`${API_BASE}/discounts`, {
-        headers,
+        headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) throw new Error(await res.text());
     return res.json();

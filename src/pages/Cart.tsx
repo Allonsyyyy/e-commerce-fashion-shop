@@ -5,7 +5,6 @@ import Container from "../components/Container";
 
 export default function Cart() {
 	const [cart, setCart] = useState<any>(null);
-	const navigate = useNavigate();
 
 	const loadCart = async () => {
 		const token = localStorage.getItem("token");

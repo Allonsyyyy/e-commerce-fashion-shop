@@ -75,9 +75,9 @@ export default function AdminProducts() {
             setShowModal(false);
             resetForm();
             loadData();
-            alert("Thành công!");
+            alert("Success!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            alert(err.message || "An error occurred!");
         }
     };
 
@@ -96,7 +96,7 @@ export default function AdminProducts() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
+        if (!confirm("Are you sure you want to delete this product?")) return;
 
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -104,9 +104,9 @@ export default function AdminProducts() {
         try {
             await deleteProduct(token, id);
             loadData();
-            alert("Đã xóa thành công!");
+            alert("Deleted successfully!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            alert(err.message || "An error occurred!");
         }
     };
 
@@ -127,7 +127,7 @@ export default function AdminProducts() {
         <AdminLayout>
             <div>
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold">Quản lý sản phẩm</h1>
+                    <h1 className="text-3xl font-bold">Products Management</h1>
                     <button
                         onClick={() => {
                             resetForm();
@@ -136,12 +136,12 @@ export default function AdminProducts() {
                         className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                     >
                         <Plus size={20} />
-                        Thêm sản phẩm
+                        Add Product
                     </button>
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-12">Đang tải...</div>
+                    <div className="text-center py-12">Loading...</div>
                 ) : (
                     <div className="bg-white rounded-lg shadow overflow-hidden">
                         <table className="w-full">
@@ -191,19 +191,19 @@ export default function AdminProducts() {
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 w-full max-w-md">
                             <h2 className="text-2xl font-bold mb-4">
-                                {editingProduct ? "Sửa sản phẩm" : "Thêm sản phẩm"}
+                                {editingProduct ? "Edit Product" : "Add Product"}
                             </h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <input
                                     type="text"
-                                    placeholder="Tên sản phẩm"
+                                    placeholder="Product Name"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     required
                                 />
                                 <textarea
-                                    placeholder="Mô tả"
+                                    placeholder="Description"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -211,7 +211,7 @@ export default function AdminProducts() {
                                 />
                                 <input
                                     type="number"
-                                    placeholder="Giá"
+                                    placeholder="Price"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.price}
                                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
@@ -219,7 +219,7 @@ export default function AdminProducts() {
                                 />
                                 <input
                                     type="number"
-                                    placeholder="Giảm giá (%)"
+                                    placeholder="Discount (%)"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.discount}
                                     onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
@@ -227,7 +227,7 @@ export default function AdminProducts() {
                                 />
                                 <input
                                     type="number"
-                                    placeholder="Tồn kho"
+                                    placeholder="Stock"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.stock}
                                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
@@ -239,7 +239,7 @@ export default function AdminProducts() {
                                     onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                                     required
                                 >
-                                    <option value="">Chọn danh mục</option>
+                                    <option value="">Select Category</option>
                                     {categories.map((cat) => (
                                         <option key={cat.id} value={cat.id}>
                                             {cat.name}

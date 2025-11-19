@@ -334,110 +334,18 @@ export default function Checkout() {
 		<main className="py-12">
 			<Container>
 				<h1 className="heading-3">Checkout</h1>
-				{globalError && (
-					<div className="mt-4 rounded-md bg-red-100 px-4 py-3 text-red-700 text-sm">{globalError}</div>
-				)}
 				<div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-					<section className="card lg:col-span-2 space-y-6">
-						<div>
-							<h2 className="heading-4 mb-4">Shipping information</h2>
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-								<input
-									className="input"
-									placeholder="Full name"
-									value={form.fullName}
-									onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-								/>
-								<input
-									className="input"
-									placeholder="Phone number"
-									value={form.phone}
-									onChange={(e) => setForm({ ...form, phone: e.target.value })}
-								/>
-							</div>
-							<input
-								className="input mt-4"
-								placeholder="Street / apartment / building"
-								value={form.street}
-								onChange={(e) => setForm({ ...form, street: e.target.value })}
-							/>
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-								<select
-									className="input"
-									value={provinceId}
-									onChange={(e) => setProvinceId(e.target.value)}
-								>
-									<option value="">Select province</option>
-									{provinces.map((province) => (
-										<option key={province.ProvinceID} value={province.ProvinceID}>
-											{province.ProvinceName}
-										</option>
-									))}
-								</select>
-								<select
-									className="input"
-									value={districtId}
-									onChange={(e) => setDistrictId(e.target.value)}
-									disabled={!provinceId || !districts.length}
-								>
-									<option value="">Select district</option>
-									{districts.map((district) => (
-										<option key={district.DistrictID} value={district.DistrictID}>
-											{district.DistrictName}
-										</option>
-									))}
-								</select>
-								<select
-									className="input"
-									value={wardCode}
-									onChange={(e) => setWardCode(e.target.value)}
-									disabled={!districtId || !wards.length}
-								>
-									<option value="">Select ward</option>
-									{wards.map((ward) => (
-										<option key={ward.WardCode} value={ward.WardCode}>
-											{ward.WardName}
-										</option>
-									))}
-								</select>
-							</div>
-							{shippingError && (
-								<p className="mt-2 text-sm text-red-500">
-									{shippingError}
-								</p>
-							)}
+					<form className="lg:col-span-2 space-y-5">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+							<input className="input" placeholder="First name" required />
+							<input className="input" placeholder="Last name" required />
 						</div>
-
-						<div>
-							<h2 className="heading-4 mb-4">Payment method</h2>
-							<div className="space-y-3">
-								<label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer">
-									<input
-										type="radio"
-										value="cod"
-										checked={paymentMethod === "cod"}
-										onChange={() => setPaymentMethod("cod")}
-									/>
-									<div>
-										<p className="font-medium">Cash on delivery (COD)</p>
-										<p className="text-sm text-neutral-500">Pay directly to the shipper.</p>
-									</div>
-								</label>
-								<label className="flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer">
-									<input
-										type="radio"
-										value="vnpay"
-										checked={paymentMethod === "vnpay"}
-										onChange={() => setPaymentMethod("vnpay")}
-									/>
-									<div>
-										<p className="font-medium">Pay with VNPay</p>
-										<p className="text-sm text-neutral-500">
-											After confirming the order you will be redirected to the VNPay checkout page.
-										</p>
-									</div>
-								</label>
-							</div>
+						<input className="input" type="email" placeholder="Email" required />
+						<input className="input" placeholder="Address" required />
+						<div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+							<input className="input" placeholder="City" required />
+							<input className="input" placeholder="State" required />
+							<input className="input" placeholder="ZIP" required />
 						</div>
 					</section>
 
