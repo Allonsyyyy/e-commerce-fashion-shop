@@ -60,12 +60,19 @@ export default function CategoryPage() {
     if (loading) return <div className="py-20 text-center text-neutral-500">Loading category...</div>;
     if (!category) return <div className="py-20 text-center text-red-500">Category not found.</div>;
 
+    // Determine if ROOT NAV should be shown
+    const showRootNav = category.parent && rootCategories.length > 1;
+    
+    // Filter out root categories from tabs if they're already shown in ROOT NAV
+    const rootCategoryIds = showRootNav ? rootCategories.map(r => r.id) : [];
+    const filteredTabs = tabCategories.filter(cat => !rootCategoryIds.includes(cat.id));
+
     return (
         <main className="py-12">
             <Container>
 
-                {/* ROOT NAV - Only show if we're in a child category or if there are multiple root categories */}
-                {category.parent && rootCategories.length > 1 && (
+                {/* ROOT NAV - Only show if we're in a child category and there are multiple root categories */}
+                {showRootNav && (
                     <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b">
                         {rootCategories.map((root) => (
                             <Link
@@ -83,10 +90,10 @@ export default function CategoryPage() {
                     </div>
                 )}
 
-                {/* CHILD CATEGORIES TABS - Only show if current category has children or is a child itself */}
-                {tabCategories.length > 0 && (
+                {/* CHILD CATEGORIES TABS - Show children, but exclude root categories if they're already shown above */}
+                {filteredTabs.length > 0 && (
                     <div className="flex gap-2 mb-10 overflow-x-auto pb-2 border-b">
-                        {tabCategories.map((cat) => (
+                        {filteredTabs.map((cat) => (
                             <Link
                                 key={cat.id}
                                 to={`/category/${cat.id}`}

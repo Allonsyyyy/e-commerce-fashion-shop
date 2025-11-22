@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { ShoppingCart, Search, Menu, X, User, Heart } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Container from './Container'
@@ -8,7 +8,27 @@ export default function Header() {
 	const [user, setUser] = useState<any>(null)
 	const [profileOpen, setProfileOpen] = useState(false)
 	const navigate = useNavigate()
+	const location = useLocation()
 	const profileRef = useRef<HTMLDivElement | null>(null)
+
+	// Helper function to check if a nav item is active
+	const isNavActive = (path: string, category?: string) => {
+		const currentPath = location.pathname
+		const searchParams = new URLSearchParams(location.search)
+		const currentCategory = searchParams.get('category')
+
+		if (path === '/shop') {
+			if (category) {
+				// For Men/Women: active if path is /shop and category matches exactly
+				return currentPath === '/shop' && currentCategory === category
+			} else {
+				// For Shop: active if path is /shop and (no category or category is not men/women)
+				return currentPath === '/shop' && (currentCategory === null || (currentCategory !== 'men' && currentCategory !== 'women'))
+			}
+		}
+		// For About/Contact: check pathname only
+		return currentPath === path
+	}
 
 	const loadUser = () => {
 		const token = localStorage.getItem('token')
@@ -167,26 +187,51 @@ export default function Header() {
 					</div>
 
 					<nav className="hidden md:flex items-center gap-8 pb-4 border-t border-neutral-100 pt-4">
-						<NavLink to="/shop" className={({ isActive }) =>
-							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
-								'text-neutral-600 hover:text-neutral-900 transition-colors'
-						}>Shop</NavLink>
-						<NavLink to="/shop?category=men" className={({ isActive }) =>
-							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
-								'text-neutral-600 hover:text-neutral-900 transition-colors'
-						}>Men</NavLink>
-						<NavLink to="/shop?category=women" className={({ isActive }) =>
-							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
-								'text-neutral-600 hover:text-neutral-900 transition-colors'
-						}>Women</NavLink>
-						<NavLink to="/about" className={({ isActive }) =>
-							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
-								'text-neutral-600 hover:text-neutral-900 transition-colors'
-						}>About</NavLink>
-						<NavLink to="/contact" className={({ isActive }) =>
-							isActive ? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' :
-								'text-neutral-600 hover:text-neutral-900 transition-colors'
-						}>Contact</NavLink>
+						<Link 
+							to="/shop" 
+							className={isNavActive('/shop') 
+								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' 
+								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
+							}
+						>
+							Shop
+						</Link>
+						<Link 
+							to="/shop?category=men" 
+							className={isNavActive('/shop', 'men') 
+								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' 
+								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
+							}
+						>
+							Men
+						</Link>
+						<Link 
+							to="/shop?category=women" 
+							className={isNavActive('/shop', 'women') 
+								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' 
+								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
+							}
+						>
+							Women
+						</Link>
+						<Link 
+							to="/about" 
+							className={isNavActive('/about') 
+								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' 
+								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
+							}
+						>
+							About
+						</Link>
+						<Link 
+							to="/contact" 
+							className={isNavActive('/contact') 
+								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' 
+								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
+							}
+						>
+							Contact
+						</Link>
 					</nav>
 				</Container>
 			</div>
@@ -195,11 +240,61 @@ export default function Header() {
 				<div className="md:hidden border-t border-neutral-200 bg-white">
 					<Container>
 						<div className="py-4 space-y-4">
-							<NavLink to="/shop" className="block py-2 text-neutral-600 hover:text-neutral-900">Shop</NavLink>
-							<NavLink to="/shop?category=men" className="block py-2 text-neutral-600 hover:text-neutral-900">Men</NavLink>
-							<NavLink to="/shop?category=women" className="block py-2 text-neutral-600 hover:text-neutral-900">Women</NavLink>
-							<NavLink to="/about" className="block py-2 text-neutral-600 hover:text-neutral-900">About</NavLink>
-							<NavLink to="/contact" className="block py-2 text-neutral-600 hover:text-neutral-900">Contact</NavLink>
+							<Link 
+								to="/shop" 
+								onClick={() => setMobileMenuOpen(false)}
+								className={`block py-2 transition-colors ${
+									isNavActive('/shop') 
+										? 'text-neutral-900 font-medium' 
+										: 'text-neutral-600 hover:text-neutral-900'
+								}`}
+							>
+								Shop
+							</Link>
+							<Link 
+								to="/shop?category=men" 
+								onClick={() => setMobileMenuOpen(false)}
+								className={`block py-2 transition-colors ${
+									isNavActive('/shop', 'men') 
+										? 'text-neutral-900 font-medium' 
+										: 'text-neutral-600 hover:text-neutral-900'
+								}`}
+							>
+								Men
+							</Link>
+							<Link 
+								to="/shop?category=women" 
+								onClick={() => setMobileMenuOpen(false)}
+								className={`block py-2 transition-colors ${
+									isNavActive('/shop', 'women') 
+										? 'text-neutral-900 font-medium' 
+										: 'text-neutral-600 hover:text-neutral-900'
+								}`}
+							>
+								Women
+							</Link>
+							<Link 
+								to="/about" 
+								onClick={() => setMobileMenuOpen(false)}
+								className={`block py-2 transition-colors ${
+									isNavActive('/about') 
+										? 'text-neutral-900 font-medium' 
+										: 'text-neutral-600 hover:text-neutral-900'
+								}`}
+							>
+								About
+							</Link>
+							<Link 
+								to="/contact" 
+								onClick={() => setMobileMenuOpen(false)}
+								className={`block py-2 transition-colors ${
+									isNavActive('/contact') 
+										? 'text-neutral-900 font-medium' 
+										: 'text-neutral-600 hover:text-neutral-900'
+								}`}
+							>
+								Contact
+							</Link>
 						</div>
 					</Container>
 				</div>

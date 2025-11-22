@@ -12,6 +12,26 @@ import {
 	type Province,
 	type Ward,
 } from "../api/shippingApi";
+import {
+	Package,
+	Truck,
+	XCircle,
+	MapPin,
+	User,
+	Phone,
+	Calendar,
+	FileText,
+	CheckCircle2,
+	AlertCircle,
+	Loader2,
+	X,
+	Box,
+	Ruler,
+	Weight,
+	DollarSign,
+	Shield,
+	MessageSquare,
+} from "lucide-react";
 
 type TabKey = "pending" | "shipping" | "cancelled";
 
@@ -60,7 +80,7 @@ export default function StaffFulfillmentPage() {
 	useEffect(() => {
 		fetchProvinces()
 			.then(setProvinces)
-			.catch((err) => console.error("Không thể tải danh sách tỉnh/thành", err));
+			.catch((err) => console.error("Failed to load provinces list", err));
 	}, []);
 
 const normalizeText = (value?: string | null) =>
@@ -138,7 +158,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			setDistrictCache((prev) => ({ ...prev, [provinceId]: list }));
 			return list;
 		} catch (err) {
-			console.error("Không thể tải quận/huyện", err);
+			console.error("Failed to load districts", err);
 			return [];
 		}
 	};
@@ -150,7 +170,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			setWardCache((prev) => ({ ...prev, [districtId]: list }));
 			return list;
 		} catch (err) {
-			console.error("Không thể tải phường/xã", err);
+			console.error("Failed to load wards", err);
 			return [];
 		}
 	};
@@ -169,7 +189,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 				provinceList = await fetchProvinces();
 				setProvinces(provinceList);
 			} catch (err) {
-				console.error("Không thể tải danh sách tỉnh", err);
+				console.error("Failed to load provinces list", err);
 				return null;
 			}
 		}
@@ -248,7 +268,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			setOrders(res.data);
 		} catch (err) {
 			console.error(err);
-			setError("Không thể tải danh sách đơn hàng.");
+			setError("Failed to load orders list.");
 		} finally {
 			setLoading(false);
 		}
@@ -293,7 +313,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 				provinceList = await fetchProvinces();
 				setProvinces(provinceList);
 			} catch (err) {
-				console.error("Không thể tải danh sách tỉnh", err);
+				console.error("Failed to load provinces list", err);
 				return { provinceMatch: undefined, districtMatch: undefined, wardMatch: undefined };
 			}
 		}
@@ -339,14 +359,14 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			pickStationId: null,
 			deliverStationId: null,
 			pickShift: [2],
-			content: `Đơn hàng #${order.id}`,
+			content: `Order #${order.id}`,
 			returnPhone: "",
 			returnAddress: "",
 			returnDistrictId: null,
 			returnWardCode: "",
 			items:
 				order.items?.map((item) => ({
-					name: item.variant?.product?.name || "Sản phẩm",
+					name: item.variant?.product?.name || "Product",
 					code: item.variant?.sku,
 					quantity: item.quantity,
 					price: Number(item.variant?.price || item.price || 0),
@@ -405,7 +425,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		e.preventDefault();
 		if (!form) return;
 		if (!form.toWardCode || !form.toDistrictId) {
-			setError("Vui lòng điền WardCode và ID quận/huyện chính xác.");
+			setError("Please fill in WardCode and District ID accurately.");
 			return;
 		}
 
@@ -424,12 +444,12 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 				deliverStationId: form.deliverStationId ? Number(form.deliverStationId) : null,
 			});
 
-			alert("Tạo vận đơn GHN thành công!");
+			alert("GHN shipping order created successfully!");
 			closeForm();
 			await loadOrders();
 		} catch (err: any) {
 			console.error(err);
-			setError(err?.message || "Tạo vận đơn thất bại.");
+			setError(err?.message || "Failed to create shipping order.");
 		} finally {
 			setSubmitting(false);
 		}
@@ -437,241 +457,565 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 
 	const handleCancelShipping = async (order: Order) => {
 		if (!order.ghnOrderCode) return;
-		if (!window.confirm("Bạn có chắc muốn hủy vận đơn GHN này?")) return;
+		if (!window.confirm("Are you sure you want to cancel this GHN shipping order?")) return;
 		setCancellingCode(order.ghnOrderCode);
 		try {
 			await cancelShippingOrder(order.ghnOrderCode);
-			alert("Đã gửi yêu cầu hủy vận đơn.");
+			alert("Cancel request sent successfully.");
 			await loadOrders();
 		} catch (err: any) {
 			console.error(err);
-			alert(err?.message || "Hủy vận đơn thất bại.");
+			alert(err?.message || "Failed to cancel shipping order.");
 		} finally {
 			setCancellingCode(null);
 		}
 	};
 
+	const getTabCount = (tabId: TabKey) => {
+		if (tabId === "pending") {
+			return orders.filter((order) => {
+				const isCancelled =
+					order.orderStatus?.toLowerCase() === "cancelled" || order.shipmentStatus?.toLowerCase() === "returned";
+				return (
+					!isCancelled &&
+					!order.ghnOrderCode &&
+					(order.shipmentStatus === "not_shipped" || order.shipmentStatus === "pending" || !order.shipmentStatus)
+				);
+			}).length;
+		}
+		if (tabId === "shipping") {
+			return orders.filter(
+				(order) =>
+					order.shipmentStatus === "shipping" ||
+					order.shipmentStatus === "shipped" ||
+					order.shipmentStatus === "delivered" ||
+					!!order.ghnOrderCode,
+			).length;
+		}
+		return orders.filter(
+			(order) =>
+				order.orderStatus?.toLowerCase() === "cancelled" ||
+				order.shipmentStatus?.toLowerCase() === "returned" ||
+				order.shipmentStatus?.toLowerCase() === "cancelled",
+		).length;
+	};
+
+	const tabs = [
+		{ id: "pending" as TabKey, label: "Pending Orders", icon: Package },
+		{ id: "shipping" as TabKey, label: "Shipping/Delivered", icon: Truck },
+		{ id: "cancelled" as TabKey, label: "Cancelled", icon: XCircle },
+	];
+
 	return (
-		<main className="py-10">
+		<main className="py-8 bg-gradient-to-br from-neutral-50 to-white min-h-screen">
 			<Container>
-				<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-					<div>
-						<h1 className="heading-3">Trang nhân viên giao hàng</h1>
-						<p className="text-sm text-neutral-500">
-							Theo dõi toàn bộ đơn hàng của hệ thống và tạo vận đơn GHN.
-						</p>
-					</div>
-					<div className="flex gap-2 bg-neutral-100 rounded-xl p-1">
-						{[
-							{ id: "pending", label: "Đơn cần xử lý" },
-							{ id: "shipping", label: "Đang/Đã giao" },
-							{ id: "cancelled", label: "Đã hủy giao" },
-						].map((tab) => (
-							<button
-								key={tab.id}
-								className={`px-4 py-2 rounded-lg text-sm font-medium ${
-									activeTab === tab.id ? "bg-white shadow text-neutral-900" : "text-neutral-500"
-								}`}
-								onClick={() => setActiveTab(tab.id as TabKey)}
-							>
-								{tab.label}
-							</button>
-						))}
+				{/* Header Section */}
+				<div className="mb-8">
+					<div className="flex items-center gap-3 mb-2">
+						<div className="p-3 bg-neutral-900 rounded-xl">
+							<Truck className="w-6 h-6 text-white" />
+						</div>
+						<div>
+							<h1 className="heading-3">Shipping Management</h1>
+							<p className="text-sm text-neutral-600 mt-1">
+								Track and process orders, create GHN shipping orders
+							</p>
+						</div>
 					</div>
 				</div>
 
+				{/* Tabs */}
+				<div className="flex flex-wrap gap-3 mb-8">
+					{tabs.map((tab) => {
+						const Icon = tab.icon;
+						const isActive = activeTab === tab.id;
+						return (
+							<button
+								key={tab.id}
+								onClick={() => setActiveTab(tab.id)}
+								className={`group flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all ${
+									isActive
+										? "bg-neutral-900 text-white shadow-lg shadow-neutral-900/20"
+										: "bg-white text-neutral-600 border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"
+								}`}
+							>
+								<Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-neutral-500"}`} />
+								<span>{tab.label}</span>
+								{getTabCount(tab.id) > 0 && (
+									<span
+										className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+											isActive
+												? "bg-white/20 text-white"
+												: "bg-neutral-100 text-neutral-600"
+										}`}
+									>
+										{getTabCount(tab.id)}
+									</span>
+								)}
+							</button>
+						);
+					})}
+				</div>
+
 				{loading ? (
-					<div className="text-center py-12">Đang tải danh sách...</div>
+					<div className="flex flex-col items-center justify-center py-16">
+						<Loader2 className="w-8 h-8 text-neutral-400 animate-spin mb-4" />
+						<p className="text-neutral-600">Loading orders list...</p>
+					</div>
 				) : filteredOrders.length === 0 ? (
-					<div className="text-neutral-600">Không có đơn hàng trong mục này.</div>
+					<div className="card text-center py-16">
+						<div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
+							<Package className="w-8 h-8 text-neutral-400" />
+						</div>
+						<h3 className="text-lg font-semibold text-neutral-900 mb-2">No Orders</h3>
+						<p className="text-neutral-600">There are currently no orders in this section.</p>
+					</div>
 				) : (
 					<div className="space-y-4">
-						{filteredOrders.map((order) => (
-							<div key={order.id} className="card space-y-3">
-								<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2">
-									<div>
-										<p className="font-semibold">Đơn #{order.id}</p>
-										<p className="text-sm text-neutral-500">
-											Khách: {order.user?.name} · {order.user?.phone}
-										</p>
-										<p className="text-sm text-neutral-500">Trạng thái: {order.orderStatus}</p>
-										{order.ghnOrderCode && (
-											<p className="text-sm text-neutral-500">Mã GHN: {order.ghnOrderCode}</p>
+						{filteredOrders.map((order) => {
+							return (
+								<div key={order.id} className="card hover:shadow-md transition-shadow">
+									{/* Header */}
+									<div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
+										<div className="flex-1">
+											<div className="flex items-center gap-3 mb-3">
+												<div className="p-2 bg-neutral-100 rounded-lg">
+									<FileText className="w-5 h-5 text-neutral-600" />
+								</div>
+												<div>
+													<h3 className="font-semibold text-lg text-neutral-900">Order #{order.id}</h3>
+													{order.ghnOrderCode && (
+														<div className="flex items-center gap-1 mt-1">
+															<Truck className="w-3 h-3 text-neutral-500" />
+															<span className="text-xs text-neutral-600 font-mono">
+																GHN: {order.ghnOrderCode}
+															</span>
+														</div>
+													)}
+												</div>
+											</div>
+
+											{/* Customer Info */}
+											<div className="flex flex-wrap items-center gap-4 mb-3 text-sm">
+												<div className="flex items-center gap-2 text-neutral-600">
+													<User className="w-4 h-4 text-neutral-400" />
+													<span className="font-medium">{order.user?.name || "N/A"}</span>
+												</div>
+												<div className="flex items-center gap-2 text-neutral-600">
+													<Phone className="w-4 h-4 text-neutral-400" />
+													<span>{order.user?.phone || "N/A"}</span>
+												</div>
+												<div className="flex items-center gap-2 text-neutral-600">
+													<Calendar className="w-4 h-4 text-neutral-400" />
+													<span>
+														{order.createdAt
+															? new Date(order.createdAt).toLocaleDateString("en-US")
+															: "N/A"}
+													</span>
+												</div>
+											</div>
+
+											{/* Status Badge */}
+											<div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg border text-xs font-medium mb-3">
+												{order.shipmentStatus === "delivered" ? (
+													<CheckCircle2 className="w-3 h-3" />
+												) : order.shipmentStatus === "cancelled" ||
+													order.orderStatus?.toLowerCase() === "cancelled" ? (
+													<XCircle className="w-3 h-3" />
+												) : (
+													<AlertCircle className="w-3 h-3" />
+												)}
+													<span>
+														{order.shipmentStatus === "delivered"
+															? "Delivered"
+															: order.shipmentStatus === "shipping" || order.shipmentStatus === "shipped"
+																? "Shipping"
+																: order.shipmentStatus === "cancelled" ||
+																		order.orderStatus?.toLowerCase() === "cancelled"
+																	? "Cancelled"
+																	: "Pending"}
+													</span>
+											</div>
+										</div>
+
+										{/* Amount */}
+										<div className="lg:text-right">
+											<p className="text-xs text-neutral-500 mb-1">Total Amount</p>
+											<p className="text-2xl font-bold text-neutral-900">
+												{Number(order.totalAmount).toLocaleString("en-US")}₫
+											</p>
+										</div>
+									</div>
+
+									{/* Address */}
+									<div className="bg-neutral-50 rounded-lg p-3 mb-4">
+										<div className="flex items-start gap-2">
+											<MapPin className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
+											<p className="text-sm text-neutral-700">{order.shippingAddress}</p>
+										</div>
+									</div>
+
+									{/* Products */}
+									<div className="mb-4">
+										<p className="text-xs font-medium text-neutral-500 mb-2">Products</p>
+										<div className="space-y-1">
+											{order.items?.slice(0, 3).map((item) => (
+												<div key={item.id} className="flex items-center justify-between text-sm">
+													<span className="text-neutral-700">
+														{item.variant?.product?.name || "Product"}
+													</span>
+													<span className="text-neutral-500 font-medium">x{item.quantity}</span>
+												</div>
+											))}
+											{(order.items?.length || 0) > 3 && (
+												<p className="text-xs text-neutral-500 mt-2">
+													...and {order.items!.length - 3} more products
+												</p>
+											)}
+										</div>
+									</div>
+
+									{/* Actions */}
+									<div className="flex justify-end gap-2 pt-4 border-t border-neutral-200">
+										{activeTab === "pending" ? (
+											isOrderCancelled(order) ? (
+												<div className="flex items-center gap-2 text-sm text-error-600">
+													<XCircle className="w-4 h-4" />
+													<span>Order Cancelled</span>
+												</div>
+											) : (
+												<button
+													className="btn-primary flex items-center gap-2"
+													onClick={() => openCreateForm(order)}
+												>
+													<Truck className="w-4 h-4" />
+													Create GHN Order
+												</button>
+											)
+										) : activeTab === "shipping" ? (
+											order.ghnOrderCode ? (
+												<button
+													className="btn-secondary flex items-center gap-2 text-error-600 border-error-300 hover:bg-error-50"
+													disabled={cancellingCode === order.ghnOrderCode}
+													onClick={() => handleCancelShipping(order)}
+												>
+													{cancellingCode === order.ghnOrderCode ? (
+														<>
+															<Loader2 className="w-4 h-4 animate-spin" />
+															Cancelling...
+														</>
+													) : (
+														<>
+															<XCircle className="w-4 h-4" />
+															Cancel Shipping
+														</>
+													)}
+												</button>
+											) : (
+												<div className="flex items-center gap-2 text-sm text-neutral-500">
+													<AlertCircle className="w-4 h-4" />
+													<span>No GHN Code</span>
+												</div>
+											)
+										) : (
+											<div className="flex items-center gap-2 text-sm text-error-600 font-medium">
+												<XCircle className="w-4 h-4" />
+												<span>Shipping Cancelled</span>
+											</div>
 										)}
 									</div>
-									<div className="text-lg font-semibold text-neutral-900">
-										{Number(order.totalAmount).toLocaleString()}₫
-									</div>
 								</div>
-								<p className="text-sm text-neutral-600">Địa chỉ: {order.shippingAddress}</p>
-								<div className="text-sm text-neutral-600">
-									{order.items?.slice(0, 2).map((item) => (
-										<div key={item.id}>
-											{item.variant?.product?.name} x {item.quantity}
-										</div>
-									))}
-									{(order.items?.length || 0) > 2 && <div>...và {order.items!.length - 2} sản phẩm khác</div>}
-								</div>
-
-								{activeTab === "pending" ? (
-									isOrderCancelled(order) ? (
-										<div className="text-right text-sm text-neutral-500">Đơn đã bị hủy</div>
-									) : (
-										<div className="flex justify-end">
-											<button className="btn-primary" onClick={() => openCreateForm(order)}>
-												Tạo đơn GHN
-											</button>
-										</div>
-									)
-								) : activeTab === "shipping" ? (
-									order.ghnOrderCode ? (
-										<div className="flex justify-end">
-											<button
-												className="btn-secondary text-red-600 border-red-300 hover:bg-red-50"
-												disabled={cancellingCode === order.ghnOrderCode}
-												onClick={() => handleCancelShipping(order)}
-											>
-												{cancellingCode === order.ghnOrderCode ? "Đang hủy..." : "Hủy giao hàng"}
-											</button>
-										</div>
-									) : (
-										<div className="text-right text-sm text-neutral-500">Chưa có mã GHN</div>
-									)
-								) : (
-									<div className="text-right text-sm text-red-500 font-semibold">
-										Đã hủy giao hàng
-									</div>
-								)}
-							</div>
-						))}
+							);
+						})}
 					</div>
 				)}
 			</Container>
 
 			{selectedOrder && form && (
-				<div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-					<div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-auto">
-						<div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
-							<div>
-								<h2 className="heading-4">Tạo vận đơn GHN cho #{selectedOrder.id}</h2>
-								<p className="text-sm text-neutral-500">Điền thông tin đầy đủ trước khi gửi.</p>
+				<div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+					<div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+						{/* Header */}
+						<div className="px-6 py-5 border-b border-neutral-200 flex items-center justify-between bg-gradient-to-r from-neutral-50 to-white">
+							<div className="flex items-center gap-3">
+								<div className="p-2 bg-neutral-900 rounded-lg">
+									<Truck className="w-5 h-5 text-white" />
+								</div>
+								<div>
+									<h2 className="heading-4">Create GHN Shipping Order</h2>
+									<p className="text-sm text-neutral-600">Order #{selectedOrder.id}</p>
+								</div>
 							</div>
-							<button className="text-neutral-500 hover:text-neutral-900" onClick={closeForm}>
-								✕
+							<button
+								className="p-2 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
+								onClick={closeForm}
+							>
+								<X className="w-5 h-5" />
 							</button>
 						</div>
-						<form onSubmit={handleSubmit} className="p-6 space-y-4">
-							<div className="grid md:grid-cols-2 gap-4">
-								<input
-									className="input"
-									placeholder="Tên người nhận"
-									value={form.toName}
-									onChange={(e) => setForm({ ...form, toName: e.target.value })}
-									required
-								/>
-								<input
-									className="input"
-									placeholder="Số điện thoại"
-									value={form.toPhone}
-									onChange={(e) => setForm({ ...form, toPhone: e.target.value })}
-									required
-								/>
+
+						{/* Form Content */}
+						<form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+							{/* Customer Information */}
+							<div className="space-y-4">
+								<h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+									<User className="w-4 h-4" />
+									Recipient Information
+								</h3>
+								<div className="grid md:grid-cols-2 gap-4">
+									<div>
+										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
+											Recipient Name <span className="text-error-500">*</span>
+										</label>
+										<input
+											className="input"
+											placeholder="Enter recipient name"
+											value={form.toName}
+											onChange={(e) => setForm({ ...form, toName: e.target.value })}
+											required
+										/>
+									</div>
+									<div>
+										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
+											Phone Number <span className="text-error-500">*</span>
+										</label>
+										<input
+											className="input"
+											placeholder="Enter phone number"
+											value={form.toPhone}
+											onChange={(e) => setForm({ ...form, toPhone: e.target.value })}
+											required
+										/>
+									</div>
+								</div>
 							</div>
-							<textarea
-								className="input"
-								placeholder="Địa chỉ chi tiết"
-								value={form.toAddress}
-								onChange={(e) => setForm({ ...form, toAddress: e.target.value })}
-								required
-							/>
-							<div className="grid md:grid-cols-3 gap-4">
-								<input
-									className="input"
-									placeholder="Phường / Xã"
-									value={wardName}
-									onChange={(e) => handleWardInputChange(e.target.value)}
-								/>
-								<input
-									className="input"
-									placeholder="Quận / Huyện"
-									value={districtName}
-									onChange={(e) => handleDistrictInputChange(e.target.value)}
-								/>
-								<input
-									className="input"
-									placeholder="Tỉnh / Thành phố"
-									value={form.toProvinceName || ""}
-									onChange={(e) => handleProvinceInputChange(e.target.value)}
-								/>
+
+							{/* Address Information */}
+							<div className="space-y-4">
+								<h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+									<MapPin className="w-4 h-4" />
+									Shipping Address
+								</h3>
+								<div>
+									<label className="block text-sm font-medium text-neutral-700 mb-1.5">
+										Detailed Address <span className="text-error-500">*</span>
+									</label>
+									<textarea
+										className="input min-h-[80px] resize-none"
+										placeholder="House number, street name..."
+										value={form.toAddress}
+										onChange={(e) => setForm({ ...form, toAddress: e.target.value })}
+										required
+									/>
+								</div>
+								<div className="grid md:grid-cols-3 gap-4">
+									<div>
+										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
+											Ward
+										</label>
+										<input
+											className="input"
+											placeholder="Enter ward"
+											value={wardName}
+											onChange={(e) => handleWardInputChange(e.target.value)}
+										/>
+										{matchedNames.ward && (
+											<p className="text-xs text-success-600 mt-1 flex items-center gap-1">
+												<CheckCircle2 className="w-3 h-3" />
+												Matched: {matchedNames.ward}
+											</p>
+										)}
+									</div>
+									<div>
+										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
+											District
+										</label>
+										<input
+											className="input"
+											placeholder="Enter district"
+											value={districtName}
+											onChange={(e) => handleDistrictInputChange(e.target.value)}
+										/>
+										{matchedNames.district && (
+											<p className="text-xs text-success-600 mt-1 flex items-center gap-1">
+												<CheckCircle2 className="w-3 h-3" />
+												Matched: {matchedNames.district}
+											</p>
+										)}
+									</div>
+									<div>
+										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
+											Province / City
+										</label>
+										<input
+											className="input"
+											placeholder="Enter province/city"
+											value={form.toProvinceName || ""}
+											onChange={(e) => handleProvinceInputChange(e.target.value)}
+										/>
+										{matchedNames.province && (
+											<p className="text-xs text-success-600 mt-1 flex items-center gap-1">
+												<CheckCircle2 className="w-3 h-3" />
+												Matched: {matchedNames.province}
+											</p>
+										)}
+									</div>
+								</div>
 							</div>
+							{/* Debug Info (Collapsible) */}
 							{Boolean(parsedAddress || matchedNames.ward || matchedNames.district || matchedNames.province) && (
-								<div className="text-xs text-neutral-500 space-y-1">
-									<p>
-										Khách nhập: {parsedAddress?.ward || "?"}, {parsedAddress?.district || "?"},{" "}
-										{parsedAddress?.province || "?"}
-									</p>
-									<p>
-										Đã khớp: {matchedNames.ward || "?"}, {matchedNames.district || "?"}, {matchedNames.province || "?"}
-									</p>
-									<p>
-										Mã GHN: {form.toWardCode || "Chưa xác định"} · ID Quận:{" "}
-										{form.toDistrictId ? form.toDistrictId : "Chưa xác định"}
-									</p>
+								<div className="bg-neutral-50 rounded-lg p-4 border border-neutral-200">
+									<p className="text-xs font-semibold text-neutral-700 mb-2">Address Matching Info</p>
+									<div className="space-y-1.5 text-xs">
+										<div className="flex items-center gap-2">
+											<span className="text-neutral-500">Customer entered:</span>
+											<span className="text-neutral-700 font-mono">
+												{parsedAddress?.ward || "?"}, {parsedAddress?.district || "?"},{" "}
+												{parsedAddress?.province || "?"}
+											</span>
+										</div>
+										<div className="flex items-center gap-2">
+											<span className="text-neutral-500">Matched:</span>
+											<span className="text-success-600 font-medium">
+												{matchedNames.ward || "?"}, {matchedNames.district || "?"}, {matchedNames.province || "?"}
+											</span>
+										</div>
+										<div className="flex items-center gap-2">
+											<span className="text-neutral-500">GHN Code:</span>
+											<span className="font-mono text-neutral-700">
+												{form.toWardCode || "Not determined"}
+											</span>
+											<span className="text-neutral-400">·</span>
+											<span className="text-neutral-500">District ID:</span>
+											<span className="font-mono text-neutral-700">
+												{form.toDistrictId ? form.toDistrictId : "Not determined"}
+											</span>
+										</div>
+									</div>
 								</div>
 							)}
-							{parsedAddress && (
-								<p className="text-xs text-neutral-500">
-									Gợi ý: {parsedAddress.ward || "?"}, {parsedAddress.district || "?"}, {parsedAddress.province || "?"}
-								</p>
-							)}
-							<div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-								{(["weight", "length", "width", "height"] as const).map((field) => (
-									<input
-										key={field}
-										className="input"
-										type="number"
-										placeholder={field}
-										value={form[field]}
-										onChange={(e) =>
-											setForm({
-												...form,
-												[field]: Number(e.target.value),
-											})
-										}
+
+							{/* Package Dimensions */}
+							<div className="space-y-4">
+								<h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+									<Box className="w-4 h-4" />
+									Dimensions & Weight
+								</h3>
+								<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+									{([
+										{ field: "weight" as const, label: "Weight (g)", icon: Weight },
+										{ field: "length" as const, label: "Length (cm)", icon: Ruler },
+										{ field: "width" as const, label: "Width (cm)", icon: Ruler },
+										{ field: "height" as const, label: "Height (cm)", icon: Ruler },
+									] as const).map(({ field, label, icon: Icon }) => (
+										<div key={field}>
+											<label className="block text-sm font-medium text-neutral-700 mb-1.5">
+												{label}
+											</label>
+											<div className="relative">
+												<Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+												<input
+													className="input pl-10"
+													type="number"
+													placeholder="0"
+													value={form[field]}
+													onChange={(e) =>
+														setForm({
+															...form,
+															[field]: Number(e.target.value),
+														})
+													}
+												/>
+											</div>
+										</div>
+									))}
+								</div>
+							</div>
+
+							{/* Financial Information */}
+							<div className="space-y-4">
+								<h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
+									<DollarSign className="w-4 h-4" />
+									Payment Information
+								</h3>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+									<div>
+										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
+											COD Amount (₫)
+										</label>
+										<input
+											className="input"
+											type="number"
+											placeholder="0"
+											value={form.codAmount}
+											onChange={(e) => setForm({ ...form, codAmount: Number(e.target.value) })}
+										/>
+									</div>
+									<div>
+										<label className="block text-sm font-medium text-neutral-700 mb-1.5 flex items-center gap-2">
+											<Shield className="w-4 h-4" />
+											Insurance Value (₫)
+										</label>
+										<input
+											className="input"
+											type="number"
+											placeholder="0"
+											value={form.insuranceValue}
+											onChange={(e) => setForm({ ...form, insuranceValue: Number(e.target.value) })}
+										/>
+									</div>
+								</div>
+								<div>
+									<label className="block text-sm font-medium text-neutral-700 mb-1.5 flex items-center gap-2">
+										<MessageSquare className="w-4 h-4" />
+										Note
+									</label>
+									<textarea
+										className="input min-h-[80px] resize-none"
+										placeholder="Enter note (optional)..."
+										value={form.note || ""}
+										onChange={(e) => setForm({ ...form, note: e.target.value })}
 									/>
-								))}
-							</div>
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-								<input
-									className="input"
-									type="number"
-									placeholder="COD Amount"
-									value={form.codAmount}
-									onChange={(e) => setForm({ ...form, codAmount: Number(e.target.value) })}
-								/>
-								<input
-									className="input"
-									type="number"
-									placeholder="Giá trị bảo hiểm"
-									value={form.insuranceValue}
-									onChange={(e) => setForm({ ...form, insuranceValue: Number(e.target.value) })}
-								/>
-								<input
-									className="input"
-									placeholder="Ghi chú"
-									value={form.note || ""}
-									onChange={(e) => setForm({ ...form, note: e.target.value })}
-								/>
+								</div>
 							</div>
 
-							{error && <p className="text-sm text-red-500">{error}</p>}
+							{/* Error Message */}
+							{error && (
+								<div className="bg-error-50 border border-error-200 rounded-lg p-4 flex items-start gap-3">
+									<AlertCircle className="w-5 h-5 text-error-600 flex-shrink-0 mt-0.5" />
+									<div>
+										<p className="text-sm font-medium text-error-900">An error occurred</p>
+										<p className="text-sm text-error-700 mt-1">{error}</p>
+									</div>
+								</div>
+							)}
 
-							<div className="flex justify-end gap-3">
-								<button type="button" className="btn-secondary" onClick={closeForm} disabled={submitting}>
-									Hủy
+							{/* Form Actions */}
+							<div className="flex justify-end gap-3 pt-4 border-t border-neutral-200">
+								<button
+									type="button"
+									className="btn-secondary flex items-center gap-2"
+									onClick={closeForm}
+									disabled={submitting}
+								>
+									<X className="w-4 h-4" />
+									Cancel
 								</button>
-								<button type="submit" className="btn-primary" disabled={submitting}>
-									{submitting ? "Đang tạo..." : "Tạo vận đơn"}
+								<button
+									type="submit"
+									className="btn-primary flex items-center gap-2"
+									disabled={submitting}
+								>
+									{submitting ? (
+										<>
+											<Loader2 className="w-4 h-4 animate-spin" />
+											Creating...
+										</>
+									) : (
+										<>
+											<CheckCircle2 className="w-4 h-4" />
+											Create Shipping Order
+										</>
+									)}
 								</button>
 							</div>
 						</form>

@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCart, removeCartItem, updateCartItem, clearCart } from "../api/cartApi";
 import Container from "../components/Container";
 
 export default function Cart() {
 	const [cart, setCart] = useState<any>(null);
-
+	const navigate = useNavigate();
+	
 	const loadCart = async () => {
 		const token = localStorage.getItem("token");
 		if (!token) return;
@@ -15,6 +16,15 @@ export default function Cart() {
 	useEffect(() => {
 		loadCart();
 	}, []);
+
+	// Calculate total price automatically from cart items
+	const totalPrice = useMemo(() => {
+		if (!cart?.items) return 0;
+		return cart.items.reduce(
+			(sum: number, item: any) => sum + Number(item.price) * Number(item.quantity),
+			0
+		);
+	}, [cart?.items]);
 
 	if (!cart) return <div className="py-20 text-center">Loading...</div>;
 
@@ -62,28 +72,38 @@ export default function Cart() {
 										onChange={async (e) => {
 											const token = localStorage.getItem("token");
 											const quantity = Number(e.target.value);
+											if (quantity < 1) return;
 
-											const updated = await updateCartItem(token!, item.id, quantity);
-
-											// Tính toán totalPrice
-											const newTotal = updated.items.reduce(
-												(sum: number, it: any) => sum + it.price * it.quantity,
-												0
-											);
-
-											setCart({ ...updated, totalPrice: newTotal });
+											try {
+												const updated = await updateCartItem(token!, item.id, quantity);
+												// Update cart state - totalPrice will be calculated automatically
+												setCart(updated);
+											} catch (error) {
+												console.error("Failed to update cart item:", error);
+												alert("Failed to update quantity. Please try again.");
+											}
 										}}
-
 										className="mt-2 w-16 border rounded px-2"
 									/>
 								</div>
 
 								<button
-									className="text-red-500"
+									className="text-red-500 hover:text-red-700 transition-colors"
 									onClick={async () => {
 										const token = localStorage.getItem("token");
-										await removeCartItem(token!, item.id);
-										await loadCart();
+										if (!token) return;
+										
+										try {
+											await removeCartItem(token, item.id);
+											// Update cart state locally - remove item from items array
+											setCart((prevCart: any) => ({
+												...prevCart,
+												items: prevCart.items.filter((it: any) => it.id !== item.id),
+											}));
+										} catch (error) {
+											console.error("Failed to remove cart item:", error);
+											alert("Failed to remove item. Please try again.");
+										}
 									}}
 								>
 									Xóa
@@ -95,7 +115,7 @@ export default function Cart() {
 					<div className="card h-fit">
 						<h2 className="heading-4">Tổng tiền</h2>
 						<p className="mt-4 font-bold text-lg text-neutral-900">
-							Total: {Number(cart.totalPrice).toLocaleString()}
+							Total: {totalPrice.toLocaleString()}₫
 						</p>
 
 						<button className="btn-primary mt-6 w-full" onClick={handleCheckout}>
@@ -107,8 +127,19 @@ export default function Cart() {
 							onClick={async () => {
 								if (!window.confirm("Xóa toàn bộ giỏ hàng?")) return;
 								const token = localStorage.getItem("token");
-								await clearCart(token!);
-								await loadCart();
+								if (!token) return;
+								
+								try {
+									await clearCart(token);
+									// Update cart state locally - clear items array
+									setCart((prevCart: any) => ({
+										...prevCart,
+										items: [],
+									}));
+								} catch (error) {
+									console.error("Failed to clear cart:", error);
+									alert("Failed to clear cart. Please try again.");
+								}
 							}}
 						>
 							Xóa toàn bộ
