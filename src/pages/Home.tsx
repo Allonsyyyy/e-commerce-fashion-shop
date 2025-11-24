@@ -6,9 +6,13 @@ import ProductCard from "../components/ProductCard";
 import Newsletter from "../components/Newsletter";
 import { Star, Truck, Shield, RefreshCw } from "lucide-react";
 import type { Product, ProductImage } from "../types/product";
+import { getRecommendations } from "../api/recommendationsApi";
 
 export default function Home() {
 	const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+	const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
+	const [isRecLoading, setIsRecLoading] = useState(false);
+	const [recError, setRecError] = useState<string | null>(null);
 
 	useEffect(() => {
 		fetch("http://localhost:3000/api/v1/products?page=1&limit=100&sort=-createdAt")
@@ -21,6 +25,23 @@ export default function Home() {
 				setFeaturedProducts(products.slice(0, 8));
 			})
 			.catch((err) => console.error("Fetch products failed:", err));
+	}, []);
+
+	useEffect(() => {
+		const token = localStorage.getItem("token");
+		if (!token) return;
+
+		setRecError(null);
+		setIsRecLoading(true);
+		getRecommendations(8)
+			.then((data) => setRecommendedProducts(data || []))
+			.catch((err) => {
+				// Hide auth errors silently, surface others
+				if (String(err).toLowerCase().includes("unauthorized")) return;
+				setRecError("Không thể tải gợi ý ngay bây giờ.");
+				console.error(err);
+			})
+			.finally(() => setIsRecLoading(false));
 	}, []);
 
 	const features = [
@@ -82,6 +103,53 @@ export default function Home() {
 					</div>
 				</Container>
 			</section>
+
+			{/* Personalized recommendations */}
+			{(recommendedProducts.length > 0 || isRecLoading || recError) && (
+				<section className="py-16 bg-white">
+					<Container>
+						<div className="flex items-center justify-between mb-8">
+							<div>
+								<h2 className="heading-3 mb-2">Gợi ý dành riêng cho bạn</h2>
+								<p className="body-text text-neutral-600">
+									Dựa trên các sản phẩm bạn đã mua
+								</p>
+							</div>
+							{recError && (
+								<span className="text-sm text-red-600">{recError}</span>
+							)}
+						</div>
+
+						{isRecLoading ? (
+							<p className="text-neutral-600">Đang tải gợi ý...</p>
+						) : (
+							<>
+								{!recommendedProducts.length ? (
+									<p className="text-neutral-600">
+										Chúng tôi sẽ gợi ý sau khi bạn có một vài đơn hàng.
+									</p>
+								) : (
+									<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+										{recommendedProducts.map((p) => (
+											<ProductCard
+												key={`rec-${p.id}`}
+												title={p.name}
+												price={p.price}
+												discount={p.discount}
+												image={
+													p.mainImageUrl ||
+													p.images?.find((img: ProductImage) => img.isMain)?.imageUrl
+												}
+												to={`/product/${p.id}`}
+											/>
+										))}
+									</div>
+								)}
+							</>
+						)}
+					</Container>
+				</section>
+			)}
 
 			{/* Features */}
 			<section className="py-16 bg-white border-y border-neutral-200">
