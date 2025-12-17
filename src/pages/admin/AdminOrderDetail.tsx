@@ -74,11 +74,102 @@ export default function AdminOrderDetail() {
                 refunded: { label: "Refunded", className: "bg-neutral-100 text-neutral-800 border-neutral-200" },
             },
             shipment: {
-                not_shipped: { label: "Not Shipped", className: "bg-neutral-100 text-neutral-800 border-neutral-200" },
-                shipped: { label: "Shipped", className: "bg-blue-100 text-blue-800 border-blue-200" },
-                delivered: { label: "Delivered", className: "bg-green-100 text-green-800 border-green-200" },
-                cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800 border-red-200" },
+                ready_to_pick: {
+                    label: "Not Shipped",
+                    className: "bg-neutral-100 text-neutral-800 border-neutral-200",
+                },
+
+                picking: {
+                    label: "Picking",
+                    className: "bg-blue-100 text-blue-800 border-blue-200",
+                },
+
+                cancel: {
+                    label: "Cancelled",
+                    className: "bg-red-100 text-red-800 border-red-200",
+                },
+
+                money_collect_picking: {
+                    label: "Picking (COD)",
+                    className: "bg-blue-100 text-blue-800 border-blue-200",
+                },
+
+                picked: {
+                    label: "Picked",
+                    className: "bg-blue-100 text-blue-800 border-blue-200",
+                },
+
+                storing: {
+                    label: "Storing",
+                    className: "bg-blue-100 text-blue-800 border-blue-200",
+                },
+
+                transporting: {
+                    label: "Transporting",
+                    className: "bg-blue-100 text-blue-800 border-blue-200",
+                },
+
+                sorting: {
+                    label: "Sorting",
+                    className: "bg-blue-100 text-blue-800 border-blue-200",
+                },
+
+                delivering: {
+                    label: "Delivering",
+                    className: "bg-blue-100 text-blue-800 border-blue-200",
+                },
+
+                money_collect_delivering: {
+                    label: "Delivering (COD)",
+                    className: "bg-blue-100 text-blue-800 border-blue-200",
+                },
+
+                delivered: {
+                    label: "Delivered",
+                    className: "bg-green-100 text-green-800 border-green-200",
+                },
+
+                delivery_fail: {
+                    label: "Delivery Failed",
+                    className: "bg-red-100 text-red-800 border-red-200",
+                },
+
+                waiting_to_return: {
+                    label: "Waiting to Return",
+                    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+                },
+
+                return: {
+                    label: "Return",
+                    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+                },
+
+                return_transporting: {
+                    label: "Returning (Transport)",
+                    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+                },
+
+                return_sorting: {
+                    label: "Returning (Sorting)",
+                    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+                },
+
+                returning: {
+                    label: "Returning",
+                    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+                },
+
+                return_fail: {
+                    label: "Return Failed",
+                    className: "bg-red-100 text-red-800 border-red-200",
+                },
+
+                returned: {
+                    label: "Returned",
+                    className: "bg-purple-100 text-purple-800 border-purple-200",
+                },
             },
+
         };
 
         const config = statusConfig[type]?.[status] || { label: status, className: "bg-neutral-100 text-neutral-800 border-neutral-200" };

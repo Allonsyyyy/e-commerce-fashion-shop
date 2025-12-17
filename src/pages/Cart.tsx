@@ -80,7 +80,7 @@ export default function Cart() {
 												setCart(updated);
 											} catch (error) {
 												console.error("Failed to update cart item:", error);
-												alert("Failed to update quantity. Please try again.");
+												alert("Cập nhật số lượng thất bại. Vui lòng thử lại.");
 											}
 										}}
 										className="mt-2 w-16 border rounded px-2"
@@ -102,7 +102,7 @@ export default function Cart() {
 											}));
 										} catch (error) {
 											console.error("Failed to remove cart item:", error);
-											alert("Failed to remove item. Please try again.");
+											alert("Xóa sản phẩm thất bại. Vui lòng thử lại.");
 										}
 									}}
 								>
@@ -138,7 +138,7 @@ export default function Cart() {
 									}));
 								} catch (error) {
 									console.error("Failed to clear cart:", error);
-									alert("Failed to clear cart. Please try again.");
+									alert("Xóa giỏ hàng thất bại. Vui lòng thử lại.");
 								}
 							}}
 						>

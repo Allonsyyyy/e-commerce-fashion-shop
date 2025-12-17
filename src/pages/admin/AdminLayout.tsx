@@ -32,7 +32,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 const profile = await getProfile(token);
                 setUserRole(profile.role);
             } catch (err) {
-                console.error("Failed to load user profile:", err);
+                console.error("Tải hồ sơ người dùng thất bại:", err);
                 navigate("/login");
             }
         };
@@ -47,20 +47,20 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     // Menu items for Staff
     const staffMenuItems = [
-        { path: "/admin", icon: LayoutDashboard, label: "Dashboard" },
-        { path: "/admin/categories", icon: FolderTree, label: "Categories" },
-        { path: "/admin/products", icon: Package, label: "Products" },
-        { path: "/admin/users", icon: Users, label: "Users" },
-        { path: "/admin/inventory", icon: Warehouse, label: "Inventory" },
-        { path: "/admin/discounts", icon: Tag, label: "Discounts" },
-        { path: "/admin/shipping", icon: Truck, label: "Shipping" },
-        { path: "/admin/best-selling", icon: TrendingUp, label: "Best Selling" },
+        { path: "/admin", icon: LayoutDashboard, label: "Bảng điều khiển" },
+        { path: "/admin/categories", icon: FolderTree, label: "Danh mục" },
+        { path: "/admin/products", icon: Package, label: "Sản phẩm" },
+        { path: "/admin/users", icon: Users, label: "Người dùng" },
+        { path: "/admin/inventory", icon: Warehouse, label: "Kho hàng" },
+        { path: "/admin/discounts", icon: Tag, label: "Khuyến mãi" },
+        { path: "/admin/shipping", icon: Truck, label: "Vận chuyển" },
+        { path: "/admin/best-selling", icon: TrendingUp, label: "Bán chạy" },
     ];
 
     // Menu items for Admin (includes all staff items + revenue)
     const adminMenuItems = [
         ...staffMenuItems,
-        { path: "/admin/revenue", icon: DollarSign, label: "Revenue" },
+        { path: "/admin/revenue", icon: DollarSign, label: "Doanh thu" },
     ];
 
     const menuItems = userRole === "admin" ? adminMenuItems : staffMenuItems;
@@ -71,10 +71,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <aside className="w-64 bg-neutral-900 text-white min-h-screen">
                 <div className="p-6">
                     <h1 className="text-2xl font-bold">
-                        {userRole === "admin" ? "Admin Panel" : "Staff Panel"}
+                        {userRole === "admin" ? "Bảng quản trị" : "Bảng nhân viên"}
                     </h1>
                     <p className="text-sm text-neutral-400 mt-1">
-                        {userRole === "admin" ? "Administrator" : "Staff"}
+                        {userRole === "admin" ? "Quản trị viên" : "Nhân viên"}
                     </p>
                 </div>
                 <nav className="px-4">
@@ -101,7 +101,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-neutral-800 w-full text-left"
                     >
                         <LogOut size={20} />
-                        <span>Logout</span>
+                        <span>Đăng xuất</span>
                     </button>
                 </div>
             </aside>
@@ -115,4 +115,3 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </div>
     );
 }
-

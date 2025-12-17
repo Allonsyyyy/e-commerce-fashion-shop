@@ -97,7 +97,7 @@ export default function Checkout() {
 			.then((data) => setCart(data))
 			.catch((err: unknown) => {
 				console.error(err);
-				setGlobalError("Cannot load cart. Please try again.");
+				setGlobalError("Không tải được giỏ hàng. Vui lòng thử lại.");
 			})
 			.finally(() => setLoadingCart(false));
 	}, [navigate, isBuyNowMode]);
@@ -107,7 +107,7 @@ export default function Checkout() {
 			.then(setProvinces)
 			.catch((err: unknown) => {
 				console.error(err);
-				setGlobalError("Unable to load provinces.");
+				setGlobalError("Không tải được danh sách tỉnh/thành.");
 			});
 	}, []);
 
@@ -125,7 +125,7 @@ export default function Checkout() {
 			.then(setDistricts)
 			.catch((err: unknown) => {
 				console.error(err);
-				setGlobalError("Unable to load districts.");
+				setGlobalError("Không tải được danh sách quận/huyện.");
 			});
 	}, [provinceId]);
 
@@ -141,7 +141,7 @@ export default function Checkout() {
 			.then(setWards)
 			.catch((err: unknown) => {
 				console.error(err);
-				setGlobalError("Unable to load wards.");
+				setGlobalError("Không tải được danh sách phường/xã.");
 			});
 	}, [districtId]);
 
@@ -204,7 +204,7 @@ export default function Checkout() {
 				if (cancelled) return;
 				console.error(err);
 				setShippingFee(null);
-				setShippingError("Unable to calculate shipping fee. Please try again.");
+				setShippingError("Không tính được phí vận chuyển. Vui lòng thử lại.");
 			})
 			.finally(() => {
 				if (cancelled) return;
@@ -235,11 +235,11 @@ export default function Checkout() {
 
 	const handlePlaceOrder = async () => {
 		if (!canPlaceOrder) {
-			setGlobalError("Please fill every required field and wait for the shipping fee.");
+			setGlobalError("Vui lòng điền đủ thông tin và chờ tính phí vận chuyển.");
 			return;
 		}
 		if (isBuyNowMode && !buyNowItem) {
-			setGlobalError("Your selected product is no longer available. Please try again.");
+			setGlobalError("Sản phẩm bạn chọn không còn khả dụng. Vui lòng thử lại.");
 			return;
 		}
 
@@ -291,7 +291,7 @@ export default function Checkout() {
 			});
 		} catch (err: any) {
 			console.error(err);
-			const message = err?.message || "Checkout failed. Please try again later.";
+			const message = err?.message || "Thanh toán thất bại. Vui lòng thử lại.";
 			setGlobalError(message);
 		} finally {
 			setIsSubmitting(false);
@@ -299,17 +299,17 @@ export default function Checkout() {
 	};
 
 	if (loadingCart) {
-		return <div className="py-20 text-center">Loading cart...</div>;
+		return <div className="py-20 text-center">Đang tải giỏ hàng...</div>;
 	}
 
 	if (isBuyNowMode && !buyNowItem) {
 		return (
 			<main className="py-12">
 				<Container>
-					<h1 className="heading-3 mb-4">Product unavailable</h1>
-					<p className="mb-6 text-neutral-600">Your buy-now selection expired. Please go back and try again.</p>
+					<h1 className="heading-3 mb-4">Sản phẩm không khả dụng</h1>
+					<p className="mb-6 text-neutral-600">Lựa chọn mua ngay đã hết hạn. Vui lòng quay lại và thử lại.</p>
 					<button className="btn-primary" onClick={() => navigate(-1)}>
-						Go back
+						Quay lại
 					</button>
 				</Container>
 			</main>
@@ -320,10 +320,10 @@ export default function Checkout() {
 		return (
 			<main className="py-12">
 				<Container>
-					<h1 className="heading-3 mb-4">Your cart is empty</h1>
-					<p className="mb-6 text-neutral-600">Add some products to your cart before checking out.</p>
+					<h1 className="heading-3 mb-4">Giỏ hàng trống</h1>
+					<p className="mb-6 text-neutral-600">Hãy thêm sản phẩm vào giỏ trước khi thanh toán.</p>
 					<button className="btn-primary" onClick={() => navigate("/shop")}>
-						Back to shop
+						Về trang mua sắm
 					</button>
 				</Container>
 			</main>
@@ -333,7 +333,7 @@ export default function Checkout() {
 	return (
 		<main className="py-12">
 			<Container>
-				<h1 className="heading-3">Checkout</h1>
+				<h1 className="heading-3">Thanh toán</h1>
 				{globalError && (
 					<div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
 						{globalError}
@@ -348,18 +348,18 @@ export default function Checkout() {
 						}}
 					>
 						<div className="card space-y-5 p-6">
-							<h2 className="heading-4">Shipping information</h2>
+							<h2 className="heading-4">Thông tin giao hàng</h2>
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 								<input
 									className="input"
-									placeholder="Full name"
+									placeholder="Họ và tên"
 									value={form.fullName}
 									onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))}
 									required
 								/>
 								<input
 									className="input"
-									placeholder="Phone number"
+									placeholder="Số điện thoại"
 									value={form.phone}
 									onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
 									required
@@ -372,7 +372,7 @@ export default function Checkout() {
 									onChange={(e) => setProvinceId(e.target.value)}
 									required
 								>
-									<option value="">Select province</option>
+									<option value="">Chọn tỉnh/thành</option>
 									{provinces.map((province) => (
 										<option key={province.ProvinceID} value={province.ProvinceID}>
 											{province.ProvinceName}
@@ -386,7 +386,7 @@ export default function Checkout() {
 									disabled={!provinceId}
 									required
 								>
-									<option value="">Select district</option>
+									<option value="">Chọn quận/huyện</option>
 									{districts.map((district) => (
 										<option key={district.DistrictID} value={district.DistrictID}>
 											{district.DistrictName}
@@ -400,7 +400,7 @@ export default function Checkout() {
 									disabled={!districtId}
 									required
 								>
-									<option value="">Select ward</option>
+									<option value="">Chọn phường/xã</option>
 									{wards.map((ward) => (
 										<option key={ward.WardCode} value={ward.WardCode}>
 											{ward.WardName}
@@ -410,7 +410,7 @@ export default function Checkout() {
 							</div>
 							<input
 								className="input"
-								placeholder="Street address"
+								placeholder="Địa chỉ chi tiết"
 								value={form.street}
 								onChange={(e) => setForm((prev) => ({ ...prev, street: e.target.value }))}
 								required
@@ -419,7 +419,7 @@ export default function Checkout() {
 						</div>
 
 						<div className="card space-y-4 p-6">
-							<h2 className="heading-4">Payment method</h2>
+							<h2 className="heading-4">Phương thức thanh toán</h2>
 							<label className="flex items-center gap-3 rounded border border-neutral-200 px-4 py-3 text-sm font-medium">
 								<input
 									type="radio"
@@ -428,7 +428,7 @@ export default function Checkout() {
 									checked={paymentMethod === "cod"}
 									onChange={() => setPaymentMethod("cod")}
 								/>
-								<span>Cash on delivery</span>
+								<span>Thanh toán khi nhận hàng</span>
 							</label>
 							<label className="flex items-center gap-3 rounded border border-neutral-200 px-4 py-3 text-sm font-medium">
 								<input
@@ -444,7 +444,7 @@ export default function Checkout() {
 					</form>
 
 					<aside className="card h-fit">
-						<h2 className="heading-4">Order summary</h2>
+						<h2 className="heading-4">Tóm tắt đơn hàng</h2>
 						<div className="mt-4 space-y-3 max-h-[220px] overflow-auto pr-1">
 							{orderItems.map((item: any) => (
 								<div key={item.id} className="flex justify-between text-sm">
@@ -458,17 +458,17 @@ export default function Checkout() {
 
 						<div className="mt-6 space-y-3 text-sm">
 							<div className="flex items-center justify-between">
-								<span>Subtotal</span>
+								<span>Tạm tính</span>
 								<span className="font-semibold">{formatCurrency(subtotal)}</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span>Shipping fee</span>
+								<span>Phí vận chuyển</span>
 								<span className="font-semibold">
-									{calculatingFee && wardCode ? "Calculating..." : shippingFee !== null ? formatCurrency(shippingFee) : "--"}
+									{calculatingFee && wardCode ? "Đang tính..." : shippingFee !== null ? formatCurrency(shippingFee) : "--"}
 								</span>
 							</div>
 							<div className="flex items-center justify-between border-t pt-3 text-base font-semibold">
-								<span>Grand total</span>
+								<span>Tổng cộng</span>
 								<span>{formatCurrency(total)}</span>
 							</div>
 						</div>
@@ -478,7 +478,7 @@ export default function Checkout() {
 							onClick={handlePlaceOrder}
 							disabled={!canPlaceOrder}
 						>
-							{isSubmitting ? "Placing order..." : paymentMethod === "vnpay" ? "Pay with VNPay" : "Place order"}
+							{isSubmitting ? "Đang đặt hàng..." : paymentMethod === "vnpay" ? "Thanh toán VNPay" : "Đặt hàng"}
 						</button>
 					</aside>
 				</div>

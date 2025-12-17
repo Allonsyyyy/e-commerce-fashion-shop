@@ -22,7 +22,7 @@ export default function LoginPage() {
             navigate("/");
             window.location.reload();
         } catch (err: any) {
-            setError(err.message || "Login failed! Please check your information.");
+            setError(err.message || "Đăng nhập thất bại! Vui lòng kiểm tra thông tin.");
         } finally {
             setLoading(false);
         }
@@ -38,9 +38,9 @@ export default function LoginPage() {
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-900 rounded-full mb-4">
                                 <LogIn className="h-8 w-8 text-white" />
                             </div>
-                            <h1 className="heading-3 mb-2">Sign In</h1>
+                            <h1 className="heading-3 mb-2">Đăng nhập</h1>
                             <p className="body-text text-neutral-600">
-                                Welcome back! Please sign in to your account.
+                                Chào mừng trở lại! Vui lòng đăng nhập tài khoản.
                             </p>
                         </div>
 
@@ -74,7 +74,7 @@ export default function LoginPage() {
                             {/* Password */}
                             <div>
                                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                                    Password
+                                    Mật khẩu
                                 </label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
@@ -98,33 +98,33 @@ export default function LoginPage() {
                                 {loading ? (
                                     <>
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                        Signing in...
-                                    </>
-                                ) : (
-                                    <>
-                                        Sign In
-                                        <ArrowRight className="h-5 w-5" />
-                                    </>
-                                )}
+                                        Đang đăng nhập...
+                                </>
+                            ) : (
+                                <>
+                                    Đăng nhập
+                                    <ArrowRight className="h-5 w-5" />
+                                </>
+                            )}
                             </button>
                         </form>
 
                         {/* Divider */}
                         <div className="my-6 flex items-center">
                             <div className="flex-1 border-t border-neutral-200"></div>
-                            <span className="px-4 text-sm text-neutral-500">or</span>
+                            <span className="px-4 text-sm text-neutral-500">hoặc</span>
                             <div className="flex-1 border-t border-neutral-200"></div>
                         </div>
 
                         {/* Register Link */}
                         <div className="text-center">
                             <p className="body-text text-neutral-600">
-                                Don't have an account?{" "}
+                                Chưa có tài khoản?{" "}
                                 <Link
                                     to="/register"
                                     className="font-semibold text-neutral-900 hover:underline"
                                 >
-                                    Sign up now
+                                    Đăng ký ngay
                                 </Link>
                             </p>
                         </div>

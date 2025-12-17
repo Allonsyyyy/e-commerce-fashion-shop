@@ -34,10 +34,10 @@ export default function OrderDetail() {
 
     const getStatusBadge = (status: string) => {
         const statusConfig: Record<string, { label: string; className: string }> = {
-            pending: { label: "Pending", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-            processing: { label: "Processing", className: "bg-blue-100 text-blue-800 border-blue-200" },
-            completed: { label: "Completed", className: "bg-green-100 text-green-800 border-green-200" },
-            cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800 border-red-200" },
+            pending: { label: "Chờ xử lý", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+            processing: { label: "Đang xử lý", className: "bg-blue-100 text-blue-800 border-blue-200" },
+            completed: { label: "Hoàn tất", className: "bg-green-100 text-green-800 border-green-200" },
+            cancelled: { label: "Đã hủy", className: "bg-red-100 text-red-800 border-red-200" },
         };
 
         const config = statusConfig[status] || { label: status, className: "bg-neutral-100 text-neutral-800 border-neutral-200" };
@@ -50,10 +50,10 @@ export default function OrderDetail() {
 
     const getPaymentStatusBadge = (status: string) => {
         const statusConfig: Record<string, { label: string; className: string }> = {
-            unpaid: { label: "Unpaid", className: "bg-orange-100 text-orange-800 border-orange-200" },
-            paid: { label: "Paid", className: "bg-green-100 text-green-800 border-green-200" },
-            failed: { label: "Failed", className: "bg-red-100 text-red-800 border-red-200" },
-            refunded: { label: "Refunded", className: "bg-neutral-100 text-neutral-800 border-neutral-200" },
+            unpaid: { label: "Chưa thanh toán", className: "bg-orange-100 text-orange-800 border-orange-200" },
+            paid: { label: "Đã thanh toán", className: "bg-green-100 text-green-800 border-green-200" },
+            failed: { label: "Thanh toán thất bại", className: "bg-red-100 text-red-800 border-red-200" },
+            refunded: { label: "Đã hoàn tiền", className: "bg-neutral-100 text-neutral-800 border-neutral-200" },
         };
 
         const config = statusConfig[status] || { label: status, className: "bg-neutral-100 text-neutral-800 border-neutral-200" };
@@ -66,10 +66,10 @@ export default function OrderDetail() {
 
     const getShipmentStatusBadge = (status: string) => {
         const statusConfig: Record<string, { label: string; className: string }> = {
-            not_shipped: { label: "Not Shipped", className: "bg-neutral-100 text-neutral-800 border-neutral-200" },
-            shipped: { label: "Shipped", className: "bg-blue-100 text-blue-800 border-blue-200" },
-            delivered: { label: "Delivered", className: "bg-green-100 text-green-800 border-green-200" },
-            cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800 border-red-200" },
+            not_shipped: { label: "Chưa giao", className: "bg-neutral-100 text-neutral-800 border-neutral-200" },
+            shipped: { label: "Đang giao", className: "bg-blue-100 text-blue-800 border-blue-200" },
+            delivered: { label: "Đã giao", className: "bg-green-100 text-green-800 border-green-200" },
+            cancelled: { label: "Đã hủy", className: "bg-red-100 text-red-800 border-red-200" },
         };
 
         const config = statusConfig[status] || { label: status, className: "bg-neutral-100 text-neutral-800 border-neutral-200" };
@@ -86,7 +86,7 @@ export default function OrderDetail() {
                 <Container>
                     <div className="text-center py-20">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900"></div>
-                        <p className="mt-4 text-neutral-600">Loading order details...</p>
+                        <p className="mt-4 text-neutral-600">Đang tải chi tiết đơn hàng...</p>
                     </div>
                 </Container>
             </main>
@@ -99,10 +99,10 @@ export default function OrderDetail() {
                 <Container>
                     <div className="text-center py-20">
                         <Package className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-                        <h2 className="text-2xl font-bold text-neutral-900 mb-2">Order Not Found</h2>
-                        <p className="text-neutral-600 mb-6">The order does not exist or you don't have permission to view it</p>
+                        <h2 className="text-2xl font-bold text-neutral-900 mb-2">Không tìm thấy đơn hàng</h2>
+                        <p className="text-neutral-600 mb-6">Đơn hàng không tồn tại hoặc bạn không có quyền xem.</p>
                         <Link to="/orders" className="btn-primary inline-block">
-                            Back to Orders
+                            Về danh sách đơn
                         </Link>
                     </div>
                 </Container>
@@ -120,15 +120,15 @@ export default function OrderDetail() {
                     className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-6 transition-colors"
                 >
                     <ArrowLeft className="h-4 w-4" />
-                    <span>Back to Orders</span>
+                    <span>Về danh sách đơn</span>
                 </Link>
 
                 <div className="mb-8">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-neutral-900 mb-2">Order #{order.id}</h1>
+                            <h1 className="text-3xl font-bold text-neutral-900 mb-2">Đơn hàng #{order.id}</h1>
                             <p className="text-neutral-600">
-                                Placed on {new Date(order.createdAt).toLocaleDateString("en-US", {
+                                Đặt ngày {new Date(order.createdAt).toLocaleDateString("vi-VN", {
                                     year: "numeric",
                                     month: "long",
                                     day: "numeric",
@@ -146,7 +146,7 @@ export default function OrderDetail() {
                     <div className="lg:col-span-2 space-y-6">
                         {/* Order Items */}
                         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-                            <h2 className="text-xl font-semibold text-neutral-900 mb-6">Ordered Products</h2>
+                            <h2 className="text-xl font-semibold text-neutral-900 mb-6">Sản phẩm đã đặt</h2>
                             <div className="space-y-4">
                                 {order.items.map((item) => (
                                     <div
@@ -167,7 +167,7 @@ export default function OrderDetail() {
                                             </p>
                                             <div className="flex items-center gap-4 text-sm text-neutral-600">
                                                 <span>SKU: {item.variant.sku}</span>
-                                                <span>Quantity: {item.quantity}</span>
+                                                <span>Số lượng: {item.quantity}</span>
                                             </div>
                                         </div>
                                         <div className="text-right">
@@ -175,7 +175,7 @@ export default function OrderDetail() {
                                                 {parseFloat(item.price).toLocaleString("vi-VN")}₫
                                             </p>
                                             <p className="text-sm text-neutral-600 mt-1">
-                                                Total: {(parseFloat(item.price) * item.quantity).toLocaleString("vi-VN")}₫
+                                                Tổng: {(parseFloat(item.price) * item.quantity).toLocaleString("vi-VN")}₫
                                             </p>
                                         </div>
                                     </div>
@@ -187,15 +187,15 @@ export default function OrderDetail() {
                         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
                             <div className="flex items-center gap-3 mb-4">
                                 <Truck className="h-5 w-5 text-neutral-600" />
-                                <h2 className="text-xl font-semibold text-neutral-900">Shipping Information</h2>
+                                <h2 className="text-xl font-semibold text-neutral-900">Thông tin giao hàng</h2>
                             </div>
                             <div className="space-y-3">
                                 <div>
-                                    <span className="text-sm text-neutral-600">Shipping Address:</span>
+                                    <span className="text-sm text-neutral-600">Địa chỉ giao hàng:</span>
                                     <p className="font-medium text-neutral-900 mt-1">{order.shippingAddress}</p>
                                 </div>
                                 <div>
-                                    <span className="text-sm text-neutral-600">Shipping Status:</span>
+                                    <span className="text-sm text-neutral-600">Trạng thái giao hàng:</span>
                                     <div className="mt-1">{getShipmentStatusBadge(order.shipmentStatus)}</div>
                                 </div>
                             </div>
@@ -206,25 +206,25 @@ export default function OrderDetail() {
                     <div className="space-y-6">
                         {/* Order Summary */}
                         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-                            <h2 className="text-xl font-semibold text-neutral-900 mb-6">Order Summary</h2>
+                            <h2 className="text-xl font-semibold text-neutral-900 mb-6">Tóm tắt đơn hàng</h2>
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-neutral-600">Items:</span>
-                                    <span className="font-medium text-neutral-900">{totalItems} {totalItems === 1 ? 'item' : 'items'}</span>
+                                    <span className="text-neutral-600">Số lượng:</span>
+                                    <span className="font-medium text-neutral-900">{totalItems} sản phẩm</span>
                                 </div>
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-neutral-600">Subtotal:</span>
+                                    <span className="text-neutral-600">Tạm tính:</span>
                                     <span className="font-medium text-neutral-900">
                                         {parseFloat(order.totalAmount).toLocaleString("vi-VN")}₫
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-neutral-600">Shipping:</span>
-                                    <span className="font-medium text-neutral-900">Free</span>
+                                    <span className="text-neutral-600">Vận chuyển:</span>
+                                    <span className="font-medium text-neutral-900">Miễn phí</span>
                                 </div>
                                 <div className="border-t border-neutral-200 pt-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-lg font-semibold text-neutral-900">Total:</span>
+                                        <span className="text-lg font-semibold text-neutral-900">Tổng cộng:</span>
                                         <span className="text-xl font-bold text-neutral-900">
                                             {parseFloat(order.totalAmount).toLocaleString("vi-VN")}₫
                                         </span>
@@ -237,22 +237,22 @@ export default function OrderDetail() {
                         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
                             <div className="flex items-center gap-3 mb-4">
                                 <CreditCard className="h-5 w-5 text-neutral-600" />
-                                <h2 className="text-xl font-semibold text-neutral-900">Payment</h2>
+                            <h2 className="text-xl font-semibold text-neutral-900">Thanh toán</h2>
                             </div>
                             <div className="space-y-3">
                                 <div>
-                                    <span className="text-sm text-neutral-600">Method:</span>
+                                    <span className="text-sm text-neutral-600">Phương thức:</span>
                                     <p className="font-medium text-neutral-900 mt-1">
-                                        {order.paymentMethod === "vnpay" ? "VNPay" : "Cash on Delivery"}
+                                        {order.paymentMethod === "vnpay" ? "VNPay" : "Thanh toán khi nhận hàng"}
                                     </p>
                                 </div>
                                 <div>
-                                    <span className="text-sm text-neutral-600">Status:</span>
+                                    <span className="text-sm text-neutral-600">Trạng thái:</span>
                                     <div className="mt-1">{getPaymentStatusBadge(order.paymentStatus)}</div>
                                 </div>
                                 {order.vnpTxnRef && (
                                     <div>
-                                        <span className="text-sm text-neutral-600">Transaction ID:</span>
+                                        <span className="text-sm text-neutral-600">Mã giao dịch:</span>
                                         <p className="font-medium text-neutral-900 mt-1">{order.vnpTxnRef}</p>
                                     </div>
                                 )}
@@ -264,4 +264,3 @@ export default function OrderDetail() {
         </main>
     );
 }
-

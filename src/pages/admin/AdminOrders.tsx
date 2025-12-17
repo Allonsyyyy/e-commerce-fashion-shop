@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+
+import { getOrders, type Order } from "../../api/admin/ordersApi";
 import AdminLayout from "./AdminLayout";
-import { getOrders } from "../../api/admin/ordersApi";
-import type { Order } from "../../api/admin/ordersApi";
 
 export default function AdminOrders() {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -22,10 +22,16 @@ export default function AdminOrders() {
             setOrders(data.data);
             setTotal(data.total);
         } catch (err) {
-            console.error("Failed to load orders:", err);
+            console.error("Tải đơn hàng thất bại:", err);
         } finally {
             setLoading(false);
         }
+    };
+
+    const statusLabel: Record<string, string> = {
+        pending: "Đang xử lý",
+        completed: "Hoàn thành",
+        cancelled: "Đã hủy",
     };
 
     const getStatusBadge = (status: string) => {
@@ -36,7 +42,7 @@ export default function AdminOrders() {
         };
         return (
             <span className={`px-2 py-1 rounded text-sm ${colors[status] || "bg-neutral-100 text-neutral-800"}`}>
-                {status}
+                {statusLabel[status] || status}
             </span>
         );
     };
@@ -73,7 +79,7 @@ export default function AdminOrders() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                {parseFloat(order.totalAmount).toLocaleString()}đ
+                                                {parseFloat(order.totalAmount).toLocaleString()} đ
                                             </td>
                                             <td className="px-6 py-4">{getStatusBadge(order.orderStatus)}</td>
                                             <td className="px-6 py-4">
@@ -118,4 +124,3 @@ export default function AdminOrders() {
         </AdminLayout>
     );
 }
-

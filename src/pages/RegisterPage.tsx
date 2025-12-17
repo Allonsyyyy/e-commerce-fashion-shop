@@ -23,10 +23,10 @@ export default function RegisterPage() {
 
 		try {
 			await register(formData);
-			alert("Registration successful! Please sign in.");
+			alert("Đăng ký thành công! Vui lòng đăng nhập.");
 			navigate("/login");
 		} catch (err: any) {
-			setError(err.message || "Registration failed! Please try again.");
+			setError(err.message || "Đăng ký thất bại! Vui lòng thử lại.");
 		} finally {
 			setLoading(false);
 		}
@@ -42,9 +42,9 @@ export default function RegisterPage() {
 							<div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-900 rounded-full mb-4">
 								<UserPlus className="h-8 w-8 text-white" />
 							</div>
-							<h1 className="heading-3 mb-2">Create New Account</h1>
+							<h1 className="heading-3 mb-2">Tạo tài khoản mới</h1>
 							<p className="body-text text-neutral-600">
-								Fill in your information to create an account and start shopping
+								Điền thông tin để tạo tài khoản và bắt đầu mua sắm
 							</p>
 						</div>
 
@@ -60,13 +60,13 @@ export default function RegisterPage() {
 							{/* Name */}
 							<div>
 								<label className="block text-sm font-medium text-neutral-700 mb-2">
-									Full Name
+									Họ và tên
 								</label>
 								<div className="relative">
 									<User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
 									<input
 										type="text"
-										placeholder="John Doe"
+										placeholder="Nguyễn Văn A"
 										className="input pl-10 w-full"
 										value={formData.name}
 										onChange={(e) =>
@@ -86,7 +86,7 @@ export default function RegisterPage() {
 									<Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
 									<input
 										type="email"
-										placeholder="your@email.com"
+										placeholder="email@domain.com"
 										className="input pl-10 w-full"
 										value={formData.email}
 										onChange={(e) =>
@@ -100,7 +100,7 @@ export default function RegisterPage() {
 							{/* Password */}
 							<div>
 								<label className="block text-sm font-medium text-neutral-700 mb-2">
-									Password
+									Mật khẩu
 								</label>
 								<div className="relative">
 									<Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
@@ -117,14 +117,14 @@ export default function RegisterPage() {
 									/>
 								</div>
 								<p className="mt-1 text-xs text-neutral-500">
-									Password must be at least 6 characters
+									Mật khẩu tối thiểu 6 ký tự
 								</p>
 							</div>
 
 							{/* Phone */}
 							<div>
 								<label className="block text-sm font-medium text-neutral-700 mb-2">
-									Phone Number
+									Số điện thoại
 								</label>
 								<div className="relative">
 									<Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
@@ -144,12 +144,12 @@ export default function RegisterPage() {
 							{/* Address */}
 							<div>
 								<label className="block text-sm font-medium text-neutral-700 mb-2">
-									Address
+									Địa chỉ
 								</label>
 								<div className="relative">
 									<MapPin className="absolute left-3 top-3 h-5 w-5 text-neutral-400" />
 									<textarea
-										placeholder="Enter full address..."
+										placeholder="Nhập địa chỉ đầy đủ..."
 										className="input pl-10 w-full min-h-[80px] resize-none"
 										value={formData.address}
 										onChange={(e) =>
@@ -169,11 +169,11 @@ export default function RegisterPage() {
 								{loading ? (
 									<>
 										<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-										Creating account...
+										Đang tạo tài khoản...
 									</>
 								) : (
 									<>
-										Create Account
+										Tạo tài khoản
 										<ArrowRight className="h-5 w-5" />
 									</>
 								)}
@@ -183,19 +183,19 @@ export default function RegisterPage() {
 						{/* Divider */}
 						<div className="my-6 flex items-center">
 							<div className="flex-1 border-t border-neutral-200"></div>
-							<span className="px-4 text-sm text-neutral-500">or</span>
+							<span className="px-4 text-sm text-neutral-500">hoặc</span>
 							<div className="flex-1 border-t border-neutral-200"></div>
 						</div>
 
 						{/* Login Link */}
 						<div className="text-center">
 							<p className="body-text text-neutral-600">
-								Already have an account?{" "}
+								Đã có tài khoản?{" "}
 								<Link
 									to="/login"
 									className="font-semibold text-neutral-900 hover:underline"
 								>
-									Sign in now
+									Đăng nhập ngay
 								</Link>
 							</p>
 						</div>

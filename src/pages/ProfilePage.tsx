@@ -9,7 +9,7 @@ export default function ProfilePage() {
 	useEffect(() => {
 		const token = localStorage.getItem("token");
 		if (!token) {
-			setError("Please log in to view your profile.");
+			setError("Vui lòng đăng nhập để xem hồ sơ.");
 			setLoading(false);
 			return;
 		}
@@ -19,20 +19,20 @@ export default function ProfilePage() {
 		})
 			.then((res) => res.json())
 			.then((data) => setProfile(data))
-			.catch(() => setError("Unable to load profile information."))
+			.catch(() => setError("Không thể tải thông tin hồ sơ."))
 			.finally(() => setLoading(false));
 	}, []);
 
 	if (loading) {
-		return <div className="py-20 text-center">Loading profile...</div>;
+		return <div className="py-20 text-center">Đang tải hồ sơ...</div>;
 	}
 
 	if (error || !profile) {
 		return (
 			<main className="py-12">
 				<Container>
-					<h1 className="heading-3 mb-4">Profile</h1>
-					<p className="text-neutral-600">{error || "No data available."}</p>
+					<h1 className="heading-3 mb-4">Hồ sơ</h1>
+					<p className="text-neutral-600">{error || "Không có dữ liệu."}</p>
 				</Container>
 			</main>
 		);
@@ -41,16 +41,16 @@ export default function ProfilePage() {
 	return (
 		<main className="py-12">
 			<Container>
-				<h1 className="heading-3 mb-6">My profile</h1>
+				<h1 className="heading-3 mb-6">Hồ sơ của tôi</h1>
 				<div className="card space-y-3">
 					<p>
-						<span className="font-semibold">Name:</span> {profile.name || "N/A"}
+						<span className="font-semibold">Tên:</span> {profile.name || "N/A"}
 					</p>
 					<p>
 						<span className="font-semibold">Email:</span> {profile.email}
 					</p>
 					<p>
-						<span className="font-semibold">Role:</span> {profile.role}
+						<span className="font-semibold">Vai trò:</span> {profile.role}
 					</p>
 				</div>
 			</Container>

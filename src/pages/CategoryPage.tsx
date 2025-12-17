@@ -57,8 +57,8 @@ export default function CategoryPage() {
         })();
     }, [id]);
 
-    if (loading) return <div className="py-20 text-center text-neutral-500">Loading category...</div>;
-    if (!category) return <div className="py-20 text-center text-red-500">Category not found.</div>;
+    if (loading) return <div className="py-20 text-center text-neutral-500">Đang tải danh mục...</div>;
+    if (!category) return <div className="py-20 text-center text-red-500">Không tìm thấy danh mục.</div>;
 
     // Determine if ROOT NAV should be shown
     const showRootNav = category.parent && rootCategories.length > 1;
@@ -120,7 +120,7 @@ export default function CategoryPage() {
                 {/* PRODUCT GRID */}
                 {products.length === 0 ? (
                     <div className="py-20 text-center text-neutral-500">
-                        No products found in this category.
+                        Không có sản phẩm trong danh mục này.
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

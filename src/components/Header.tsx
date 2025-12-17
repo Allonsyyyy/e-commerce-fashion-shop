@@ -11,7 +11,10 @@ export default function Header() {
 	const location = useLocation()
 	const profileRef = useRef<HTMLDivElement | null>(null)
 
-	// Helper function to check if a nav item is active
+	// ⭐ ADD SEARCH KEYWORD STATE
+	const [keyword, setKeyword] = useState("")
+
+	// Helper: nav highlight
 	const isNavActive = (path: string, category?: string) => {
 		const currentPath = location.pathname
 		const searchParams = new URLSearchParams(location.search)
@@ -19,14 +22,11 @@ export default function Header() {
 
 		if (path === '/shop') {
 			if (category) {
-				// For Men/Women: active if path is /shop and category matches exactly
 				return currentPath === '/shop' && currentCategory === category
 			} else {
-				// For Shop: active if path is /shop and (no category or category is not men/women)
 				return currentPath === '/shop' && (currentCategory === null || (currentCategory !== 'men' && currentCategory !== 'women'))
 			}
 		}
-		// For About/Contact: check pathname only
 		return currentPath === path
 	}
 
@@ -76,16 +76,22 @@ export default function Header() {
 		navigate('/')
 	}
 
+	// ⭐ ADD SEARCH HANDLER
+	const handleSearch = () => {
+		if (!keyword.trim()) return
+		navigate(`/shop?q=${encodeURIComponent(keyword)}`)
+	}
+
 	return (
 		<header className="sticky top-0 z-50 bg-white border-b border-neutral-200 shadow-sm">
 			<div className="bg-neutral-900 text-white text-xs py-2">
 				<Container>
 					<div className="flex items-center justify-between">
-						<p>Free shipping on orders over $100</p>
+						<p>Miễn phí vận chuyển cho đơn từ 2.500.000₫</p>
 						<div className="hidden sm:flex items-center gap-4">
-							<a href="#" className="hover:text-neutral-300">Help</a>
-							<a href="#" className="hover:text-neutral-300">Returns</a>
-							<a href="#" className="hover:text-neutral-300">Track Order</a>
+							<a href="#" className="hover:text-neutral-300">Trợ giúp</a>
+							<a href="#" className="hover:text-neutral-300">Đổi / trả</a>
+							<a href="#" className="hover:text-neutral-300">Theo dõi đơn</a>
 						</div>
 					</div>
 				</Container>
@@ -95,17 +101,29 @@ export default function Header() {
 				<Container>
 					<div className="flex items-center gap-4 lg:gap-8 py-4">
 						<Link to="/" className="font-display text-2xl font-bold tracking-tight text-neutral-900 hover:text-neutral-700 transition-colors flex-shrink-0">
-							Shop
+							Cửa hàng
 						</Link>
 
+						{/* ⭐ UPDATED SEARCH BAR */}
 						<div className="hidden md:flex flex-1 max-w-2xl">
 							<div className="relative w-full">
 								<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
+
 								<input
 									type="text"
-									placeholder="Search products..."
+									placeholder="Tìm sản phẩm..."
+									value={keyword}
+									onChange={(e) => setKeyword(e.target.value)}
+									onKeyDown={(e) => e.key === "Enter" && handleSearch()}
 									className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
 								/>
+
+								<button
+									onClick={handleSearch}
+									className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-neutral-900 text-white rounded-md text-sm"
+								>
+									Tìm
+								</button>
 							</div>
 						</div>
 
@@ -176,7 +194,7 @@ export default function Header() {
 
 							<Link to="/cart" className="relative inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors">
 								<ShoppingCart className="h-5 w-5" />
-								<span className="hidden sm:inline">Cart</span>
+								<span className="hidden sm:inline">Giỏ hàng</span>
 								<span className="absolute -right-2 -top-2 h-5 min-w-5 px-1.5 rounded-full bg-neutral-900 text-white text-[10px] font-semibold flex items-center justify-center">0</span>
 							</Link>
 
@@ -187,50 +205,50 @@ export default function Header() {
 					</div>
 
 					<nav className="hidden md:flex items-center gap-8 pb-4 border-t border-neutral-100 pt-4">
-						<Link 
-							to="/shop" 
-							className={isNavActive('/shop') 
-								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' 
+						<Link
+							to="/shop"
+							className={isNavActive('/shop')
+								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium'
 								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
 							}
 						>
-							Shop
+							Cửa hàng
 						</Link>
-						<Link 
-							to="/shop?category=men" 
-							className={isNavActive('/shop', 'men') 
-								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' 
+						<Link
+							to="/shop?category=men"
+							className={isNavActive('/shop', 'men')
+								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium'
 								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
 							}
 						>
-							Men
+							Nam
 						</Link>
-						<Link 
-							to="/shop?category=women" 
-							className={isNavActive('/shop', 'women') 
-								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' 
+						<Link
+							to="/shop?category=women"
+							className={isNavActive('/shop', 'women')
+								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium'
 								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
 							}
 						>
-							Women
+							Nữ
 						</Link>
-						<Link 
-							to="/about" 
-							className={isNavActive('/about') 
-								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' 
+						<Link
+							to="/about"
+							className={isNavActive('/about')
+								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium'
 								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
 							}
 						>
-							About
+							Về chúng tôi
 						</Link>
-						<Link 
-							to="/contact" 
-							className={isNavActive('/contact') 
-								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium' 
+						<Link
+							to="/contact"
+							className={isNavActive('/contact')
+								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium'
 								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
 							}
 						>
-							Contact
+							Liên hệ
 						</Link>
 					</nav>
 				</Container>
@@ -240,60 +258,60 @@ export default function Header() {
 				<div className="md:hidden border-t border-neutral-200 bg-white">
 					<Container>
 						<div className="py-4 space-y-4">
-							<Link 
-								to="/shop" 
+							<Link
+								to="/shop"
 								onClick={() => setMobileMenuOpen(false)}
 								className={`block py-2 transition-colors ${
-									isNavActive('/shop') 
-										? 'text-neutral-900 font-medium' 
+									isNavActive('/shop')
+										? 'text-neutral-900 font-medium'
 										: 'text-neutral-600 hover:text-neutral-900'
 								}`}
 							>
-								Shop
+								Cửa hàng
 							</Link>
-							<Link 
-								to="/shop?category=men" 
+							<Link
+								to="/shop?category=men"
 								onClick={() => setMobileMenuOpen(false)}
 								className={`block py-2 transition-colors ${
-									isNavActive('/shop', 'men') 
-										? 'text-neutral-900 font-medium' 
+									isNavActive('/shop', 'men')
+										? 'text-neutral-900 font-medium'
 										: 'text-neutral-600 hover:text-neutral-900'
 								}`}
 							>
-								Men
+								Nam
 							</Link>
-							<Link 
-								to="/shop?category=women" 
+							<Link
+								to="/shop?category=women"
 								onClick={() => setMobileMenuOpen(false)}
 								className={`block py-2 transition-colors ${
-									isNavActive('/shop', 'women') 
-										? 'text-neutral-900 font-medium' 
+									isNavActive('/shop', 'women')
+										? 'text-neutral-900 font-medium'
 										: 'text-neutral-600 hover:text-neutral-900'
 								}`}
 							>
-								Women
+								Nữ
 							</Link>
-							<Link 
-								to="/about" 
+							<Link
+								to="/about"
 								onClick={() => setMobileMenuOpen(false)}
 								className={`block py-2 transition-colors ${
-									isNavActive('/about') 
-										? 'text-neutral-900 font-medium' 
+									isNavActive('/about')
+										? 'text-neutral-900 font-medium'
 										: 'text-neutral-600 hover:text-neutral-900'
 								}`}
 							>
-								About
+								Về chúng tôi
 							</Link>
-							<Link 
-								to="/contact" 
+							<Link
+								to="/contact"
 								onClick={() => setMobileMenuOpen(false)}
 								className={`block py-2 transition-colors ${
-									isNavActive('/contact') 
-										? 'text-neutral-900 font-medium' 
+									isNavActive('/contact')
+										? 'text-neutral-900 font-medium'
 										: 'text-neutral-600 hover:text-neutral-900'
 								}`}
 							>
-								Contact
+								Liên hệ
 							</Link>
 						</div>
 					</Container>

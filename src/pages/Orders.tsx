@@ -40,10 +40,10 @@ export default function Orders() {
 
     const getStatusBadge = (status: string) => {
         const statusConfig: Record<string, { label: string; className: string }> = {
-            pending: { label: "Pending", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-            processing: { label: "Processing", className: "bg-blue-100 text-blue-800 border-blue-200" },
-            completed: { label: "Completed", className: "bg-green-100 text-green-800 border-green-200" },
-            cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800 border-red-200" },
+            pending: { label: "Chờ xử lý", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+            processing: { label: "Đang xử lý", className: "bg-blue-100 text-blue-800 border-blue-200" },
+            completed: { label: "Hoàn tất", className: "bg-green-100 text-green-800 border-green-200" },
+            cancelled: { label: "Đã hủy", className: "bg-red-100 text-red-800 border-red-200" },
         };
 
         const config = statusConfig[status] || { label: status, className: "bg-neutral-100 text-neutral-800 border-neutral-200" };
@@ -56,10 +56,10 @@ export default function Orders() {
 
     const getPaymentStatusBadge = (status: string) => {
         const statusConfig: Record<string, { label: string; className: string }> = {
-            unpaid: { label: "Unpaid", className: "text-orange-600" },
-            paid: { label: "Paid", className: "text-green-600" },
-            failed: { label: "Failed", className: "text-red-600" },
-            refunded: { label: "Refunded", className: "text-neutral-600" },
+            unpaid: { label: "Chưa thanh toán", className: "text-orange-600" },
+            paid: { label: "Đã thanh toán", className: "text-green-600" },
+            failed: { label: "Thất bại", className: "text-red-600" },
+            refunded: { label: "Đã hoàn tiền", className: "text-neutral-600" },
         };
 
         const config = statusConfig[status] || { label: status, className: "text-neutral-600" };
@@ -72,7 +72,7 @@ export default function Orders() {
                 <Container>
                     <div className="text-center py-20">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900"></div>
-                        <p className="mt-4 text-neutral-600">Loading orders...</p>
+                        <p className="mt-4 text-neutral-600">Đang tải đơn hàng...</p>
                     </div>
                 </Container>
             </main>
@@ -85,10 +85,10 @@ export default function Orders() {
                 <Container>
                     <div className="text-center py-20">
                         <Package className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-                        <h2 className="text-2xl font-bold text-neutral-900 mb-2">Please Sign In</h2>
-                        <p className="text-neutral-600 mb-6">You need to sign in to view your orders</p>
+                        <h2 className="text-2xl font-bold text-neutral-900 mb-2">Vui lòng đăng nhập</h2>
+                        <p className="text-neutral-600 mb-6">Bạn cần đăng nhập để xem đơn hàng</p>
                         <Link to="/login" className="btn-primary inline-block">
-                            Sign In
+                            Đăng nhập
                         </Link>
                     </div>
                 </Container>
@@ -100,17 +100,17 @@ export default function Orders() {
         <main className="py-12 min-h-screen bg-neutral-50">
             <Container>
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-neutral-900 mb-2">My Orders</h1>
-                    <p className="text-neutral-600">Track and manage your orders</p>
+                    <h1 className="text-3xl font-bold text-neutral-900 mb-2">Đơn hàng của tôi</h1>
+                    <p className="text-neutral-600">Theo dõi và quản lý đơn hàng</p>
                 </div>
 
                 {orders.length === 0 ? (
                     <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-12 text-center">
                         <Package className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-                        <h2 className="text-xl font-semibold text-neutral-900 mb-2">No Orders Yet</h2>
-                        <p className="text-neutral-600 mb-6">You don't have any orders yet. Start shopping!</p>
+                        <h2 className="text-xl font-semibold text-neutral-900 mb-2">Chưa có đơn hàng</h2>
+                        <p className="text-neutral-600 mb-6">Bạn chưa có đơn hàng nào. Bắt đầu mua sắm ngay!</p>
                         <Link to="/shop" className="btn-primary inline-block">
-                            Shop Now
+                            Mua sắm ngay
                         </Link>
                     </div>
                 ) : (
@@ -125,7 +125,7 @@ export default function Orders() {
                                         <div className="flex items-center gap-4">
                                             <div className="flex items-center gap-2 text-neutral-600">
                                                 <Package className="h-5 w-5" />
-                                                <span className="font-semibold text-neutral-900">Order #{order.id}</span>
+                                                <span className="font-semibold text-neutral-900">Đơn #{order.id}</span>
                                             </div>
                                             {getStatusBadge(order.orderStatus)}
                                         </div>
@@ -146,17 +146,17 @@ export default function Orders() {
                                     <div className="border-t border-neutral-100 pt-4 mb-4">
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                             <div>
-                                                <span className="text-neutral-600">Payment Method:</span>
+                                                <span className="text-neutral-600">Phương thức thanh toán:</span>
                                                 <p className="font-medium text-neutral-900 mt-1">
-                                                    {order.paymentMethod === "vnpay" ? "VNPay" : "Cash on Delivery"}
+                                                    {order.paymentMethod === "vnpay" ? "VNPay" : "Thanh toán khi nhận hàng"}
                                                 </p>
                                             </div>
                                             <div>
-                                                <span className="text-neutral-600">Payment Status:</span>
+                                                <span className="text-neutral-600">Trạng thái thanh toán:</span>
                                                 <p className="mt-1">{getPaymentStatusBadge(order.paymentStatus)}</p>
                                             </div>
                                             <div>
-                                                <span className="text-neutral-600">Shipping Address:</span>
+                                                <span className="text-neutral-600">Địa chỉ giao hàng:</span>
                                                 <p className="font-medium text-neutral-900 mt-1">{order.shippingAddress}</p>
                                             </div>
                                         </div>
@@ -165,7 +165,7 @@ export default function Orders() {
                                     <div className="border-t border-neutral-100 pt-4">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-sm text-neutral-600 mb-2">Products ({order.items.length})</p>
+                                                <p className="text-sm text-neutral-600 mb-2">Sản phẩm ({order.items.length})</p>
                                                 <div className="flex gap-2">
                                                     {order.items.slice(0, 3).map((item) => (
                                                         <img
@@ -224,4 +224,3 @@ export default function Orders() {
         </main>
     );
 }
-

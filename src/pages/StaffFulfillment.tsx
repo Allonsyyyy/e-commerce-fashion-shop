@@ -1,6 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
 import Container from "../components/Container";
 import { getOrders, type Order } from "../api/admin/ordersApi";
+import { getAdminReviews, replyReview, type AdminReview } from "../api/admin/reviewsApi";
+import {
+	approveReturnRequest,
+	completeReturnRequest,
+	getAdminReturns,
+	receiveReturnRequest,
+	rejectReturnRequest,
+	type AdminReturnRequest,
+} from "../api/admin/returnsApi";
 import {
 	createShippingOrder,
 	cancelShippingOrder,
@@ -31,9 +41,12 @@ import {
 	DollarSign,
 	Shield,
 	MessageSquare,
+	RefreshCw,
+	Star,
 } from "lucide-react";
 
 type TabKey = "pending" | "shipping" | "cancelled";
+type ReturnAction = "approve" | "reject" | "receive" | "complete";
 
 const DEFAULT_DIMENSIONS = {
 	weight: 200,
@@ -54,6 +67,7 @@ export default function StaffFulfillmentPage() {
 	const [orders, setOrders] = useState<Order[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState<TabKey>("pending");
+	const [sectionTab, setSectionTab] = useState<"shipping" | "reviews" | "returns">("shipping");
 	const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 	const [parsedAddress, setParsedAddress] = useState<ParsedAddress | null>(null);
 	const [form, setForm] = useState<CreateShippingOrderPayload | null>(null);
@@ -72,6 +86,22 @@ export default function StaffFulfillmentPage() {
 	const [provinces, setProvinces] = useState<Province[]>([]);
 	const [districtCache, setDistrictCache] = useState<Record<number, District[]>>({});
 	const [wardCache, setWardCache] = useState<Record<number, Ward[]>>({});
+	const [reviews, setReviews] = useState<AdminReview[]>([]);
+	const [reviewsLoading, setReviewsLoading] = useState(false);
+	const [reviewsError, setReviewsError] = useState<string | null>(null);
+	const [reviewTotal, setReviewTotal] = useState(0);
+	const [reviewSearchInput, setReviewSearchInput] = useState("");
+	const [reviewSearch, setReviewSearch] = useState("");
+	const [replyingReview, setReplyingReview] = useState<AdminReview | null>(null);
+	const [replyMessage, setReplyMessage] = useState("");
+	const [replySubmitting, setReplySubmitting] = useState(false);
+	const [returns, setReturns] = useState<AdminReturnRequest[]>([]);
+	const [returnsLoading, setReturnsLoading] = useState(false);
+	const [returnsError, setReturnsError] = useState<string | null>(null);
+	const [returnsTotal, setReturnsTotal] = useState(0);
+	const [returnSearchInput, setReturnSearchInput] = useState("");
+	const [returnSearch, setReturnSearch] = useState("");
+	const [returnActionLoading, setReturnActionLoading] = useState<number | null>(null);
 
 	useEffect(() => {
 		loadOrders();
@@ -274,37 +304,244 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		}
 	};
 
+	const loadReviews = useCallback(async () => {
+		const token = localStorage.getItem("token");
+		if (!token) {
+			setReviewsError("Please log in as an admin to load reviews.");
+			setReviews([]);
+			return;
+		}
+
+		setReviewsLoading(true);
+		setReviewsError(null);
+		try {
+			const res = await getAdminReviews(token, { limit: 50, sort: "-createdAt", q: reviewSearch || undefined });
+			const list = Array.isArray(res.data) ? res.data : [];
+			setReviews(list);
+			setReviewTotal(typeof res.total === "number" ? res.total : list.length);
+		} catch (err) {
+			console.error(err);
+			setReviewsError("Failed to load reviews.");
+		} finally {
+			setReviewsLoading(false);
+		}
+	}, [reviewSearch]);
+
+	const extractReturnList = (payload: any): { list: AdminReturnRequest[]; total: number } => {
+		if (!payload) return { list: [], total: 0 };
+		if (Array.isArray(payload)) {
+			return { list: payload, total: payload.length };
+		}
+		if (Array.isArray(payload.data)) {
+			return { list: payload.data, total: typeof payload.total === "number" ? payload.total : payload.data.length };
+		}
+		if (Array.isArray(payload.data?.data)) {
+			const list = payload.data.data;
+			const total = payload.data.total ?? payload.total ?? list.length;
+			return { list, total };
+		}
+		return { list: [], total: 0 };
+	};
+
+	const loadReturns = useCallback(async () => {
+		const token = localStorage.getItem("token");
+		if (!token) {
+			setReturnsError("Please log in as an admin to load return requests.");
+			setReturns([]);
+			return;
+		}
+
+		setReturnsLoading(true);
+		setReturnsError(null);
+		try {
+			const res = await getAdminReturns(token, {
+				limit: 50,
+				sort: "-createdAt",
+				q: returnSearch || undefined,
+			});
+			const { list, total } = extractReturnList(res);
+			setReturns(list);
+			setReturnsTotal(total);
+		} catch (err) {
+			console.error(err);
+			setReturnsError("Failed to load return requests.");
+		} finally {
+			setReturnsLoading(false);
+		}
+	}, [returnSearch]);
+
+	useEffect(() => {
+		if (sectionTab === "reviews") {
+			loadReviews();
+		}
+	}, [sectionTab, loadReviews]);
+
+	useEffect(() => {
+		if (sectionTab === "returns") {
+			loadReturns();
+		}
+	}, [sectionTab, loadReturns]);
+
+	const openReplyModal = (review: AdminReview) => {
+		setReplyingReview(review);
+		setReplyMessage(review.reply || review.sellerReply || "");
+	};
+
+	const closeReplyModal = () => {
+		setReplyingReview(null);
+		setReplyMessage("");
+		setReplySubmitting(false);
+	};
+
+	const handleSubmitReply = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		if (!replyingReview) return;
+		if (!replyMessage.trim()) {
+			alert("Please enter a reply before submitting.");
+			return;
+		}
+
+		const token = localStorage.getItem("token");
+		if (!token) {
+			alert("Please log in as an admin to reply.");
+			return;
+		}
+
+		setReplySubmitting(true);
+		try {
+			await replyReview(token, replyingReview.id, replyMessage.trim());
+			await loadReviews();
+			closeReplyModal();
+		} catch (err) {
+			console.error(err);
+			alert("Failed to send reply. Please try again.");
+		} finally {
+			setReplySubmitting(false);
+		}
+	};
+
+	const formatReturnStatus = (status?: string | null) => {
+		if (!status) return "Unknown";
+		return status
+			.split("_")
+			.map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+			.join(" ");
+	};
+
+	const getReturnStatusStyle = (status?: string | null) => {
+		const normalized = status?.toLowerCase();
+		if (normalized === "pending") return "bg-amber-50 text-amber-700 border border-amber-100";
+		if (normalized === "approved" || normalized === "shipping_new")
+			return "bg-blue-50 text-blue-700 border border-blue-100";
+		if (normalized === "receiving" || normalized === "received")
+			return "bg-purple-50 text-purple-700 border border-purple-100";
+		if (normalized === "completed") return "bg-emerald-50 text-emerald-700 border border-emerald-100";
+		if (normalized === "rejected") return "bg-error-50 text-error-700 border border-error-100";
+		return "bg-neutral-100 text-neutral-600 border border-neutral-200";
+	};
+
+	const getReturnActions = (status?: string | null): ReturnAction[] => {
+		const normalized = status?.toLowerCase();
+		if (normalized === "pending") return ["approve", "reject"];
+		if (normalized === "approved" || normalized === "shipping_new") return ["receive", "reject"];
+		if (normalized === "receiving" || normalized === "received") return ["complete"];
+		return [];
+	};
+
+	const baseReturnActionClass =
+		"px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors border";
+	const getReturnActionClass = (action: ReturnAction) => {
+		switch (action) {
+			case "approve":
+				return `${baseReturnActionClass} bg-neutral-900 text-white border-neutral-900 hover:bg-neutral-800`;
+			case "reject":
+				return `${baseReturnActionClass} bg-white text-error-600 border-error-300 hover:bg-error-50`;
+			case "receive":
+				return `${baseReturnActionClass} bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50`;
+			case "complete":
+				return `${baseReturnActionClass} bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-500`;
+			default:
+				return baseReturnActionClass;
+		}
+	};
+
+	const actionLabels: Record<ReturnAction, string> = {
+		approve: "Chấp nhận yêu cầu",
+		reject: "Từ chối",
+		receive: "Đã nhận được hàng",
+		complete: "Hoàn tất đổi trả",
+	};
+
+	const handleReturnAction = async (request: AdminReturnRequest, action: ReturnAction) => {
+		const token = localStorage.getItem("token");
+		if (!token) {
+			alert("Please log in as an admin to update returns.");
+			return;
+		}
+
+		setReturnActionLoading(request.id);
+		try {
+			if (action === "approve") {
+				await approveReturnRequest(token, request.id);
+			} else if (action === "reject") {
+				const reason = window.prompt("Enter a rejection reason (optional)")?.trim();
+				await rejectReturnRequest(token, request.id, reason || undefined);
+			} else if (action === "receive") {
+				await receiveReturnRequest(token, request.id);
+			} else if (action === "complete") {
+				await completeReturnRequest(token, request.id);
+			}
+			await loadReturns();
+		} catch (err) {
+			console.error(err);
+			alert("Failed to update the return request. Please try again.");
+		} finally {
+			setReturnActionLoading(null);
+		}
+	};
+
+	const normalizeShipmentStatus = (status?: string | null) => status?.toLowerCase() ?? "";
+	const isPendingShipmentStatus = (status?: string | null) => {
+		const normalized = normalizeShipmentStatus(status);
+		return normalized === "not_shipped" || normalized === "pending" || normalized === "ready_to_pick";
+	};
+	const isShippingShipmentStatus = (status?: string | null) => {
+		const normalized = normalizeShipmentStatus(status);
+		return normalized === "shipping" || normalized === "shipped" || normalized === "delivered";
+	};
+	const isCancelledShipmentStatus = (status?: string | null) => {
+		const normalized = normalizeShipmentStatus(status);
+		return normalized === "cancelled" || normalized === "returned";
+	};
+
 	const filteredOrders = useMemo(() => {
 		if (activeTab === "pending") {
 			return orders.filter((order) => {
 				const isCancelled =
-					order.orderStatus?.toLowerCase() === "cancelled" || order.shipmentStatus?.toLowerCase() === "returned";
+					order.orderStatus?.toLowerCase() === "cancelled" || isCancelledShipmentStatus(order.shipmentStatus);
 				return (
 					!isCancelled &&
 					!order.ghnOrderCode &&
-					(order.shipmentStatus === "not_shipped" || order.shipmentStatus === "pending" || !order.shipmentStatus)
+					(isPendingShipmentStatus(order.shipmentStatus) || !order.shipmentStatus)
 				);
 			});
 		}
 		if (activeTab === "shipping") {
 			return orders.filter(
 				(order) =>
-					order.shipmentStatus === "shipping" ||
-					order.shipmentStatus === "shipped" ||
-					order.shipmentStatus === "delivered" ||
+					isShippingShipmentStatus(order.shipmentStatus) ||
 					!!order.ghnOrderCode,
 			);
 		}
 		return orders.filter(
 			(order) =>
 				order.orderStatus?.toLowerCase() === "cancelled" ||
-				order.shipmentStatus?.toLowerCase() === "returned" ||
-				order.shipmentStatus?.toLowerCase() === "cancelled",
+				isCancelledShipmentStatus(order.shipmentStatus),
 		);
 	}, [orders, activeTab]);
 
 	const isOrderCancelled = (order: Order) =>
-		order.orderStatus?.toLowerCase() === "cancelled" || order.shipmentStatus?.toLowerCase() === "returned";
+		order.orderStatus?.toLowerCase() === "cancelled" || isCancelledShipmentStatus(order.shipmentStatus);
 
 	const resolveAddressCodes = async (parsed: ParsedAddress) => {
 		let provinceList = provinces.length ? provinces : null;
@@ -475,28 +712,25 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		if (tabId === "pending") {
 			return orders.filter((order) => {
 				const isCancelled =
-					order.orderStatus?.toLowerCase() === "cancelled" || order.shipmentStatus?.toLowerCase() === "returned";
+					order.orderStatus?.toLowerCase() === "cancelled" || isCancelledShipmentStatus(order.shipmentStatus);
 				return (
 					!isCancelled &&
 					!order.ghnOrderCode &&
-					(order.shipmentStatus === "not_shipped" || order.shipmentStatus === "pending" || !order.shipmentStatus)
+					(isPendingShipmentStatus(order.shipmentStatus) || !order.shipmentStatus)
 				);
 			}).length;
 		}
 		if (tabId === "shipping") {
 			return orders.filter(
 				(order) =>
-					order.shipmentStatus === "shipping" ||
-					order.shipmentStatus === "shipped" ||
-					order.shipmentStatus === "delivered" ||
+					isShippingShipmentStatus(order.shipmentStatus) ||
 					!!order.ghnOrderCode,
 			).length;
 		}
 		return orders.filter(
 			(order) =>
 				order.orderStatus?.toLowerCase() === "cancelled" ||
-				order.shipmentStatus?.toLowerCase() === "returned" ||
-				order.shipmentStatus?.toLowerCase() === "cancelled",
+				isCancelledShipmentStatus(order.shipmentStatus),
 		).length;
 	};
 
@@ -505,11 +739,312 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		{ id: "shipping" as TabKey, label: "Shipping/Delivered", icon: Truck },
 		{ id: "cancelled" as TabKey, label: "Cancelled", icon: XCircle },
 	];
+	const safeReviews = Array.isArray(reviews) ? reviews : [];
+	const safeReturns = Array.isArray(returns) ? returns : [];
 
-	return (
-		<main className="py-8 bg-gradient-to-br from-neutral-50 to-white min-h-screen">
-			<Container>
-				{/* Header Section */}
+	const renderMainContent = () => {
+		if (sectionTab === "reviews") {
+			return (
+				<>
+					<div className="mb-8">
+						<div className="flex items-center gap-3 mb-2">
+							<div className="p-3 bg-neutral-900 rounded-xl">
+								<MessageSquare className="w-6 h-6 text-white" />
+							</div>
+							<div>
+								<h1 className="heading-3">Review Management</h1>
+								<p className="text-sm text-neutral-600 mt-1">
+									Monitor customer reviews and send timely replies.
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<form
+						className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6"
+						onSubmit={(e) => {
+							e.preventDefault();
+							setReviewSearch(reviewSearchInput.trim());
+						}}
+					>
+						<p className="text-sm text-neutral-500">Total reviews: {reviewTotal}</p>
+						<div className="flex gap-2 w-full md:w-auto">
+							<input
+								className="input w-full md:w-72"
+								placeholder="Search by product or customer"
+								value={reviewSearchInput}
+								onChange={(e) => setReviewSearchInput(e.target.value)}
+							/>
+							<button type="submit" className="btn-secondary whitespace-nowrap">
+								Search
+							</button>
+							{reviewSearch && (
+								<button
+									type="button"
+									className="px-4 py-2 rounded-lg border text-sm font-medium hover:bg-neutral-50"
+									onClick={() => {
+										setReviewSearch("");
+										setReviewSearchInput("");
+									}}
+								>
+									Clear
+								</button>
+							)}
+						</div>
+					</form>
+
+					{reviewsLoading ? (
+						<div className="flex flex-col items-center justify-center py-16">
+							<Loader2 className="w-8 h-8 text-neutral-400 animate-spin mb-4" />
+							<p className="text-neutral-600">Loading reviews...</p>
+						</div>
+					) : reviewsError ? (
+						<div className="bg-error-50 border border-error-200 rounded-lg p-4">
+							<p className="text-sm font-medium text-error-900">{reviewsError}</p>
+						</div>
+					) : safeReviews.length === 0 ? (
+						<div className="card text-center py-16">
+							<div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
+								<MessageSquare className="w-8 h-8 text-neutral-400" />
+							</div>
+							<h3 className="text-lg font-semibold text-neutral-900 mb-2">No Reviews</h3>
+							<p className="text-neutral-600">There are no reviews matching your filters.</p>
+						</div>
+					) : (
+						<div className="space-y-4">
+							{safeReviews.map((review) => {
+								const starCount = Math.max(0, Math.min(5, Math.round(review.rating ?? 0)));
+								return (
+									<div key={review.id} className="card space-y-4">
+										<div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+											<div>
+												<p className="font-semibold text-neutral-900">
+													{review.product?.name || "Product"} • Review #{review.id}
+												</p>
+												<p className="text-sm text-neutral-500">
+													{review.user?.name || "Customer"} •{" "}
+													{review.createdAt
+														? new Date(review.createdAt).toLocaleString()
+														: "Unknown date"}
+												</p>
+											</div>
+											<div className="flex items-center gap-1 text-amber-500">
+												{Array.from({ length: starCount }).map((_, idx) => (
+													<Star key={idx} className="w-4 h-4 fill-current" />
+												))}
+												<span className="text-sm text-neutral-600 ml-2">{review.rating}/5</span>
+											</div>
+										</div>
+
+										<p className="text-sm text-neutral-700 whitespace-pre-line">{review.comment}</p>
+
+										{(review.reply || review.sellerReply) && (
+											<div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3">
+												<p className="text-xs font-semibold text-neutral-500 mb-1">Your reply</p>
+												<p className="text-sm text-neutral-700">
+													{review.reply || review.sellerReply}
+												</p>
+												{review.sellerRepliedAt && (
+													<p className="text-xs text-neutral-500 mt-1">
+														Updated {new Date(review.sellerRepliedAt).toLocaleString()}
+													</p>
+												)}
+											</div>
+										)}
+
+										<div className="flex justify-end">
+											<button
+												type="button"
+												className="btn-primary"
+												onClick={() => openReplyModal(review)}
+											>
+												{review.reply || review.sellerReply ? "Edit Reply" : "Reply"}
+											</button>
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					)}
+				</>
+			);
+		}
+
+		if (sectionTab === "returns") {
+			return (
+				<>
+					<div className="mb-8">
+						<div className="flex items-center gap-3 mb-2">
+							<div className="p-3 bg-neutral-900 rounded-xl">
+								<RefreshCw className="w-6 h-6 text-white" />
+							</div>
+							<div>
+								<h1 className="heading-3">Return Management</h1>
+								<p className="text-sm text-neutral-600 mt-1">
+									Review and process customer return requests.
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<form
+						className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6"
+						onSubmit={(e) => {
+							e.preventDefault();
+							setReturnSearch(returnSearchInput.trim());
+						}}
+					>
+						<p className="text-sm text-neutral-500">Total requests: {returnsTotal}</p>
+						<div className="flex gap-2 w-full md:w-auto">
+							<input
+								className="input w-full md:w-72"
+								placeholder="Search by order, user, SKU..."
+								value={returnSearchInput}
+								onChange={(e) => setReturnSearchInput(e.target.value)}
+							/>
+							<button type="submit" className="btn-secondary whitespace-nowrap">
+								Search
+							</button>
+							{returnSearch && (
+								<button
+									type="button"
+									className="px-4 py-2 rounded-lg border text-sm font-medium hover:bg-neutral-50"
+									onClick={() => {
+										setReturnSearch("");
+										setReturnSearchInput("");
+									}}
+								>
+									Clear
+								</button>
+							)}
+						</div>
+					</form>
+
+					{returnsLoading ? (
+						<div className="flex flex-col items-center justify-center py-16">
+							<Loader2 className="w-8 h-8 text-neutral-400 animate-spin mb-4" />
+							<p className="text-neutral-600">Loading return requests...</p>
+						</div>
+					) : returnsError ? (
+						<div className="bg-error-50 border border-error-200 rounded-lg p-4">
+							<p className="text-sm font-medium text-error-900">{returnsError}</p>
+						</div>
+					) : safeReturns.length === 0 ? (
+						<div className="card text-center py-16">
+							<div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
+								<RefreshCw className="w-8 h-8 text-neutral-400" />
+							</div>
+							<h3 className="text-lg font-semibold text-neutral-900 mb-2">No Return Requests</h3>
+							<p className="text-neutral-600">There are no return requests matching your filters.</p>
+						</div>
+					) : (
+						<div className="space-y-4">
+							{safeReturns.map((request) => {
+								const actions = getReturnActions(request.status);
+								return (
+									<div key={request.id} className="card space-y-4">
+										<div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+											<div>
+												<p className="font-semibold text-neutral-900">
+													Order #{request.orderItem?.order?.id ?? "N/A"} • Item #{request.orderItemId}
+												</p>
+												<p className="text-sm text-neutral-500">
+													{request.orderItem?.order?.user?.name || "Customer"} •{" "}
+													{request.createdAt
+														? new Date(request.createdAt).toLocaleString()
+														: "Unknown date"}
+												</p>
+											</div>
+											<div className="flex flex-col gap-1 items-start md:items-end">
+												<span
+													className={`px-3 py-1 rounded-full text-xs font-semibold ${getReturnStatusStyle(request.status)}`}
+												>
+													{formatReturnStatus(request.status)}
+												</span>
+												{request.rejectReason && (
+													<span className="text-xs text-error-600">
+														Rejected: {request.rejectReason}
+													</span>
+												)}
+											</div>
+										</div>
+
+										<div className="grid gap-3 md:grid-cols-2">
+											<div>
+												<p className="text-xs font-semibold text-neutral-500">Product</p>
+												<p className="text-sm text-neutral-800">
+													{request.orderItem?.variant?.product?.name || "N/A"}
+												</p>
+												{request.orderItem?.variant?.sku && (
+													<p className="text-xs text-neutral-500">
+														SKU: {request.orderItem.variant.sku}
+													</p>
+												)}
+											</div>
+											<div>
+												<p className="text-xs font-semibold text-neutral-500">Quantity & Price</p>
+												<p className="text-sm text-neutral-800">
+													Qty {request.orderItem?.quantity || 0} •{" "}
+													{Number(request.orderItem?.price || 0).toLocaleString("en-US")}
+												</p>
+											</div>
+											<div className="md:col-span-2">
+												<p className="text-xs font-semibold text-neutral-500">Customer Reason</p>
+												<p className="text-sm text-neutral-700">{request.reason || "Not provided."}</p>
+											</div>
+										</div>
+
+										{request.images?.length ? (
+											<div className="flex flex-wrap gap-2">
+												{request.images.slice(0, 4).map((image, idx) => (
+													<img
+														key={`${request.id}-${idx}`}
+														src={image}
+														alt={`Return ${request.id} evidence ${idx + 1}`}
+														className="h-16 w-16 rounded-lg object-cover border"
+													/>
+												))}
+											</div>
+										) : null}
+
+										<div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between pt-4 border-t border-neutral-200">
+											<span className="text-xs text-neutral-500">Request #{request.id}</span>
+											{actions.length === 0 ? (
+												<p className="text-sm text-neutral-500">No further actions available.</p>
+											) : (
+												<div className="flex flex-wrap gap-2">
+													{actions.map((action) => (
+														<button
+															key={action}
+															type="button"
+															className={getReturnActionClass(action)}
+															disabled={returnActionLoading === request.id}
+															onClick={() => handleReturnAction(request, action)}
+														>
+															{returnActionLoading === request.id ? (
+																<>
+																	<Loader2 className="w-4 h-4 animate-spin" />
+																	Updating...
+																</>
+															) : (
+																actionLabels[action]
+															)}
+														</button>
+													))}
+												</div>
+											)}
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					)}
+				</>
+			);
+		}
+
+		return (
+			<>
 				<div className="mb-8">
 					<div className="flex items-center gap-3 mb-2">
 						<div className="p-3 bg-neutral-900 rounded-xl">
@@ -524,7 +1059,6 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 					</div>
 				</div>
 
-				{/* Tabs */}
 				<div className="flex flex-wrap gap-3 mb-8">
 					{tabs.map((tab) => {
 						const Icon = tab.icon;
@@ -544,9 +1078,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 								{getTabCount(tab.id) > 0 && (
 									<span
 										className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-											isActive
-												? "bg-white/20 text-white"
-												: "bg-neutral-100 text-neutral-600"
+											isActive ? "bg-white/20 text-white" : "bg-neutral-100 text-neutral-600"
 										}`}
 									>
 										{getTabCount(tab.id)}
@@ -575,13 +1107,12 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 						{filteredOrders.map((order) => {
 							return (
 								<div key={order.id} className="card hover:shadow-md transition-shadow">
-									{/* Header */}
 									<div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
 										<div className="flex-1">
 											<div className="flex items-center gap-3 mb-3">
 												<div className="p-2 bg-neutral-100 rounded-lg">
-									<FileText className="w-5 h-5 text-neutral-600" />
-								</div>
+													<FileText className="w-5 h-5 text-neutral-600" />
+												</div>
 												<div>
 													<h3 className="font-semibold text-lg text-neutral-900">Order #{order.id}</h3>
 													{order.ghnOrderCode && (
@@ -595,7 +1126,6 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 												</div>
 											</div>
 
-											{/* Customer Info */}
 											<div className="flex flex-wrap items-center gap-4 mb-3 text-sm">
 												<div className="flex items-center gap-2 text-neutral-600">
 													<User className="w-4 h-4 text-neutral-400" />
@@ -615,39 +1145,36 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 												</div>
 											</div>
 
-											{/* Status Badge */}
 											<div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg border text-xs font-medium mb-3">
 												{order.shipmentStatus === "delivered" ? (
 													<CheckCircle2 className="w-3 h-3" />
 												) : order.shipmentStatus === "cancelled" ||
-													order.orderStatus?.toLowerCase() === "cancelled" ? (
+												  order.orderStatus?.toLowerCase() === "cancelled" ? (
 													<XCircle className="w-3 h-3" />
 												) : (
 													<AlertCircle className="w-3 h-3" />
 												)}
-													<span>
-														{order.shipmentStatus === "delivered"
-															? "Delivered"
-															: order.shipmentStatus === "shipping" || order.shipmentStatus === "shipped"
-																? "Shipping"
-																: order.shipmentStatus === "cancelled" ||
-																		order.orderStatus?.toLowerCase() === "cancelled"
-																	? "Cancelled"
-																	: "Pending"}
-													</span>
+												<span>
+													{order.shipmentStatus === "delivered"
+														? "Delivered"
+														: order.shipmentStatus === "shipping" || order.shipmentStatus === "shipped"
+															? "Shipping"
+															: order.shipmentStatus === "cancelled" ||
+																	order.orderStatus?.toLowerCase() === "cancelled"
+																? "Cancelled"
+																: "Pending"}
+												</span>
 											</div>
 										</div>
 
-										{/* Amount */}
 										<div className="lg:text-right">
 											<p className="text-xs text-neutral-500 mb-1">Total Amount</p>
 											<p className="text-2xl font-bold text-neutral-900">
-												{Number(order.totalAmount).toLocaleString("en-US")}₫
+												{Number(order.totalAmount).toLocaleString("en-US")}
 											</p>
 										</div>
 									</div>
 
-									{/* Address */}
 									<div className="bg-neutral-50 rounded-lg p-3 mb-4">
 										<div className="flex items-start gap-2">
 											<MapPin className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
@@ -655,7 +1182,6 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 										</div>
 									</div>
 
-									{/* Products */}
 									<div className="mb-4">
 										<p className="text-xs font-medium text-neutral-500 mb-2">Products</p>
 										<div className="space-y-1">
@@ -675,7 +1201,6 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 										</div>
 									</div>
 
-									{/* Actions */}
 									<div className="flex justify-end gap-2 pt-4 border-t border-neutral-200">
 										{activeTab === "pending" ? (
 											isOrderCancelled(order) ? (
@@ -729,9 +1254,53 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 						})}
 					</div>
 				)}
-			</Container>
+			</>
+		);
+	};
 
-			{selectedOrder && form && (
+	return (
+		<main className="min-h-screen bg-gradient-to-br from-neutral-50 to-white">
+			<div className="flex">
+				<aside className="hidden lg:flex flex-col gap-2 w-64 bg-neutral-900 text-white min-h-screen p-6">
+					<div className="mb-4">
+						<p className="text-sm text-neutral-400">Bảng điều khiển</p>
+						<h2 className="text-2xl font-bold">Thao tác</h2>
+					</div>
+					<button
+						className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+							sectionTab === "shipping" ? "bg-white/10" : "hover:bg-white/5"
+						}`}
+						onClick={() => setSectionTab("shipping")}
+					>
+						<Truck className="w-5 h-5" />
+						Tạo đơn giao hàng
+					</button>
+					<button
+						className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+							sectionTab === "reviews" ? "bg-white/10" : "hover:bg-white/5"
+						}`}
+						onClick={() => setSectionTab("reviews")}
+					>
+						<MessageSquare className="w-5 h-5" />
+						Quản lý bình luận
+					</button>
+					<button
+						className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+							sectionTab === "returns" ? "bg-white/10" : "hover:bg-white/5"
+						}`}
+						onClick={() => setSectionTab("returns")}
+					>
+						<RefreshCw className="w-5 h-5" />
+						Quản lý đổi trả
+					</button>
+				</aside>
+
+				<div className="flex-1">
+					<Container>{renderMainContent()}</Container>
+				</div>
+			</div>
+
+	{selectedOrder && form && (
 				<div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
 					<div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
 						{/* Header */}
@@ -1014,6 +1583,69 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 										<>
 											<CheckCircle2 className="w-4 h-4" />
 											Create Shipping Order
+										</>
+									)}
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			)}
+			{replyingReview && (
+				<div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+					<div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden">
+						<div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+							<div>
+								<p className="text-xs text-neutral-500">Responding to review #{replyingReview.id}</p>
+								<h3 className="text-lg font-semibold text-neutral-900">
+									{replyingReview.user?.name || "Customer"}
+								</h3>
+							</div>
+							<button
+								className="p-2 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
+								onClick={closeReplyModal}
+							>
+								<X className="w-5 h-5" />
+							</button>
+						</div>
+						<form onSubmit={handleSubmitReply} className="p-6 space-y-4">
+							<div className="space-y-1">
+								<p className="text-xs font-semibold text-neutral-500">Customer comment</p>
+								<div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-sm text-neutral-700">
+									{replyingReview.comment}
+								</div>
+							</div>
+							<div>
+								<label className="block text-sm font-medium text-neutral-700 mb-1.5">
+									Your reply <span className="text-error-500">*</span>
+								</label>
+								<textarea
+									className="input min-h-[120px] resize-none"
+									placeholder="Type your reply..."
+									value={replyMessage}
+									onChange={(e) => setReplyMessage(e.target.value)}
+									required
+								/>
+							</div>
+							<div className="flex justify-end gap-3 pt-4 border-t border-neutral-200">
+								<button
+									type="button"
+									className="btn-secondary"
+									onClick={closeReplyModal}
+									disabled={replySubmitting}
+								>
+									Cancel
+								</button>
+								<button type="submit" className="btn-primary flex items-center gap-2" disabled={replySubmitting}>
+									{replySubmitting ? (
+										<>
+											<Loader2 className="w-4 h-4 animate-spin" />
+											Sending...
+										</>
+									) : (
+										<>
+											<CheckCircle2 className="w-4 h-4" />
+											Send Reply
 										</>
 									)}
 								</button>

@@ -15,6 +15,7 @@ import OrderSuccess from "./pages/OrderSuccess.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import MyOrdersPage from "./pages/MyOrdersPage.tsx";
 import OrderDetailPage from "./pages/OrderDetailPage.tsx";
+import OrderTrackingPage from "./pages/OrderTrackingPage.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import AdminProducts from "./pages/admin/AdminProducts.tsx";
 import AdminVariants from "./pages/admin/AdminVariants.tsx";
@@ -132,6 +133,13 @@ function App() {
 				<div className="min-h-full flex flex-col">
 					<Header />
 					<div className="flex-1"><OrderDetailPage /></div>
+					<Footer />
+				</div>
+			} />
+			<Route path="/orders/:id/tracking" element={
+				<div className="min-h-full flex flex-col">
+					<Header />
+					<div className="flex-1"><OrderTrackingPage /></div>
 					<Footer />
 				</div>
 			} />

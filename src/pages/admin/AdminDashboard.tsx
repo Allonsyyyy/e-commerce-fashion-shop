@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "./AdminLayout";
+import { DollarSign, Package, ShoppingCart, Users } from "lucide-react";
+
 import { getProfile } from "../../api/authApi";
 import { getOrders } from "../../api/admin/ordersApi";
-import { getProducts } from "../../api/productsApi";
 import { getUsers } from "../../api/admin/usersApi";
-import { Package, ShoppingCart, DollarSign, Users } from "lucide-react";
+import { getProducts } from "../../api/productsApi";
+import AdminLayout from "./AdminLayout";
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState({
@@ -42,7 +43,7 @@ export default function AdminDashboard() {
                     totalUsers: usersRes.total,
                 });
             } catch (err) {
-                console.error("Failed to load stats:", err);
+                console.error("Tải số liệu thất bại:", err);
             } finally {
                 setLoading(false);
             }
@@ -54,16 +55,14 @@ export default function AdminDashboard() {
     const statCards = [
         { icon: Package, label: "Tổng sản phẩm", value: stats.totalProducts },
         { icon: ShoppingCart, label: "Tổng đơn hàng", value: stats.totalOrders },
-        ...(userRole === "admin"
-            ? [{ icon: DollarSign, label: "Doanh thu", value: `${stats.totalRevenue.toLocaleString()}đ` }]
-            : []),
+        ...(userRole === "admin" ? [{ icon: DollarSign, label: "Doanh thu", value: `${stats.totalRevenue.toLocaleString()} đ` }] : []),
         { icon: Users, label: "Người dùng", value: stats.totalUsers },
     ];
 
     return (
         <AdminLayout>
             <div>
-                <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+                <h1 className="text-3xl font-bold mb-8">Bảng điều khiển</h1>
 
                 {loading ? (
                     <div className="text-center py-12">Đang tải...</div>
@@ -89,4 +88,3 @@ export default function AdminDashboard() {
         </AdminLayout>
     );
 }
-

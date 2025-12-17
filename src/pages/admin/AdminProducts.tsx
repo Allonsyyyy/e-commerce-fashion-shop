@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import AdminLayout from "./AdminLayout";
-import { getProducts } from "../../api/productsApi";
-import { createProduct, updateProduct, deleteProduct } from "../../api/admin/productsApi";
-import { getCategories } from "../../api/categoriesApi";
-import type { Product } from "../../types/product";
-import type { Category } from "../../types/category";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+import { getCategories } from "../../api/categoriesApi";
+import { createProduct, deleteProduct, updateProduct } from "../../api/admin/productsApi";
+import { getProducts } from "../../api/productsApi";
+import type { Category } from "../../types/category";
+import type { Product } from "../../types/product";
+import AdminLayout from "./AdminLayout";
 
 export default function AdminProducts() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -44,7 +45,7 @@ export default function AdminProducts() {
             setProducts(productsRes.data);
             setCategories(categoriesRes.data);
         } catch (err) {
-            console.error("Failed to load data:", err);
+            console.error("Tải dữ liệu thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -75,9 +76,9 @@ export default function AdminProducts() {
             setShowModal(false);
             resetForm();
             loadData();
-            alert("Success!");
+            alert("Thành công!");
         } catch (err: any) {
-            alert(err.message || "An error occurred!");
+            alert(err.message || "Đã xảy ra lỗi!");
         }
     };
 
@@ -96,7 +97,7 @@ export default function AdminProducts() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Are you sure you want to delete this product?")) return;
+        if (!confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) return;
 
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -104,9 +105,9 @@ export default function AdminProducts() {
         try {
             await deleteProduct(token, id);
             loadData();
-            alert("Deleted successfully!");
+            alert("Đã xóa thành công!");
         } catch (err: any) {
-            alert(err.message || "An error occurred!");
+            alert(err.message || "Đã xảy ra lỗi!");
         }
     };
 
@@ -127,7 +128,7 @@ export default function AdminProducts() {
         <AdminLayout>
             <div>
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold">Products Management</h1>
+                    <h1 className="text-3xl font-bold">Quản lý sản phẩm</h1>
                     <button
                         onClick={() => {
                             resetForm();
@@ -136,12 +137,12 @@ export default function AdminProducts() {
                         className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                     >
                         <Plus size={20} />
-                        Add Product
+                        Thêm sản phẩm
                     </button>
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-12">Loading...</div>
+                    <div className="text-center py-12">Đang tải...</div>
                 ) : (
                     <div className="bg-white rounded-lg shadow overflow-hidden">
                         <table className="w-full">
@@ -160,7 +161,7 @@ export default function AdminProducts() {
                                     <tr key={product.id} className="border-t">
                                         <td className="px-6 py-4">{product.id}</td>
                                         <td className="px-6 py-4">{product.name}</td>
-                                        <td className="px-6 py-4">{parseFloat(product.price).toLocaleString()}đ</td>
+                                        <td className="px-6 py-4">{parseFloat(product.price).toLocaleString()} đ</td>
                                         <td className="px-6 py-4">{product.discount}%</td>
                                         <td className="px-6 py-4">{product.stock}</td>
                                         <td className="px-6 py-4">
@@ -186,24 +187,23 @@ export default function AdminProducts() {
                     </div>
                 )}
 
-                {/* Modal */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 w-full max-w-md">
                             <h2 className="text-2xl font-bold mb-4">
-                                {editingProduct ? "Edit Product" : "Add Product"}
+                                {editingProduct ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm"}
                             </h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <input
                                     type="text"
-                                    placeholder="Product Name"
+                                    placeholder="Tên sản phẩm"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     required
                                 />
                                 <textarea
-                                    placeholder="Description"
+                                    placeholder="Mô tả"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -211,7 +211,7 @@ export default function AdminProducts() {
                                 />
                                 <input
                                     type="number"
-                                    placeholder="Price"
+                                    placeholder="Giá"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.price}
                                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
@@ -219,7 +219,7 @@ export default function AdminProducts() {
                                 />
                                 <input
                                     type="number"
-                                    placeholder="Discount (%)"
+                                    placeholder="Giảm giá (%)"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.discount}
                                     onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
@@ -227,7 +227,7 @@ export default function AdminProducts() {
                                 />
                                 <input
                                     type="number"
-                                    placeholder="Stock"
+                                    placeholder="Tồn kho"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.stock}
                                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
@@ -239,7 +239,7 @@ export default function AdminProducts() {
                                     onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                                     required
                                 >
-                                    <option value="">Select Category</option>
+                                    <option value="">Chọn danh mục</option>
                                     {categories.map((cat) => (
                                         <option key={cat.id} value={cat.id}>
                                             {cat.name}
@@ -248,7 +248,7 @@ export default function AdminProducts() {
                                 </select>
                                 <input
                                     type="url"
-                                    placeholder="URL hình ảnh chính"
+                                    placeholder="URL ảnh chính"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.mainImageUrl}
                                     onChange={(e) => setFormData({ ...formData, mainImageUrl: e.target.value })}
@@ -280,4 +280,3 @@ export default function AdminProducts() {
         </AdminLayout>
     );
 }
-

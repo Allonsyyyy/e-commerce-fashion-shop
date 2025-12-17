@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Breadcrumbs from "../components/Breadcrumbs";
 import Container from "../components/Container";
 import type { Product } from "../types/product";
+import { getProductReviews, type Review } from "../api/reviewsApi";
 
 export default function ProductDetail() {
 	const { id } = useParams();
@@ -12,9 +13,21 @@ export default function ProductDetail() {
 	const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const [quantity, setQuantity] = useState<number>(1);
+	const [reviews, setReviews] = useState<Review[]>([]);
+	const [reviewsTotal, setReviewsTotal] = useState(0);
+	const [reviewsLoading, setReviewsLoading] = useState(false);
+	const [reviewsError, setReviewsError] = useState<string | null>(null);
+	const [openReplies, setOpenReplies] = useState<Record<number, boolean>>({});
 
 	useEffect(() => {
-		fetch(`http://localhost:3000/api/v1/products/${id}`)
+		const token = localStorage.getItem("token");
+		fetch(`http://localhost:3000/api/v1/products/${id}`, {
+			headers: token
+				? {
+						Authorization: `Bearer ${token}`,
+					}
+				: undefined,
+		})
 			.then((res) => res.json())
 			.then((data) => {
 				setProduct(data);
@@ -25,7 +38,27 @@ export default function ProductDetail() {
 			.catch((err) => console.error("Fetch product failed:", err));
 	}, [id]);
 
-	if (!product) return <div className="py-20 text-center">Loading...</div>;
+	useEffect(() => {
+		if (!id) return;
+		const loadReviews = async () => {
+			try {
+				setReviewsLoading(true);
+				setReviewsError(null);
+				const token = localStorage.getItem("token");
+				const res = await getProductReviews(Number(id), { page: 1, limit: 20, sort: "-createdAt" }, token);
+				setReviews(res.data);
+				setReviewsTotal(res.total);
+			} catch (err: any) {
+				console.error("Failed to load reviews", err);
+				setReviewsError("Không tải được đánh giá.");
+			} finally {
+				setReviewsLoading(false);
+			}
+		};
+		loadReviews();
+	}, [id]);
+
+if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 
 	const price = Number(product.price);
 	const discount = Number(product.discount);
@@ -76,8 +109,8 @@ export default function ProductDetail() {
 			<Container>
 				<Breadcrumbs
 					items={[
-						{ label: "Home", to: "/" },
-						{ label: product.category?.name || "Category", to: `/category/${product.categoryId}` },
+						{ label: "Trang chủ", to: "/" },
+						{ label: product.category?.name || "Danh mục", to: `/category/${product.categoryId}` },
 						{ label: product.name },
 					]}
 				/>
@@ -137,7 +170,7 @@ export default function ProductDetail() {
 							<div className="mt-8 space-y-4">
 								{/* Color */}
 								<div>
-									<h4 className="mb-2 font-medium">Color</h4>
+									<h4 className="mb-2 font-medium">Màu sắc</h4>
 									<div className="flex gap-2">
 										{product.variants.map((v) => (
 											<button
@@ -155,7 +188,7 @@ export default function ProductDetail() {
 
 								{/* Size */}
 								<div>
-									<h4 className="mb-2 font-medium">Size</h4>
+									<h4 className="mb-2 font-medium">Kích cỡ</h4>
 									<div className="flex gap-2">
 										{product.variants.map((v) => (
 											<button
@@ -175,7 +208,7 @@ export default function ProductDetail() {
 
 						{/* QUANTITY */}
 						<div className="mt-4">
-							<label className="block text-sm text-neutral-700 mb-1">Quantity</label>
+							<label className="block text-sm text-neutral-700 mb-1">Số lượng</label>
 							<input
 								type="number"
 								min={1}
@@ -187,7 +220,7 @@ export default function ProductDetail() {
 
 						{/* STOCK */}
 						<div className="mt-4 text-sm text-neutral-600">
-							Stock: {activeVariant?.stock ?? product.stock} {activeVariant?.stock === 1 || product.stock === 1 ? 'item' : 'items'}
+							Tồn kho: {activeVariant?.stock ?? product.stock} sản phẩm
 						</div>
 
 						{/* ACTION BUTTONS */}
@@ -196,9 +229,9 @@ export default function ProductDetail() {
 							<button
 								className="btn-primary flex-1 px-8 py-3"
 								onClick={async () => {
-									if (!selectedVariant) return alert("Please select color / size!");
+									if (!selectedVariant) return alert("Vui lòng chọn màu / size!");
 									const token = localStorage.getItem("token");
-									if (!token) return alert("You need to sign in!");
+									if (!token) return alert("Bạn cần đăng nhập!");
 
 									try {
 										const res = await fetch("http://localhost:3000/api/v1/cart/add", {
@@ -214,14 +247,14 @@ export default function ProductDetail() {
 										}).then((res) => res.json());
 
 										console.log("Added to cart:", res);
-										alert("Added to cart!");
+										alert("Đã thêm vào giỏ!");
 									} catch (error) {
 										console.error(error);
-										alert("Error adding to cart!");
+										alert("Thêm vào giỏ thất bại!");
 									}
 								}}
 							>
-								Add to Cart
+								Thêm vào giỏ
 							</button>
 
 							{/* Buy Now */}
@@ -229,13 +262,74 @@ export default function ProductDetail() {
 								className="btn-secondary px-8 py-3"
 								onClick={handleBuyNow}
 							>
-								Buy Now
+								Mua ngay
 							</button>
 						</div>
 					</div>
 				</div>
 			</Container>
+
+			{/* REVIEWS */}
+			<Container>
+				<div className="mt-12 card">
+					<div className="flex items-center justify-between mb-4">
+						<h2 className="heading-4">Đánh giá sản phẩm</h2>
+						{reviewsTotal > 0 && <span className="text-sm text-neutral-500">{reviewsTotal} đánh giá</span>}
+					</div>
+					{reviewsLoading ? (
+						<p className="text-neutral-600">Đang tải đánh giá...</p>
+					) : reviewsError ? (
+						<p className="text-error-600">{reviewsError}</p>
+					) : reviews.length === 0 ? (
+						<p className="text-neutral-600">Chưa có đánh giá nào.</p>
+					) : (
+						<div className="space-y-4">
+							{reviews.map((review) => (
+								<div key={review.id} className="border border-neutral-200 rounded-lg p-4">
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="font-semibold text-neutral-900">{review.user?.name || "Khách hàng"}</p>
+											<p className="text-xs text-neutral-500">
+												{review.createdAt ? new Date(review.createdAt).toLocaleDateString("vi-VN") : ""}
+											</p>
+										</div>
+										<div className="text-sm font-semibold text-amber-600">
+											{review.rating} / 5 ★
+										</div>
+									</div>
+									<p className="mt-2 text-sm text-neutral-800">{review.comment}</p>
+									{(review.sellerReply ?? review.reply) && (
+										<div className="mt-3">
+											<button
+												className="text-sm text-neutral-700 underline underline-offset-4 hover:text-neutral-900"
+												onClick={() =>
+													setOpenReplies((prev) => ({
+														...prev,
+														[review.id]: !prev[review.id],
+													}))
+												}
+											>
+												{openReplies[review.id] ? "Ẩn phản hồi của shop" : "Xem phản hồi của shop"}
+											</button>
+											{openReplies[review.id] && (
+												<div className="mt-2 text-sm text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-lg p-3">
+													<p className="text-xs text-neutral-500">
+														Phản hồi từ cửa hàng
+														{review.sellerRepliedAt
+															? ` • ${new Date(review.sellerRepliedAt).toLocaleDateString("vi-VN")}`
+															: ""}
+													</p>
+													<p>{review.sellerReply ?? review.reply}</p>
+												</div>
+											)}
+										</div>
+									)}
+								</div>
+							))}
+						</div>
+					)}
+				</div>
+			</Container>
 		</main>
 	);
 }
-

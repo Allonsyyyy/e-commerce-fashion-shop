@@ -7,28 +7,28 @@ export default function Footer() {
 	
 	const footerLinks = {
 		shop: [
-			{ label: 'New Arrivals', to: '/shop?category=new' },
-			{ label: 'Men', to: '/shop?category=men' },
-			{ label: 'Women', to: '/shop?category=women' },
-			{ label: 'Accessories', to: '/shop?category=accessories' },
-			{ label: 'Sale', to: '/shop?category=sale' },
+			{ label: 'Hàng mới', to: '/shop?category=new' },
+			{ label: 'Nam', to: '/shop?category=men' },
+			{ label: 'Nữ', to: '/shop?category=women' },
+			{ label: 'Phụ kiện', to: '/shop?category=accessories' },
+			{ label: 'Khuyến mãi', to: '/shop?category=sale' },
 		],
 		company: [
-			{ label: 'About Us', to: '/about' },
-			{ label: 'Contact', to: '/contact' },
-			{ label: 'Careers', to: '#' },
-			{ label: 'Press', to: '#' },
+			{ label: 'Về chúng tôi', to: '/about' },
+			{ label: 'Liên hệ', to: '/contact' },
+			{ label: 'Tuyển dụng', to: '#' },
+			{ label: 'Báo chí', to: '#' },
 		],
 		support: [
-			{ label: 'Shipping Info', to: '#' },
-			{ label: 'Returns', to: '#' },
-			{ label: 'FAQ', to: '#' },
-			{ label: 'Track Order', to: '#' },
+			{ label: 'Thông tin giao hàng', to: '#' },
+			{ label: 'Đổi trả', to: '#' },
+			{ label: 'Câu hỏi thường gặp', to: '#' },
+			{ label: 'Theo dõi đơn', to: '#' },
 		],
 		legal: [
-			{ label: 'Privacy Policy', to: '#' },
-			{ label: 'Terms of Service', to: '#' },
-			{ label: 'Cookie Policy', to: '#' },
+			{ label: 'Chính sách bảo mật', to: '#' },
+			{ label: 'Điều khoản sử dụng', to: '#' },
+			{ label: 'Chính sách cookie', to: '#' },
 		],
 	}
 
@@ -48,7 +48,7 @@ export default function Footer() {
 					<div className="col-span-2 lg:col-span-1">
 						<h3 className="font-display text-2xl font-bold mb-4">Shop</h3>
 						<p className="body-small text-neutral-400 mb-6">
-							Premium essentials, curated for comfort and style.
+							Sản phẩm tinh gọn, thoải mái và thời trang.
 						</p>
 						<div className="flex items-center gap-4">
 							{socialLinks.map((social, i) => (
@@ -66,7 +66,7 @@ export default function Footer() {
 
 					{/* Shop */}
 					<div>
-						<h4 className="font-semibold mb-4">Shop</h4>
+						<h4 className="font-semibold mb-4">Mua sắm</h4>
 						<ul className="space-y-3">
 							{footerLinks.shop.map((link, i) => (
 								<li key={i}>
@@ -80,7 +80,7 @@ export default function Footer() {
 
 					{/* Company */}
 					<div>
-						<h4 className="font-semibold mb-4">Company</h4>
+						<h4 className="font-semibold mb-4">Công ty</h4>
 						<ul className="space-y-3">
 							{footerLinks.company.map((link, i) => (
 								<li key={i}>
@@ -94,7 +94,7 @@ export default function Footer() {
 
 					{/* Support */}
 					<div>
-						<h4 className="font-semibold mb-4">Support</h4>
+						<h4 className="font-semibold mb-4">Hỗ trợ</h4>
 						<ul className="space-y-3">
 							{footerLinks.support.map((link, i) => (
 								<li key={i}>
@@ -108,7 +108,7 @@ export default function Footer() {
 
 					{/* Legal */}
 					<div>
-						<h4 className="font-semibold mb-4">Legal</h4>
+						<h4 className="font-semibold mb-4">Pháp lý</h4>
 						<ul className="space-y-3">
 							{footerLinks.legal.map((link, i) => (
 								<li key={i}>
@@ -125,17 +125,17 @@ export default function Footer() {
 				<div className="border-t border-neutral-800 py-6">
 					<div className="flex flex-col sm:flex-row items-center justify-between gap-4">
 						<p className="body-small text-neutral-400">
-							© {currentYear} Shop. All rights reserved.
+							© {currentYear} Shop. Giữ mọi quyền.
 						</p>
 						<div className="flex items-center gap-6">
 							<Link to="#" className="body-small text-neutral-400 hover:text-white transition-colors">
-								Privacy
+								Bảo mật
 							</Link>
 							<Link to="#" className="body-small text-neutral-400 hover:text-white transition-colors">
-								Terms
+								Điều khoản
 							</Link>
 							<Link to="#" className="body-small text-neutral-400 hover:text-white transition-colors">
-								Cookies
+								Cookie
 							</Link>
 						</div>
 					</div>
@@ -144,5 +144,4 @@ export default function Footer() {
 		</footer>
 	)
 }
-
 

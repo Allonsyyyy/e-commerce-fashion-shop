@@ -45,10 +45,10 @@ export default function Home() {
 	}, []);
 
 	const features = [
-		{ icon: Truck, title: "Free Shipping", desc: "On orders over 100k" },
-		{ icon: RefreshCw, title: "Easy Returns", desc: "30-day return policy" },
-		{ icon: Shield, title: "Secure Payment", desc: "100% secure checkout" },
-		{ icon: Star, title: "Best Quality", desc: "Premium products only" },
+		{ icon: Truck, title: "Miễn phí giao hàng", desc: "Cho đơn từ 100k" },
+		{ icon: RefreshCw, title: "Đổi trả dễ dàng", desc: "Chính sách 30 ngày" },
+		{ icon: Shield, title: "Thanh toán an toàn", desc: "Bảo mật 100%" },
+		{ icon: Star, title: "Chất lượng cao", desc: "Chỉ sản phẩm chọn lọc" },
 	];
 
 	return (
@@ -59,9 +59,9 @@ export default function Home() {
 			<section className="py-16 bg-white">
 				<Container>
 					<div className="text-center mb-12">
-						<h2 className="heading-3 mb-4">Shop by Category</h2>
+						<h2 className="heading-3 mb-4">Mua sắm theo danh mục</h2>
 						<p className="body-text text-neutral-600">
-							Discover our curated collections
+							Khám phá các bộ sưu tập được chọn lọc
 						</p>
 					</div>
 					<Carousel />
@@ -73,16 +73,16 @@ export default function Home() {
 				<Container>
 					<div className="flex items-center justify-between mb-8">
 						<div>
-							<h2 className="heading-3 mb-2">Featured Products</h2>
+							<h2 className="heading-3 mb-2">Sản phẩm nổi bật</h2>
 							<p className="body-text text-neutral-600">
-								Newly added products
+								Sản phẩm vừa cập nhật
 							</p>
 						</div>
 						<a
 							className="body-small text-neutral-600 hover:text-neutral-900 transition-colors font-medium hidden md:inline-flex items-center gap-1"
 							href="/shop"
 						>
-							View all <span>→</span>
+							Xem tất cả <span>→</span>
 						</a>
 					</div>
 

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "./AdminLayout";
+import { Edit, Plus, Trash2 } from "lucide-react";
+
+import { createCategory, deleteCategory, updateCategory } from "../../api/admin/categoriesApi";
 import { getCategories } from "../../api/categoriesApi";
-import { createCategory, updateCategory, deleteCategory } from "../../api/admin/categoriesApi";
 import type { Category } from "../../types/category";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import AdminLayout from "./AdminLayout";
 
 export default function AdminCategories() {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -25,7 +26,7 @@ export default function AdminCategories() {
             const data = await getCategories({ page: 1, limit: 100 });
             setCategories(data.data);
         } catch (err) {
-            console.error("Failed to load categories:", err);
+            console.error("Tải danh mục thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -69,7 +70,7 @@ export default function AdminCategories() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Bạn có chắc muốn xóa danh mục này?")) return;
+        if (!confirm("Bạn chắc chắn muốn xóa danh mục này?")) return;
 
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -157,7 +158,6 @@ export default function AdminCategories() {
                     </div>
                 )}
 
-                {/* Modal */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -220,4 +220,3 @@ export default function AdminCategories() {
         </AdminLayout>
     );
 }
-

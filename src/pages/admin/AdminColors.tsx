@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { Edit, Plus, Trash2 } from "lucide-react";
+
+import { createColor, deleteColor, getColors, updateColor } from "../../api/admin/colorsApi";
 import AdminLayout from "./AdminLayout";
-import { getColors, createColor, updateColor, deleteColor } from "../../api/admin/colorsApi";
-import { Plus, Edit, Trash2 } from "lucide-react";
 
 export default function AdminColors() {
     const [colors, setColors] = useState<any[]>([]);
@@ -22,7 +23,7 @@ export default function AdminColors() {
             const data = await getColors(token);
             setColors(data);
         } catch (err) {
-            console.error("Failed to load colors:", err);
+            console.error("Tải danh sách màu thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -57,7 +58,7 @@ export default function AdminColors() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Bạn có chắc muốn xóa màu này?")) return;
+        if (!confirm("Bạn chắc chắn muốn xóa màu này?")) return;
 
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -129,7 +130,6 @@ export default function AdminColors() {
                     </div>
                 )}
 
-                {/* Modal */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -172,4 +172,3 @@ export default function AdminColors() {
         </AdminLayout>
     );
 }
-

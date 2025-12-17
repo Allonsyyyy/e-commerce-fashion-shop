@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { Edit, Plus, Trash2 } from "lucide-react";
+
+import { createSize, deleteSize, getSizes, updateSize } from "../../api/admin/sizesApi";
 import AdminLayout from "./AdminLayout";
-import { getSizes, createSize, updateSize, deleteSize } from "../../api/admin/sizesApi";
-import { Plus, Edit, Trash2 } from "lucide-react";
 
 export default function AdminSizes() {
     const [sizes, setSizes] = useState<any[]>([]);
@@ -22,7 +23,7 @@ export default function AdminSizes() {
             const data = await getSizes(token);
             setSizes(data);
         } catch (err) {
-            console.error("Failed to load sizes:", err);
+            console.error("Tải kích thước thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -57,7 +58,7 @@ export default function AdminSizes() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Bạn có chắc muốn xóa kích thước này?")) return;
+        if (!confirm("Bạn chắc chắn muốn xóa kích thước này?")) return;
 
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -129,7 +130,6 @@ export default function AdminSizes() {
                     </div>
                 )}
 
-                {/* Modal */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -172,4 +172,3 @@ export default function AdminSizes() {
         </AdminLayout>
     );
 }
-
