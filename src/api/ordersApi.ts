@@ -3,11 +3,15 @@ type BuyNowPayload = {
     quantity: number;
     paymentMethod: "vnpay" | "cod";
     shippingAddress: string;
+    shippingFee: number;
+    discountCode?: string;
 };
 
 type FromCartPayload = {
     paymentMethod: "vnpay" | "cod";
     shippingAddress: string;
+    shippingFee: number;
+    discountCode?: string;
 };
 
 const API_BASE = "http://localhost:3000/api/v1";

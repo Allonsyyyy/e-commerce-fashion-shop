@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
+import { Link } from "react-router-dom";
 import Container from "../components/Container";
 import { getOrders, type Order } from "../api/admin/ordersApi";
 import { getAdminReviews, replyReview, type AdminReview } from "../api/admin/reviewsApi";
@@ -1293,6 +1294,12 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 						<RefreshCw className="w-5 h-5" />
 						Quản lý đổi trả
 					</button>
+					<Link
+						to="/"
+						className="mt-4 w-full inline-flex items-center justify-center px-4 py-3 rounded-lg border border-white/20 hover:bg-white/10 transition-colors text-center"
+					>
+						Về trang chủ
+					</Link>
 				</aside>
 
 				<div className="flex-1">

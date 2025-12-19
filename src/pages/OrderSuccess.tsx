@@ -13,7 +13,9 @@ export default function OrderSuccess() {
 	const queryOrderId = params.get("orderId");
 	const derivedOrderId = queryOrderId || (txnRef ? txnRef.split("_")[0] : null);
 	const isVNPayFlow = Boolean(statusCode);
-	const [order, setOrder] = useState<any>((location.state as any)?.order || null);
+	const routeState = location.state as any;
+	const [order, setOrder] = useState<any>(routeState?.order || null);
+	const clientTotals = routeState?.clientTotals;
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
@@ -128,7 +130,10 @@ export default function OrderSuccess() {
 										<p className="flex justify-between">
 											<span>Tổng tiền</span>
 											<strong className="text-neutral-900">
-												{Number(order.totalAmount).toLocaleString("vi-VN")}₫
+												{Number(
+													clientTotals?.total ?? order.totalAmount,
+												).toLocaleString("vi-VN")}
+												₫
 											</strong>
 										</p>
 										<p className="flex justify-between">
@@ -160,13 +165,50 @@ export default function OrderSuccess() {
 							</div>
 
 							<div className="space-y-4">
+								{clientTotals && (
+									<div className="rounded-2xl border border-neutral-100 bg-white p-4">
+										<p className="text-xs uppercase tracking-wide text-neutral-500 mb-2">
+											Chi tiết thanh toán
+										</p>
+										<div className="space-y-2 text-sm text-neutral-600">
+											<div className="flex justify-between">
+												<span>Tạm tính</span>
+												<span>
+													{clientTotals.originalSubtotal.toLocaleString("vi-VN")}₫
+												</span>
+											</div>
+											{clientTotals.discountAmount > 0 && (
+												<div className="flex justify-between text-emerald-600">
+													<span>Giảm giá</span>
+													<span>
+														-
+														{clientTotals.discountAmount.toLocaleString("vi-VN")}₫
+													</span>
+												</div>
+											)}
+											<div className="flex justify-between">
+												<span>Phí vận chuyển</span>
+												<span>
+													{clientTotals.shippingFee.toLocaleString("vi-VN")}₫
+												</span>
+											</div>
+											<div className="flex justify-between font-semibold text-neutral-900 border-t border-neutral-100 pt-2">
+												<span>Tổng thanh toán</span>
+												<span>
+													{clientTotals.total.toLocaleString("vi-VN")}₫
+												</span>
+											</div>
+										</div>
+									</div>
+								)}
 								<div className="flex items-center justify-between">
 									<div>
 										<p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">Danh sách sản phẩm</p>
 										<h2 className="text-xl font-semibold text-neutral-900">Bạn đã chọn</h2>
 									</div>
 									<span className="text-sm text-neutral-500">
-										{order.items?.length || 0} sản phẩm • {Number(order.totalAmount).toLocaleString("vi-VN")}₫
+										{order.items?.length || 0} sản phẩm •{" "}
+										{Number(clientTotals?.total ?? order.totalAmount).toLocaleString("vi-VN")}₫
 									</span>
 								</div>
 

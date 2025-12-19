@@ -70,10 +70,10 @@ export default function Home() {
 
 			{/* Featured Products */}
 			<section className="py-16 bg-neutral-50">
-				<Container>
+				<Container size="wide">
 					<div className="flex items-center justify-between mb-8">
 						<div>
-							<h2 className="heading-3 mb-2">Sản phẩm nổi bật</h2>
+							<h2 className="heading-3 mb-2">Sản phẩm mới</h2>
 							<p className="body-text text-neutral-600">
 								Sản phẩm vừa cập nhật
 							</p>
@@ -107,7 +107,7 @@ export default function Home() {
 			{/* Personalized recommendations */}
 			{(recommendedProducts.length > 0 || isRecLoading || recError) && (
 				<section className="py-16 bg-white">
-					<Container>
+					<Container size="wide">
 						<div className="flex items-center justify-between mb-8">
 							<div>
 								<h2 className="heading-3 mb-2">Gợi ý dành riêng cho bạn</h2>

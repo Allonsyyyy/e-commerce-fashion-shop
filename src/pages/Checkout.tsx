@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Container from "../components/Container";
 import { getCart } from "../api/cartApi";
 import { buyNow, checkoutFromCart } from "../api/ordersApi";
+import { applyDiscount } from "../api/discountsApi";
 import {
 	calculateShippingFee,
 	fetchDistricts,
@@ -58,6 +59,13 @@ export default function Checkout() {
 	const [calculatingFee, setCalculatingFee] = useState(false);
 	const [shippingError, setShippingError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [discountCode, setDiscountCode] = useState("");
+	const [appliedDiscountCode, setAppliedDiscountCode] = useState<string | null>(null);
+	const [discountPercent, setDiscountPercent] = useState<number | null>(null);
+	const [discountAmount, setDiscountAmount] = useState(0);
+	const [voucherMessage, setVoucherMessage] = useState<string | null>(null);
+	const [voucherError, setVoucherError] = useState<string | null>(null);
+	const [validatingDiscount, setValidatingDiscount] = useState(false);
 
 	useEffect(() => {
 		if (!isBuyNowMode) {
@@ -220,7 +228,20 @@ export default function Checkout() {
 		isBuyNowMode && buyNowItem
 			? buyNowItem.price * buyNowItem.quantity
 			: Number(cart?.totalPrice || 0);
-	const total = shippingFee !== null ? subtotal + shippingFee : subtotal;
+	const discountedSubtotal = Math.max(
+		subtotal - (appliedDiscountCode ? discountAmount : 0),
+		0,
+	);
+	const total =
+		shippingFee !== null ? discountedSubtotal + shippingFee : discountedSubtotal;
+
+	useEffect(() => {
+		setAppliedDiscountCode(null);
+		setDiscountPercent(null);
+		setDiscountAmount(0);
+		setVoucherMessage(null);
+		setVoucherError(null);
+	}, [subtotal]);
 
 	const cartIsEmpty = isBuyNowMode ? !buyNowItem : !cart?.items?.length;
 	const canPlaceOrder =
@@ -232,6 +253,55 @@ export default function Checkout() {
 	const selectedProvince = provinces.find((p) => String(p.ProvinceID) === provinceId);
 	const selectedDistrict = districts.find((d) => String(d.DistrictID) === districtId);
 	const selectedWard = wards.find((w) => w.WardCode === wardCode);
+
+	const handleApplyVoucher = async () => {
+		const trimmed = discountCode.trim();
+		if (!trimmed) {
+			setVoucherError("Vui lòng nhập mã ưu đãi hợp lệ.");
+			setVoucherMessage(null);
+			setAppliedDiscountCode(null);
+			setDiscountPercent(null);
+			setDiscountAmount(0);
+			return;
+		}
+		try {
+			setValidatingDiscount(true);
+			setVoucherError(null);
+			const response = await applyDiscount(trimmed, subtotal);
+			const percent = Number(response.discountPercent) || 0;
+			setAppliedDiscountCode(response.code);
+			setDiscountPercent(percent);
+			setDiscountAmount(response.discountAmount || 0);
+			setVoucherMessage(
+				`Đã áp dụng mã ${response.code} (-${percent}%). Ưu đãi chỉ áp dụng cho sản phẩm.`
+			);
+		} catch (error: any) {
+			console.error(error);
+			setAppliedDiscountCode(null);
+			setDiscountPercent(null);
+			setDiscountAmount(0);
+			let message = error?.message || "Không xác thực được mã. Vui lòng thử lại.";
+			try {
+				const parsed = JSON.parse(message);
+				message = parsed?.message || parsed?.error || message;
+			} catch {
+				// ignore parse errors
+			}
+			setVoucherMessage(null);
+			setVoucherError(message);
+		} finally {
+			setValidatingDiscount(false);
+		}
+	};
+
+	const handleRemoveVoucher = () => {
+		setDiscountCode("");
+		setAppliedDiscountCode(null);
+		setDiscountPercent(null);
+		setDiscountAmount(0);
+		setVoucherMessage(null);
+		setVoucherError(null);
+	};
 
 	const handlePlaceOrder = async () => {
 		if (!canPlaceOrder) {
@@ -259,21 +329,26 @@ export default function Checkout() {
 			.filter(Boolean)
 			.join(", ");
 
+		const normalizedShippingFee = shippingFee ?? 0;
+
 		try {
 			setIsSubmitting(true);
 			setGlobalError(null);
+
+			const commonPayload = {
+				paymentMethod,
+				shippingAddress,
+				shippingFee: normalizedShippingFee,
+				...(appliedDiscountCode ? { discountCode: appliedDiscountCode } : {}),
+			};
 
 			const response = isBuyNowMode && buyNowItem
 				? await buyNow(token, {
 						variantId: buyNowItem.variantId,
 						quantity: buyNowItem.quantity,
-						paymentMethod,
-						shippingAddress,
+						...commonPayload,
 				  })
-				: await checkoutFromCart(token, {
-						paymentMethod,
-						shippingAddress,
-				  });
+				: await checkoutFromCart(token, commonPayload);
 
 			const orderPayload = response.order ?? response;
 
@@ -283,11 +358,22 @@ export default function Checkout() {
 				return;
 			}
 
+			const clientTotals = {
+				originalSubtotal: subtotal,
+				discountAmount: appliedDiscountCode ? discountAmount : 0,
+				discountedSubtotal,
+				shippingFee: normalizedShippingFee,
+				total,
+			};
+
 			sessionStorage.removeItem("buyNowItem");
 			const orderId = orderPayload?.id;
 			const url = orderId ? `/order-success?orderId=${orderId}` : "/order-success";
 			navigate(url, {
-				state: { order: orderPayload ?? null },
+				state: {
+					order: orderPayload ?? null,
+					clientTotals,
+				},
 			});
 		} catch (err: any) {
 			console.error(err);
@@ -461,6 +547,14 @@ export default function Checkout() {
 								<span>Tạm tính</span>
 								<span className="font-semibold">{formatCurrency(subtotal)}</span>
 							</div>
+							{discountAmount > 0 && (
+								<div className="flex items-center justify-between text-green-600">
+									<span>
+										Giảm giá{appliedDiscountCode ? ` (${appliedDiscountCode})` : ""}
+									</span>
+									<span>-{formatCurrency(discountAmount)}</span>
+								</div>
+							)}
 							<div className="flex items-center justify-between">
 								<span>Phí vận chuyển</span>
 								<span className="font-semibold">
@@ -471,6 +565,57 @@ export default function Checkout() {
 								<span>Tổng cộng</span>
 								<span>{formatCurrency(total)}</span>
 							</div>
+						</div>
+
+						<div className="mt-6 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+							<p className="text-sm font-semibold mb-3">Mã voucher</p>
+							<div className="flex flex-col sm:flex-row gap-3">
+								<input
+									className="input flex-1"
+									placeholder="Nhập mã giảm giá"
+									value={discountCode}
+									onChange={(e) => {
+										setDiscountCode(e.target.value);
+										setVoucherError(null);
+									}}
+								/>
+								<button
+									type="button"
+									onClick={handleApplyVoucher}
+									className="btn-primary whitespace-nowrap disabled:opacity-60"
+									disabled={validatingDiscount}
+								>
+									{validatingDiscount ? "Đang kiểm tra..." : "Áp dụng"}
+								</button>
+							</div>
+							{voucherError && (
+								<p className="mt-2 text-xs text-red-600">{voucherError}</p>
+							)}
+							{voucherMessage && (
+								<p className="mt-2 text-xs text-neutral-600">
+									{voucherMessage}
+									{discountAmount > 0 && (
+										<span> Giảm ngay {formatCurrency(discountAmount)}.</span>
+									)}
+								</p>
+							)}
+							{appliedDiscountCode && (
+								<div className="mt-2 flex items-center justify-between text-xs text-green-600">
+									<span>Đang sử dụng: {appliedDiscountCode}</span>
+									<button
+										type="button"
+										onClick={handleRemoveVoucher}
+										className="text-red-500 hover:underline"
+									>
+										Gỡ mã
+									</button>
+								</div>
+							)}
+							{!appliedDiscountCode && (
+								<p className="mt-2 text-xs text-neutral-500">
+									Nhập mã ưu đãi nếu bạn có để được giảm thêm.
+								</p>
+							)}
 						</div>
 
 						<button

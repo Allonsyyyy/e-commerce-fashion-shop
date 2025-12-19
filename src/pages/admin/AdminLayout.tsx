@@ -64,6 +64,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     ];
 
     const menuItems = userRole === "admin" ? adminMenuItems : staffMenuItems;
+    const hiddenMenuPaths = new Set<string>([
+        "/admin",
+        "/admin/users",
+        "/admin/inventory",
+        "/admin/shipping",
+    ]);
 
     return (
         <div className="min-h-screen flex">
@@ -79,6 +85,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 </div>
                 <nav className="px-4">
                     {menuItems.map((item) => {
+                        if (hiddenMenuPaths.has(item.path)) {
+                            return null;
+                        }
                         const Icon = item.icon;
                         const isActive = location.pathname === item.path;
                         return (
@@ -95,7 +104,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         );
                     })}
                 </nav>
-                <div className="px-4 mt-8">
+                <div className="px-4 mt-8 space-y-3">
                     <button
                         onClick={handleLogout}
                         className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-neutral-800 w-full text-left"
@@ -103,6 +112,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         <LogOut size={20} />
                         <span>Đăng xuất</span>
                     </button>
+                    <Link
+                        to="/"
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-white/20 hover:bg-neutral-800 transition-colors"
+                    >
+                        Về trang chủ
+                    </Link>
                 </div>
             </aside>
 

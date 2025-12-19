@@ -15,7 +15,7 @@ export default function Banner() {
 		if (slides.length <= 1) return;
 		const timer = setInterval(() => {
 			setCurrent((prev) => (prev + 1) % slides.length);
-		}, 5000);
+		}, 8000);
 		return () => clearInterval(timer);
 	}, []);
 
@@ -27,7 +27,7 @@ export default function Banner() {
 	return (
 		<section className="relative overflow-hidden">
 			<div
-				className="relative text-white flex items-center py-20 sm:py-32 px-4 sm:px-6 lg:px-12 transition-all duration-700"
+				className="relative text-white flex items-center py-32 sm:py-56 px-4 sm:px-6 lg:px-16 transition-all duration-700 min-h-[600px] sm:min-h-[720px] lg:min-h-[820px]"
 				style={{
 					backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.38), rgba(0,0,0,0.18)), url(${slides[current]})`,
 					backgroundSize: "cover",

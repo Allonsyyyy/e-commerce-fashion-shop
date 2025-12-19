@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { ShoppingCart, Search, Menu, X, User, Heart } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Container from './Container'
+import logoShop from '../assets/banners/logo-shop-quan-ao.jpg'
 
 export default function Header() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -84,24 +85,21 @@ export default function Header() {
 
 	return (
 		<header className="sticky top-0 z-50 bg-white border-b border-neutral-200 shadow-sm">
-			<div className="bg-neutral-900 text-white text-xs py-2">
+			<div className="bg-neutral-900 py-2">
 				<Container>
-					<div className="flex items-center justify-between">
-						<p>Miễn phí vận chuyển cho đơn từ 2.500.000₫</p>
-						<div className="hidden sm:flex items-center gap-4">
-							<a href="#" className="hover:text-neutral-300">Trợ giúp</a>
-							<a href="#" className="hover:text-neutral-300">Đổi / trả</a>
-							<a href="#" className="hover:text-neutral-300">Theo dõi đơn</a>
-						</div>
-					</div>
+					<div className="h-4" />
 				</Container>
 			</div>
 
 			<div className="bg-white">
 				<Container>
 					<div className="flex items-center gap-4 lg:gap-8 py-4">
-						<Link to="/" className="font-display text-2xl font-bold tracking-tight text-neutral-900 hover:text-neutral-700 transition-colors flex-shrink-0">
-							Cửa hàng
+						<Link to="/" className="flex-shrink-0 block">
+							<img
+								src={logoShop}
+								alt="Fashion Shop"
+								className="h-12 w-auto object-contain"
+							/>
 						</Link>
 
 						{/* ⭐ UPDATED SEARCH BAR */}
@@ -215,7 +213,7 @@ export default function Header() {
 							Cửa hàng
 						</Link>
 						<Link
-							to="/shop?category=men"
+							to="/category/1"
 							className={isNavActive('/shop', 'men')
 								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium'
 								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
@@ -224,7 +222,7 @@ export default function Header() {
 							Nam
 						</Link>
 						<Link
-							to="/shop?category=women"
+							to="/category/2"
 							className={isNavActive('/shop', 'women')
 								? 'text-neutral-900 border-b-2 border-neutral-900 pb-1 font-medium'
 								: 'text-neutral-600 hover:text-neutral-900 transition-colors'
