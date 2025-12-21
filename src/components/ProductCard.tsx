@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Heart, Eye } from 'lucide-react'
-import { useState } from 'react'
+import { Eye } from 'lucide-react'
 import type {ProductCardProps} from "../types/product.ts";
 
 export default function ProductCard({
@@ -10,7 +9,6 @@ export default function ProductCard({
 		discount,
 		image,
 	}: ProductCardProps) {
-	const [isWishlisted, setIsWishlisted] = useState(false)
 
 	const finalPrice = Number(price).toLocaleString('vi-VN') + '₫';
 
@@ -35,19 +33,6 @@ export default function ProductCard({
 
 					{/* Quick actions */}
 					<div className="absolute top-3 right-3 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-						<button
-							onClick={(e) => {
-								e.preventDefault()
-								setIsWishlisted(!isWishlisted)
-							}}
-							className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
-								isWishlisted
-									? 'bg-red-500 text-white'
-									: 'bg-white/90 text-neutral-700 hover:bg-white'
-							}`}
-						>
-							<Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
-						</button>
 						<button className="p-2 rounded-full bg-white/90 text-neutral-700 hover:bg-white backdrop-blur-sm transition-colors">
 							<Eye className="h-4 w-4" />
 						</button>

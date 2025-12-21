@@ -60,13 +60,12 @@ export default function ProductDetail() {
 
 if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 
-	const price = Number(product.price);
+	const activeVariant = product.variants?.find((v) => v.id === selectedVariant);
+	const price = Number(activeVariant?.price ?? product.price);
 	const discount = Number(product.discount);
 	const finalPrice = price.toLocaleString("vi-VN") + "₫";
 	const originalPrice =
 		discount > 0 ? (price / (1 - discount / 100)).toLocaleString("vi-VN") + "₫" : null;
-
-	const activeVariant = product.variants?.find((v) => v.id === selectedVariant);
 
 	const mainImage =
 		selectedImage ||

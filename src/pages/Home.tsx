@@ -110,9 +110,9 @@ export default function Home() {
 					<Container size="wide">
 						<div className="flex items-center justify-between mb-8">
 							<div>
-								<h2 className="heading-3 mb-2">Gợi ý dành riêng cho bạn</h2>
+								<h2 className="heading-3 mb-2">Sản phẩm bạn có thể quan tâm</h2>
 								<p className="body-text text-neutral-600">
-									Dựa trên các sản phẩm bạn đã mua
+									Dựa trên lịch sử mua hàng của bạn
 								</p>
 							</div>
 							{recError && (

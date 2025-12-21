@@ -48,6 +48,7 @@ import {
 
 type TabKey = "pending" | "shipping" | "cancelled";
 type ReturnAction = "approve" | "reject" | "receive" | "complete";
+type ReturnPhase = "pending" | "approved" | "receiving" | "completed" | "rejected" | "other";
 
 const DEFAULT_DIMENSIONS = {
 	weight: 200,
@@ -103,6 +104,7 @@ export default function StaffFulfillmentPage() {
 	const [returnSearchInput, setReturnSearchInput] = useState("");
 	const [returnSearch, setReturnSearch] = useState("");
 	const [returnActionLoading, setReturnActionLoading] = useState<number | null>(null);
+	const [returnStatusFilter, setReturnStatusFilter] = useState<ReturnPhase | "all">("all");
 
 	useEffect(() => {
 		loadOrders();
@@ -441,6 +443,16 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		return "bg-neutral-100 text-neutral-600 border border-neutral-200";
 	};
 
+	const getReturnPhase = (status?: string | null): ReturnPhase => {
+		const normalized = status?.toLowerCase();
+		if (normalized === "pending") return "pending";
+		if (normalized === "approved" || normalized === "shipping_new") return "approved";
+		if (normalized === "receiving" || normalized === "received") return "receiving";
+		if (normalized === "completed") return "completed";
+		if (normalized === "rejected") return "rejected";
+		return "other";
+	};
+
 	const getReturnActions = (status?: string | null): ReturnAction[] => {
 		const normalized = status?.toLowerCase();
 		if (normalized === "pending") return ["approve", "reject"];
@@ -742,6 +754,43 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 	];
 	const safeReviews = Array.isArray(reviews) ? reviews : [];
 	const safeReturns = Array.isArray(returns) ? returns : [];
+	const returnFilterLabels: Record<ReturnPhase | "all", string> = {
+		all: "All",
+		pending: "Pending",
+		approved: "Approved",
+		receiving: "Receiving",
+		completed: "Completed",
+		rejected: "Rejected",
+		other: "Other",
+	};
+	const returnStatusFilters: Array<{ id: ReturnPhase | "all"; label: string; accent: string }> = [
+		{ id: "all", label: "All", accent: "ring-neutral-200" },
+		{ id: "pending", label: "Pending", accent: "ring-amber-200" },
+		{ id: "approved", label: "Approved", accent: "ring-blue-200" },
+		{ id: "receiving", label: "Receiving", accent: "ring-purple-200" },
+		{ id: "completed", label: "Completed", accent: "ring-emerald-200" },
+		{ id: "rejected", label: "Rejected", accent: "ring-error-200" },
+	];
+	const returnPhaseCounts = useMemo(() => {
+		const counts: Record<ReturnPhase | "all", number> = {
+			all: safeReturns.length,
+			pending: 0,
+			approved: 0,
+			receiving: 0,
+			completed: 0,
+			rejected: 0,
+			other: 0,
+		};
+		safeReturns.forEach((request) => {
+			const phase = getReturnPhase(request.status);
+			counts[phase] = (counts[phase] || 0) + 1;
+		});
+		return counts;
+	}, [safeReturns]);
+	const filteredReturns = useMemo(() => {
+		if (returnStatusFilter === "all") return safeReturns;
+		return safeReturns.filter((request) => getReturnPhase(request.status) === returnStatusFilter);
+	}, [safeReturns, returnStatusFilter]);
 
 	const renderMainContent = () => {
 		if (sectionTab === "reviews") {
@@ -872,54 +921,123 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		}
 
 		if (sectionTab === "returns") {
+			const pipelineCount = returnPhaseCounts.approved + returnPhaseCounts.receiving;
+			const completionRate =
+				returnPhaseCounts.all > 0
+					? Math.round((returnPhaseCounts.completed / returnPhaseCounts.all) * 100)
+					: 0;
+			const displayedReturns = filteredReturns;
 			return (
 				<>
-					<div className="mb-8">
-						<div className="flex items-center gap-3 mb-2">
-							<div className="p-3 bg-neutral-900 rounded-xl">
-								<RefreshCw className="w-6 h-6 text-white" />
+					<div className="mb-8 space-y-4">
+						<div className="rounded-2xl border border-neutral-200 bg-gradient-to-r from-neutral-50 via-white to-white p-6 shadow-sm">
+							<div className="flex flex-wrap items-center justify-between gap-6">
+								<div className="flex items-center gap-4">
+									<div className="p-3 bg-neutral-900 rounded-2xl text-white shadow-lg shadow-neutral-900/20">
+										<RefreshCw className="w-6 h-6" />
+									</div>
+									<div>
+										<h1 className="text-2xl font-semibold text-neutral-900">Return Management</h1>
+										<p className="text-sm text-neutral-600">Review and process customer return requests with a clear summary.</p>
+									</div>
+								</div>
+								<div className="flex flex-wrap gap-6 text-sm text-neutral-600">
+									<div>
+										<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Total requests</p>
+										<p className="text-2xl font-bold text-neutral-900">{returnPhaseCounts.all}</p>
+									</div>
+									<div>
+										<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">In progress</p>
+										<p className="text-2xl font-bold text-neutral-900">{pipelineCount}</p>
+									</div>
+									<div>
+										<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Completion rate</p>
+										<p className="text-2xl font-bold text-neutral-900">{completionRate}%</p>
+									</div>
+								</div>
 							</div>
-							<div>
-								<h1 className="heading-3">Return Management</h1>
-								<p className="text-sm text-neutral-600 mt-1">
-									Review and process customer return requests.
-								</p>
-							</div>
+						</div>
+
+						<div className="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
+							{[
+								{ label: 'Waiting approval', value: returnPhaseCounts.pending, desc: 'Awaiting staff confirmation', badge: 'text-amber-700', bg: 'bg-amber-50' },
+								{ label: 'Approved', value: returnPhaseCounts.approved, desc: 'Ready to receive', badge: 'text-blue-700', bg: 'bg-blue-50' },
+								{ label: 'Receiving', value: returnPhaseCounts.receiving, desc: 'Items on the way', badge: 'text-purple-700', bg: 'bg-purple-50' },
+								{ label: 'Completed', value: returnPhaseCounts.completed, desc: 'Closed successfully', badge: 'text-emerald-700', bg: 'bg-emerald-50' },
+								{ label: 'Rejected', value: returnPhaseCounts.rejected, desc: 'Did not meet policy', badge: 'text-red-700', bg: 'bg-error-50' },
+							].map((card) => (
+								<div key={card.label} className={`rounded-2xl border border-neutral-100 p-4 shadow-sm ${card.bg}`}>
+									<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">{card.label}</p>
+									<p className={`text-3xl font-bold mt-1 ${card.badge}`}>{card.value}</p>
+									<p className="text-xs text-neutral-600 mt-2">{card.desc}</p>
+								</div>
+							))}
 						</div>
 					</div>
 
-					<form
-						className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6"
-						onSubmit={(e) => {
-							e.preventDefault();
-							setReturnSearch(returnSearchInput.trim());
-						}}
-					>
-						<p className="text-sm text-neutral-500">Total requests: {returnsTotal}</p>
-						<div className="flex gap-2 w-full md:w-auto">
-							<input
-								className="input w-full md:w-72"
-								placeholder="Search by order, user, SKU..."
-								value={returnSearchInput}
-								onChange={(e) => setReturnSearchInput(e.target.value)}
-							/>
-							<button type="submit" className="btn-secondary whitespace-nowrap">
-								Search
-							</button>
+					<div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-4 md:p-6 mb-6 space-y-4">
+						<div className="flex flex-wrap items-center justify-between gap-4">
+							<div>
+								<p className="text-sm font-semibold text-neutral-900">Filters & search</p>
+								<p className="text-xs text-neutral-500">Filter by status or keyword to find requests quickly.</p>
+							</div>
+							<p className="text-xs text-neutral-500">Showing {displayedReturns.length} / {returnPhaseCounts.all} requests</p>
+						</div>
+
+						<form
+							className="flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+							onSubmit={(e) => {
+								e.preventDefault();
+								setReturnSearch(returnSearchInput.trim());
+							}}
+						>
+							<div className="relative flex-1 w-full md:max-w-md">
+								<input
+									className="input w-full pl-4 pr-24"
+									placeholder="Search by order, customer or SKU..."
+									value={returnSearchInput}
+									onChange={(e) => setReturnSearchInput(e.target.value)}
+								/>
+								<button
+									type="submit"
+									className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 rounded-lg text-sm font-semibold bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
+								>Search</button>
+							</div>
 							{returnSearch && (
 								<button
 									type="button"
-									className="px-4 py-2 rounded-lg border text-sm font-medium hover:bg-neutral-50"
+									className="px-4 py-2 rounded-lg border border-neutral-200 text-sm font-medium text-neutral-600 hover:bg-neutral-50"
 									onClick={() => {
-										setReturnSearch("");
-										setReturnSearchInput("");
-									}}
-								>
-									Clear
-								</button>
+									setReturnSearch("");
+									setReturnSearchInput("");
+								}}
+								>Clear</button>
 							)}
+						</form>
+
+						<div className="flex flex-wrap gap-2 pt-2">
+							{returnStatusFilters.map((filter) => {
+								const isActive = returnStatusFilter === filter.id;
+								return (
+									<button
+										key={filter.id}
+										type="button"
+										onClick={() => setReturnStatusFilter(filter.id)}
+										className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ring-1 ${filter.accent} ${
+											isActive
+												? 'bg-neutral-900 text-white border-neutral-900 shadow-md shadow-neutral-900/10'
+												: 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300'
+										}`}
+									>
+										<span>{filter.label}</span>
+										<span className={`ml-2 text-xs ${isActive ? 'text-white/80' : 'text-neutral-500'}`}>
+											{returnPhaseCounts[filter.id] ?? 0}
+										</span>
+									</button>
+								);
+							})}
 						</div>
-					</form>
+					</div>
 
 					{returnsLoading ? (
 						<div className="flex flex-col items-center justify-center py-16">
@@ -927,97 +1045,108 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							<p className="text-neutral-600">Loading return requests...</p>
 						</div>
 					) : returnsError ? (
-						<div className="bg-error-50 border border-error-200 rounded-lg p-4">
+						<div className="bg-error-50 border border-error-200 rounded-2xl p-5">
 							<p className="text-sm font-medium text-error-900">{returnsError}</p>
 						</div>
-					) : safeReturns.length === 0 ? (
+					) : displayedReturns.length === 0 ? (
 						<div className="card text-center py-16">
 							<div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
 								<RefreshCw className="w-8 h-8 text-neutral-400" />
 							</div>
-							<h3 className="text-lg font-semibold text-neutral-900 mb-2">No Return Requests</h3>
-							<p className="text-neutral-600">There are no return requests matching your filters.</p>
+							<h3 className="text-lg font-semibold text-neutral-900 mb-2">No matching requests</h3>
+							<p className="text-neutral-600">
+								{returnStatusFilter === 'all' ? 'There are no return requests yet.' : `No requests found with status "${returnFilterLabels[returnStatusFilter]}".`}
+							</p>
 						</div>
 					) : (
-						<div className="space-y-4">
-							{safeReturns.map((request) => {
+						<div className="space-y-5">
+							{displayedReturns.map((request) => {
 								const actions = getReturnActions(request.status);
+								const evidenceImages = request.images?.slice(0, 4) ?? [];
 								return (
-									<div key={request.id} className="card space-y-4">
+									<div
+										key={request.id}
+										className="rounded-2xl border border-neutral-200 bg-white/90 shadow-sm hover:shadow-lg transition-shadow p-5 space-y-5"
+									>
 										<div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
 											<div>
 												<p className="font-semibold text-neutral-900">
-													Order #{request.orderItem?.order?.id ?? "N/A"} • Item #{request.orderItemId}
+													Order #{request.orderItem?.order?.id ?? "N/A"} - Item #{request.orderItemId}
 												</p>
 												<p className="text-sm text-neutral-500">
-													{request.orderItem?.order?.user?.name || "Customer"} •{" "}
-													{request.createdAt
-														? new Date(request.createdAt).toLocaleString()
-														: "Unknown date"}
+													{request.user?.name || "Customer"} -
+													{request.createdAt ? ` ${new Date(request.createdAt).toLocaleString()}` : " Unknown date"}
 												</p>
 											</div>
 											<div className="flex flex-col gap-1 items-start md:items-end">
 												<span
-													className={`px-3 py-1 rounded-full text-xs font-semibold ${getReturnStatusStyle(request.status)}`}
+													className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getReturnStatusStyle(request.status)}`}
 												>
 													{formatReturnStatus(request.status)}
 												</span>
 												{request.rejectReason && (
-													<span className="text-xs text-error-600">
+													<span className="text-xs text-error-600 bg-error-50 border border-error-100 px-2 py-1 rounded-lg">
 														Rejected: {request.rejectReason}
 													</span>
 												)}
 											</div>
 										</div>
 
-										<div className="grid gap-3 md:grid-cols-2">
-											<div>
-												<p className="text-xs font-semibold text-neutral-500">Product</p>
-												<p className="text-sm text-neutral-800">
+										<div className="grid gap-3 md:grid-cols-3">
+											<div className="rounded-xl border border-neutral-100 bg-neutral-50/60 p-4">
+												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Product</p>
+												<p className="text-sm text-neutral-900 font-medium mt-1">
 													{request.orderItem?.variant?.product?.name || "N/A"}
 												</p>
 												{request.orderItem?.variant?.sku && (
-													<p className="text-xs text-neutral-500">
-														SKU: {request.orderItem.variant.sku}
-													</p>
+													<p className="text-xs text-neutral-500">SKU: {request.orderItem.variant.sku}</p>
 												)}
 											</div>
-											<div>
-												<p className="text-xs font-semibold text-neutral-500">Quantity & Price</p>
-												<p className="text-sm text-neutral-800">
-													Qty {request.orderItem?.quantity || 0} •{" "}
-													{Number(request.orderItem?.price || 0).toLocaleString("en-US")}
+											<div className="rounded-xl border border-neutral-100 bg-neutral-50/60 p-4">
+												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Quantity & price</p>
+												<p className="text-sm text-neutral-900 font-medium mt-1">
+													Qty {request.orderItem?.quantity || 0} - {Number(request.orderItem?.price || 0).toLocaleString("en-US")}
 												</p>
 											</div>
-											<div className="md:col-span-2">
-												<p className="text-xs font-semibold text-neutral-500">Customer Reason</p>
-												<p className="text-sm text-neutral-700">{request.reason || "Not provided."}</p>
+											<div className="md:col-span-1 rounded-xl border border-neutral-100 bg-white p-4">
+												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Customer reason</p>
+												<p className="text-sm text-neutral-700 mt-1">{request.reason || "Not provided."}</p>
 											</div>
 										</div>
 
-										{request.images?.length ? (
-											<div className="flex flex-wrap gap-2">
-												{request.images.slice(0, 4).map((image, idx) => (
-													<img
-														key={`${request.id}-${idx}`}
-														src={image}
-														alt={`Return ${request.id} evidence ${idx + 1}`}
-														className="h-16 w-16 rounded-lg object-cover border"
-													/>
-												))}
+										{evidenceImages.length ? (
+											<div className="rounded-xl border border-dashed border-neutral-200 p-4">
+												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Evidence</p>
+												<div className="flex flex-wrap gap-3">
+													{evidenceImages.map((image, idx) => (
+														<img
+															key={`${request.id}-${idx}`}
+															src={image}
+															alt={`Return ${request.id} evidence ${idx + 1}`}
+															className="h-18 w-18 rounded-xl object-cover border border-neutral-200"
+														/>
+													))}
+													{request.images!.length > evidenceImages.length && (
+														<span className="text-xs text-neutral-500">
+															+{request.images!.length - evidenceImages.length} more
+														</span>
+													)}
+												</div>
 											</div>
 										) : null}
 
-										<div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between pt-4 border-t border-neutral-200">
-											<span className="text-xs text-neutral-500">Request #{request.id}</span>
+										<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between pt-4 border-t border-neutral-100">
+											<div className="text-xs text-neutral-500 flex flex-wrap gap-4">
+												<span className="font-semibold text-neutral-900">Request #{request.id}</span>
+												<span>Created at {request.createdAt ? new Date(request.createdAt).toLocaleString() : "Unknown"}</span>
+											</div>
 											{actions.length === 0 ? (
-												<p className="text-sm text-neutral-500">No further actions available.</p>
+												<p className="text-sm text-neutral-500">No further actions.</p>
 											) : (
 												<div className="flex flex-wrap gap-2">
 													{actions.map((action) => (
 														<button
 															key={action}
-															type="button"
 															className={getReturnActionClass(action)}
 															disabled={returnActionLoading === request.id}
 															onClick={() => handleReturnAction(request, action)}
@@ -1043,6 +1172,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 				</>
 			);
 		}
+
 
 		return (
 			<>

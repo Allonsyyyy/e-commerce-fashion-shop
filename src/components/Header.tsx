@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { ShoppingCart, Search, Menu, X, User, Heart } from 'lucide-react'
+import { ShoppingCart, Search, Menu, X, User } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Container from './Container'
 import logoShop from '../assets/banners/logo-shop-quan-ao.jpg'
@@ -184,11 +184,6 @@ export default function Header() {
 									</div>
 								)}
 							</div>
-
-							<Link to="/wishlist" className="hidden sm:flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors relative">
-								<Heart className="h-5 w-5" />
-								<span className="absolute -right-1 -top-1 h-4 min-w-4 px-1 rounded-full bg-neutral-900 text-white text-[10px] font-semibold flex items-center justify-center">0</span>
-							</Link>
 
 							<Link to="/cart" className="relative inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors">
 								<ShoppingCart className="h-5 w-5" />

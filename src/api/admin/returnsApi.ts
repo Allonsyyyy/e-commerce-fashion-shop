@@ -15,6 +15,12 @@ export type AdminReturnRequest = {
 	rejectReason?: string | null;
 	createdAt?: string;
 	updatedAt?: string;
+	user?: {
+		id: number;
+		name?: string | null;
+		email?: string | null;
+		phone?: string | null;
+	};
 	orderItem?: {
 		id: number;
 		quantity: number;
