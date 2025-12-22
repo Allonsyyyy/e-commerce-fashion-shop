@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Container from "../components/Container";
 import { getOrders, type Order } from "../api/admin/ordersApi";
 import { getAdminReviews, replyReview, type AdminReview } from "../api/admin/reviewsApi";
@@ -23,8 +23,12 @@ import {
 	type Province,
 	type Ward,
 } from "../api/shippingApi";
+import { toast } from "../utils/toast";
 import {
 	Package,
+	Tag,
+	FolderTree,
+	Users,
 	Truck,
 	XCircle,
 	MapPin,
@@ -66,6 +70,7 @@ type ParsedAddress = {
 };
 
 export default function StaffFulfillmentPage() {
+    const location = useLocation();
 	const [orders, setOrders] = useState<Order[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState<TabKey>("pending");
@@ -109,6 +114,14 @@ export default function StaffFulfillmentPage() {
 	useEffect(() => {
 		loadOrders();
 	}, []);
+useEffect(() => {
+		const params = new URLSearchParams(location.search);
+		const tab = params.get("tab");
+		if (tab === "shipping" || tab === "reviews" || tab === "returns") {
+			setSectionTab(tab);
+		}
+	}, [location.search]);
+
 
 	useEffect(() => {
 		fetchProvinces()
@@ -400,13 +413,13 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		e.preventDefault();
 		if (!replyingReview) return;
 		if (!replyMessage.trim()) {
-			alert("Please enter a reply before submitting.");
+			toast("Please enter a reply before submitting.");
 			return;
 		}
 
 		const token = localStorage.getItem("token");
 		if (!token) {
-			alert("Please log in as an admin to reply.");
+			toast("Please log in as an admin to reply.");
 			return;
 		}
 
@@ -417,7 +430,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			closeReplyModal();
 		} catch (err) {
 			console.error(err);
-			alert("Failed to send reply. Please try again.");
+			toast("Failed to send reply. Please try again.");
 		} finally {
 			setReplySubmitting(false);
 		}
@@ -488,7 +501,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 	const handleReturnAction = async (request: AdminReturnRequest, action: ReturnAction) => {
 		const token = localStorage.getItem("token");
 		if (!token) {
-			alert("Please log in as an admin to update returns.");
+			toast("Please log in as an admin to update returns.");
 			return;
 		}
 
@@ -507,7 +520,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			await loadReturns();
 		} catch (err) {
 			console.error(err);
-			alert("Failed to update the return request. Please try again.");
+			toast("Failed to update the return request. Please try again.");
 		} finally {
 			setReturnActionLoading(null);
 		}
@@ -694,7 +707,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 				deliverStationId: form.deliverStationId ? Number(form.deliverStationId) : null,
 			});
 
-			alert("GHN shipping order created successfully!");
+			toast("GHN shipping order created successfully!");
 			closeForm();
 			await loadOrders();
 		} catch (err: any) {
@@ -711,11 +724,11 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		setCancellingCode(order.ghnOrderCode);
 		try {
 			await cancelShippingOrder(order.ghnOrderCode);
-			alert("Cancel request sent successfully.");
+			toast("Cancel request sent successfully.");
 			await loadOrders();
 		} catch (err: any) {
 			console.error(err);
-			alert(err?.message || "Failed to cancel shipping order.");
+			toast(err?.message || "Failed to cancel shipping order.");
 		} finally {
 			setCancellingCode(null);
 		}
@@ -1424,6 +1437,37 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 						<RefreshCw className="w-5 h-5" />
 						Quản lý đổi trả
 					</button>
+					<div className="mt-4 pt-4 border-t border-white/10">
+						<p className="text-xs uppercase tracking-wide text-neutral-400 mb-3">Quản lý</p>
+						<Link
+							to="/staff/categories"
+							className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors hover:bg-white/5"
+						>
+							<FolderTree className="w-5 h-5" />
+							Quản lý danh mục
+						</Link>
+						<Link
+							to="/staff/products"
+							className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors hover:bg-white/5"
+						>
+							<Package className="w-5 h-5" />
+							Quản lý sản phẩm
+						</Link>
+						<Link
+							to="/staff/discounts"
+							className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors hover:bg-white/5"
+						>
+							<Tag className="w-5 h-5" />
+							Quản lý khuyến mãi
+						</Link>
+						<Link
+							to="/staff/users"
+							className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors hover:bg-white/5"
+						>
+							<Users className="w-5 h-5" />
+							Quản lý người dùng
+						</Link>
+					</div>
 					<Link
 						to="/"
 						className="mt-4 w-full inline-flex items-center justify-center px-4 py-3 rounded-lg border border-white/20 hover:bg-white/10 transition-colors text-center"

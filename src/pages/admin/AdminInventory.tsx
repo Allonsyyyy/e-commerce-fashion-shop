@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { getInventory, updateInventory } from "../../api/admin/inventoryApi";
 import { Edit } from "lucide-react";
+import { toast } from "../../utils/toast";
 
 export default function AdminInventory() {
     const [inventory, setInventory] = useState<any[]>([]);
@@ -49,9 +50,9 @@ export default function AdminInventory() {
             setShowModal(false);
             resetForm();
             loadData();
-            alert("Thành công!");
+            toast("Thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 

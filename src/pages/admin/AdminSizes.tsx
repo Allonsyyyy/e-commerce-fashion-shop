@@ -3,6 +3,7 @@ import { Edit, Plus, Trash2 } from "lucide-react";
 
 import { createSize, deleteSize, getSizes, updateSize } from "../../api/admin/sizesApi";
 import AdminLayout from "./AdminLayout";
+import { toast } from "../../utils/toast";
 
 export default function AdminSizes() {
     const [sizes, setSizes] = useState<any[]>([]);
@@ -45,9 +46,9 @@ export default function AdminSizes() {
             setSizeName("");
             setEditingSize(null);
             loadData();
-            alert("Thành công!");
+            toast("Thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 
@@ -66,9 +67,9 @@ export default function AdminSizes() {
         try {
             await deleteSize(token, id);
             loadData();
-            alert("Đã xóa thành công!");
+            toast("Đã xóa thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 

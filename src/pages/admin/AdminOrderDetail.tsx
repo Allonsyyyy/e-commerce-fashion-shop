@@ -4,6 +4,7 @@ import AdminLayout from "./AdminLayout";
 import { getOrder, updateOrder } from "../../api/admin/ordersApi";
 import type { Order, UpdateOrderPayload } from "../../api/admin/ordersApi";
 import { Edit, Save, X, Package, User, MapPin, CreditCard } from "lucide-react";
+import { toast } from "../../utils/toast";
 
 export default function AdminOrderDetail() {
     const { id } = useParams<{ id: string }>();
@@ -51,9 +52,9 @@ export default function AdminOrderDetail() {
             const updated = await updateOrder(token, parseInt(id), formData);
             setOrder(updated);
             setEditing(false);
-            alert("Order updated successfully!");
+            toast("Order updated successfully!");
         } catch (err: any) {
-            alert(err.message || "An error occurred!");
+            toast(err.message || "An error occurred!");
         } finally {
             setSaving(false);
         }

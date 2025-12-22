@@ -2,16 +2,16 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
-    LayoutDashboard,
     Package,
     Tag,
     FolderTree,
     Users,
-    Warehouse,
-    Truck,
     TrendingUp,
     DollarSign,
     LogOut,
+    Truck,
+    MessageSquare,
+    RefreshCw,
 } from "lucide-react";
 import { getProfile } from "../../api/authApi";
 
@@ -47,29 +47,20 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     // Menu items for Staff
     const staffMenuItems = [
-        { path: "/admin", icon: LayoutDashboard, label: "Bảng điều khiển" },
-        { path: "/admin/categories", icon: FolderTree, label: "Danh mục" },
-        { path: "/admin/products", icon: Package, label: "Sản phẩm" },
-        { path: "/admin/users", icon: Users, label: "Người dùng" },
-        { path: "/admin/inventory", icon: Warehouse, label: "Kho hàng" },
-        { path: "/admin/discounts", icon: Tag, label: "Khuyến mãi" },
-        { path: "/admin/shipping", icon: Truck, label: "Vận chuyển" },
-        { path: "/admin/best-selling", icon: TrendingUp, label: "Bán chạy" },
+        { path: "/staff/categories", icon: FolderTree, label: "Danh mục" },
+        { path: "/staff/products", icon: Package, label: "Sản phẩm" },
+        { path: "/staff/discounts", icon: Tag, label: "Khuyến mãi" },
+        { path: "/staff/users", icon: Users, label: "Người dùng" },
     ];
 
-    // Menu items for Admin (includes all staff items + revenue)
+    // Menu items for Admin (only analytics)
     const adminMenuItems = [
-        ...staffMenuItems,
+        { path: "/admin/best-selling", icon: TrendingUp, label: "Bán chạy" },
         { path: "/admin/revenue", icon: DollarSign, label: "Doanh thu" },
     ];
 
-    const menuItems = userRole === "admin" ? adminMenuItems : staffMenuItems;
-    const hiddenMenuPaths = new Set<string>([
-        "/admin",
-        "/admin/users",
-        "/admin/inventory",
-        "/admin/shipping",
-    ]);
+    const isAdmin = userRole === "admin";
+    const menuItems = isAdmin ? adminMenuItems : staffMenuItems;
 
     return (
         <div className="min-h-screen flex">
@@ -77,17 +68,40 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <aside className="w-64 bg-neutral-900 text-white min-h-screen">
                 <div className="p-6">
                     <h1 className="text-2xl font-bold">
-                        {userRole === "admin" ? "Bảng quản trị" : "Bảng nhân viên"}
+                        {isAdmin ? "Bảng quản trị" : "Bảng nhân viên"}
                     </h1>
                     <p className="text-sm text-neutral-400 mt-1">
-                        {userRole === "admin" ? "Quản trị viên" : "Nhân viên"}
+                        {isAdmin ? "Quản trị viên" : "Nhân viên"}
                     </p>
                 </div>
+                {!isAdmin && (
+                    <div className="px-4 pb-2">
+                        <p className="text-xs uppercase tracking-wide text-neutral-400 mb-3">Thao tác</p>
+                        <Link
+                            to="/staff/fulfillment?tab=shipping"
+                            className="flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors hover:bg-neutral-800"
+                        >
+                            <Truck size={20} />
+                            <span>Tạo đơn giao hàng</span>
+                        </Link>
+                        <Link
+                            to="/staff/fulfillment?tab=reviews"
+                            className="flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors hover:bg-neutral-800"
+                        >
+                            <MessageSquare size={20} />
+                            <span>Quản lý bình luận</span>
+                        </Link>
+                        <Link
+                            to="/staff/fulfillment?tab=returns"
+                            className="flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors hover:bg-neutral-800"
+                        >
+                            <RefreshCw size={20} />
+                            <span>Quản lý đổi trả</span>
+                        </Link>
+                    </div>
+                )}
                 <nav className="px-4">
                     {menuItems.map((item) => {
-                        if (hiddenMenuPaths.has(item.path)) {
-                            return null;
-                        }
                         const Icon = item.icon;
                         const isActive = location.pathname === item.path;
                         return (

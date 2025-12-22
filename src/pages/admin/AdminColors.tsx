@@ -3,6 +3,7 @@ import { Edit, Plus, Trash2 } from "lucide-react";
 
 import { createColor, deleteColor, getColors, updateColor } from "../../api/admin/colorsApi";
 import AdminLayout from "./AdminLayout";
+import { toast } from "../../utils/toast";
 
 export default function AdminColors() {
     const [colors, setColors] = useState<any[]>([]);
@@ -45,9 +46,9 @@ export default function AdminColors() {
             setColorName("");
             setEditingColor(null);
             loadData();
-            alert("Thành công!");
+            toast("Thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 
@@ -66,9 +67,9 @@ export default function AdminColors() {
         try {
             await deleteColor(token, id);
             loadData();
-            alert("Đã xóa thành công!");
+            toast("Đã xóa thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 

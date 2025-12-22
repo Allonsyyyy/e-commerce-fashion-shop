@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCart, removeCartItem, updateCartItem, clearCart } from "../api/cartApi";
 import Container from "../components/Container";
+import { toast } from "../utils/toast";
 
 export default function Cart() {
 	const [cart, setCart] = useState<any>(null);
@@ -31,12 +32,12 @@ export default function Cart() {
 	const handleCheckout = () => {
 		const token = localStorage.getItem("token");
 		if (!token) {
-			alert("Bạn chưa đăng nhập!");
+			toast("Bạn chưa đăng nhập!");
 			navigate("/login");
 			return;
 		}
 		if (!cart.items.length) {
-			alert("Giỏ hàng trống.");
+			toast("Giỏ hàng trống.");
 			return;
 		}
 		navigate("/checkout");
@@ -80,7 +81,7 @@ export default function Cart() {
 												setCart(updated);
 											} catch (error) {
 												console.error("Failed to update cart item:", error);
-												alert("Cập nhật số lượng thất bại. Vui lòng thử lại.");
+												toast("Cập nhật số lượng thất bại. Vui lòng thử lại.");
 											}
 										}}
 										className="mt-2 w-16 border rounded px-2"
@@ -102,7 +103,7 @@ export default function Cart() {
 											}));
 										} catch (error) {
 											console.error("Failed to remove cart item:", error);
-											alert("Xóa sản phẩm thất bại. Vui lòng thử lại.");
+											toast("Xóa sản phẩm thất bại. Vui lòng thử lại.");
 										}
 									}}
 								>
@@ -138,7 +139,7 @@ export default function Cart() {
 									}));
 								} catch (error) {
 									console.error("Failed to clear cart:", error);
-									alert("Xóa giỏ hàng thất bại. Vui lòng thử lại.");
+									toast("Xóa giỏ hàng thất bại. Vui lòng thử lại.");
 								}
 							}}
 						>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { getCategories } from "../../api/categoriesApi";
 import { createProduct, deleteProduct, updateProduct } from "../../api/admin/productsApi";
@@ -8,6 +8,7 @@ import { getProducts } from "../../api/productsApi";
 import type { Category } from "../../types/category";
 import type { Product } from "../../types/product";
 import AdminLayout from "./AdminLayout";
+import { toast } from "../../utils/toast";
 
 export default function AdminProducts() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -25,6 +26,7 @@ export default function AdminProducts() {
         mainImageUrl: "",
     });
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         loadData();
@@ -76,9 +78,9 @@ export default function AdminProducts() {
             setShowModal(false);
             resetForm();
             loadData();
-            alert("Thành công!");
+            toast("Thành công!");
         } catch (err: any) {
-            alert(err.message || "Đã xảy ra lỗi!");
+            toast(err.message || "Đã xảy ra lỗi!");
         }
     };
 
@@ -105,9 +107,9 @@ export default function AdminProducts() {
         try {
             await deleteProduct(token, id);
             loadData();
-            alert("Đã xóa thành công!");
+            toast("Đã xóa thành công!");
         } catch (err: any) {
-            alert(err.message || "Đã xảy ra lỗi!");
+            toast(err.message || "Đã xảy ra lỗi!");
         }
     };
 
@@ -124,21 +126,37 @@ export default function AdminProducts() {
         setEditingProduct(null);
     };
 
+    const manageBasePath = location.pathname.startsWith("/admin") ? "/admin" : "/staff";
+
     return (
         <AdminLayout>
             <div>
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                     <h1 className="text-3xl font-bold">Quản lý sản phẩm</h1>
-                    <button
-                        onClick={() => {
-                            resetForm();
-                            setShowModal(true);
-                        }}
-                        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                    >
-                        <Plus size={20} />
-                        Thêm sản phẩm
-                    </button>
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={() => navigate(`${manageBasePath}/colors`)}
+                            className="px-3 py-2 rounded border border-neutral-300 hover:bg-neutral-100"
+                        >
+                            Quản lý màu sắc
+                        </button>
+                        <button
+                            onClick={() => navigate(`${manageBasePath}/sizes`)}
+                            className="px-3 py-2 rounded border border-neutral-300 hover:bg-neutral-100"
+                        >
+                            Quản lý size
+                        </button>
+                        <button
+                            onClick={() => {
+                                resetForm();
+                                setShowModal(true);
+                            }}
+                            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                        >
+                            <Plus size={20} />
+                            Thêm sản phẩm
+                        </button>
+                    </div>
                 </div>
 
                 {loading ? (
@@ -165,7 +183,13 @@ export default function AdminProducts() {
                                         <td className="px-6 py-4">{product.discount}%</td>
                                         <td className="px-6 py-4">{product.stock}</td>
                                         <td className="px-6 py-4">
-                                            <div className="flex gap-2">
+                                            <div className="flex flex-wrap gap-2">
+                                                <button
+                                                    onClick={() => navigate(`${manageBasePath}/products/${product.id}/manage`)}
+                                                    className="px-3 py-1 rounded border border-neutral-300 text-sm hover:bg-neutral-100"
+                                                >
+                                                    Quản lý biến thể
+                                                </button>
                                                 <button
                                                     onClick={() => handleEdit(product)}
                                                     className="text-blue-600 hover:text-blue-800"

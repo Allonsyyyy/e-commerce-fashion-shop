@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { getDiscounts, createDiscount, updateDiscount, deleteDiscount } from "../../api/admin/discountsApi";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { toast } from "../../utils/toast";
 
 export default function AdminDiscounts() {
     const [discounts, setDiscounts] = useState<any[]>([]);
@@ -60,9 +61,9 @@ export default function AdminDiscounts() {
             setShowModal(false);
             resetForm();
             loadData();
-            alert("Thành công!");
+            toast("Thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 
@@ -88,9 +89,9 @@ export default function AdminDiscounts() {
         try {
             await deleteDiscount(token, id);
             loadData();
-            alert("Đã xóa thành công!");
+            toast("Đã xóa thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 

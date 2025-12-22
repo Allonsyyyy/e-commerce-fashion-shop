@@ -5,6 +5,7 @@ import { createCategory, deleteCategory, updateCategory } from "../../api/admin/
 import { getCategories } from "../../api/categoriesApi";
 import type { Category } from "../../types/category";
 import AdminLayout from "./AdminLayout";
+import { toast } from "../../utils/toast";
 
 export default function AdminCategories() {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -53,9 +54,9 @@ export default function AdminCategories() {
             setShowModal(false);
             resetForm();
             loadData();
-            alert("Thành công!");
+            toast("Thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 
@@ -78,9 +79,9 @@ export default function AdminCategories() {
         try {
             await deleteCategory(token, id);
             loadData();
-            alert("Đã xóa thành công!");
+            toast("Đã xóa thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 

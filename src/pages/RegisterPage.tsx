@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { register } from "../api/authApi";
 import Container from "../components/Container";
 import { UserPlus, User, Mail, Lock, Phone, MapPin, ArrowRight } from "lucide-react";
+import { toast } from "../utils/toast";
 
 export default function RegisterPage() {
 	const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ export default function RegisterPage() {
 
 		try {
 			await register(formData);
-			alert("Đăng ký thành công! Vui lòng đăng nhập.");
+			toast("Đăng ký thành công! Vui lòng đăng nhập.");
 			navigate("/login");
 		} catch (err: any) {
 			setError(err.message || "Đăng ký thất bại! Vui lòng thử lại.");

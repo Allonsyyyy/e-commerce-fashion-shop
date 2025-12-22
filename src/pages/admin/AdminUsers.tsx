@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { getUsers, updateUser, deleteUser } from "../../api/admin/usersApi";
 import { Edit, Trash2 } from "lucide-react";
+import { toast } from "../../utils/toast";
 
 export default function AdminUsers() {
     const [users, setUsers] = useState<any[]>([]);
@@ -57,9 +58,9 @@ export default function AdminUsers() {
             setShowModal(false);
             resetForm();
             loadData();
-            alert("Thành công!");
+            toast("Thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 
@@ -85,9 +86,9 @@ export default function AdminUsers() {
         try {
             await deleteUser(token, id);
             loadData();
-            alert("Đã xóa thành công!");
+            toast("Đã xóa thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 

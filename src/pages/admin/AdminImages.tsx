@@ -4,6 +4,7 @@ import { getProducts } from "../../api/productsApi";
 import { uploadImage, updateImage, deleteImage } from "../../api/admin/imagesApi";
 import type { Product } from "../../types/product";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { toast } from "../../utils/toast";
 
 export default function AdminImages() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -64,9 +65,9 @@ export default function AdminImages() {
             setShowModal(false);
             resetForm();
             loadData();
-            alert("Thành công!");
+            toast("Thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 
@@ -89,9 +90,9 @@ export default function AdminImages() {
         try {
             await deleteImage(token, id);
             loadData();
-            alert("Đã xóa thành công!");
+            toast("Đã xóa thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 

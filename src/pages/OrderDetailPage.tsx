@@ -4,6 +4,7 @@ import Container from "../components/Container";
 import { checkOrderItemReview, createReview, type Review } from "../api/reviewsApi";
 import { createReturnRequest, getUserReturnRequests } from "../api/returnsApi";
 import { uploadFile } from "../api/uploadApi";
+import { toast } from "../utils/toast";
 
 type ReviewStatus = Record<number, { checked: boolean; hasReview: boolean; canComment?: boolean; data?: Review | null }>;
 type ReturnStatus = Record<number, { hasRequest: boolean; status?: string }>;
@@ -131,7 +132,7 @@ export default function OrderDetailPage() {
 
 	const openReviewModal = (item: any) => {
 		if (!canReview) {
-			alert("Chỉ đánh giá khi đơn đã giao thành công.");
+			toast("Chỉ đánh giá khi đơn đã giao thành công.");
 			return;
 		}
 		setReviewModal({ orderItemId: item.id, productName: item.variant?.product?.name || "Sản phẩm" });
@@ -146,7 +147,7 @@ export default function OrderDetailPage() {
 
 	const openReturnModal = (item: any) => {
 		if (!canReturn) {
-			alert("Chỉ đổi trả khi đơn đã giao thành công.");
+			toast("Chỉ đổi trả khi đơn đã giao thành công.");
 			return;
 		}
 		setReturnModal({ orderItemId: item.id, productName: item.variant?.product?.name || "Sản phẩm" });
@@ -189,7 +190,7 @@ export default function OrderDetailPage() {
 				},
 			}));
 			closeReviewModal();
-			alert("Đánh giá thành công!");
+			toast("Đánh giá thành công!");
 		} catch (err: any) {
 			console.error(err);
 			setReviewError(err?.message || "Gửi đánh giá thất bại.");
@@ -231,7 +232,7 @@ export default function OrderDetailPage() {
 				[returnModal.orderItemId]: { hasRequest: true, status: (res as any)?.status || "pending" },
 			}));
 			closeReturnModal();
-			alert("Gửi yêu cầu đổi trả thành công!");
+			toast("Gửi yêu cầu đổi trả thành công!");
 		} catch (err: any) {
 			console.error(err);
 			setReturnError(err?.message || "Gửi yêu cầu đổi trả thất bại.");

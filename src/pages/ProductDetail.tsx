@@ -11,8 +11,12 @@ export default function ProductDetail() {
 	const navigate = useNavigate();
 	const [product, setProduct] = useState<Product | null>(null);
 	const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
+	const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
+	const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const [quantity, setQuantity] = useState<number>(1);
+	const [actionMessage, setActionMessage] = useState<string | null>(null);
+	const [actionMessageTone, setActionMessageTone] = useState<"success" | "error" | "info">("info");
 	const [reviews, setReviews] = useState<Review[]>([]);
 	const [reviewsTotal, setReviewsTotal] = useState(0);
 	const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -32,8 +36,11 @@ export default function ProductDetail() {
 			.then((data) => {
 				setProduct(data);
 				setSelectedVariant(null);
+				setSelectedColorId(null);
+				setSelectedSizeId(null);
 				setSelectedImage(null);
 				setQuantity(1);
+				setActionMessage(null);
 			})
 			.catch((err) => console.error("Fetch product failed:", err));
 	}, [id]);
@@ -60,7 +67,31 @@ export default function ProductDetail() {
 
 if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 
-	const activeVariant = product.variants?.find((v) => v.id === selectedVariant);
+	const variants = product.variants ?? [];
+	const uniqueColors = Array.from(
+		new Map(variants.filter((v) => v.color).map((v) => [v.color?.id, v.color])).values(),
+	);
+	const uniqueSizes = Array.from(
+		new Map(variants.filter((v) => v.size).map((v) => [v.size?.id, v.size])).values(),
+	);
+
+	const isColorAvailable = (colorId: number) => {
+		if (!selectedSizeId) return variants.some((v) => v.color?.id === colorId);
+		return variants.some((v) => v.color?.id === colorId && v.size?.id === selectedSizeId);
+	};
+
+	const isSizeAvailable = (sizeId: number) => {
+		if (!selectedColorId) return variants.some((v) => v.size?.id === sizeId);
+		return variants.some((v) => v.size?.id === sizeId && v.color?.id === selectedColorId);
+	};
+
+	const findVariantId = (colorId: number | null, sizeId: number | null) => {
+		if (!colorId || !sizeId) return null;
+		const match = variants.find((v) => v.color?.id === colorId && v.size?.id === sizeId);
+		return match?.id ?? null;
+	};
+
+	const activeVariant = variants.find((v) => v.id === selectedVariant);
 	const price = Number(activeVariant?.price ?? product.price);
 	const discount = Number(product.discount);
 	const finalPrice = price.toLocaleString("vi-VN") + "₫";
@@ -76,12 +107,14 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 
 	const handleBuyNow = () => {
 		if (!selectedVariant) {
-			alert("Vui l�ng ch?n m�u / size!");
+			setActionMessage("Vui lòng chọn màu / size.");
+			setActionMessageTone("error");
 			return;
 		}
 		const token = localStorage.getItem("token");
 		if (!token) {
-			alert("B?n c?n dang nh?p!");
+			setActionMessage("Bạn cần đăng nhập.");
+			setActionMessageTone("error");
 			navigate("/login");
 			return;
 		}
@@ -165,23 +198,40 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 						<p className="mt-6 body-text">{product.description}</p>
 
 						{/* VARIANTS */}
-						{product.variants && product.variants.length > 0 && (
+						{variants.length > 0 && (
 							<div className="mt-8 space-y-4">
 								{/* Color */}
 								<div>
 									<h4 className="mb-2 font-medium">Màu sắc</h4>
 									<div className="flex gap-2">
-										{product.variants.map((v) => (
-											<button
-												key={v.id}
-												className={`px-3 py-1 rounded-md border ${
-													selectedVariant === v.id ? "border-neutral-900" : "border-neutral-300"
-												}`}
-												onClick={() => setSelectedVariant(v.id)}
-											>
-												{v.color?.color}
-											</button>
-										))}
+										{uniqueColors.map((color) => {
+											if (!color) return null;
+											const disabled = !isColorAvailable(color.id);
+											return (
+												<button
+													key={color.id}
+													className={`px-3 py-1 rounded-md border ${
+														selectedColorId === color.id ? "border-neutral-900" : "border-neutral-300"
+													} ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+													disabled={disabled}
+													onClick={() => {
+														const nextColorId = color.id;
+														let nextSizeId = selectedSizeId;
+														if (
+															nextSizeId &&
+															!variants.some((v) => v.color?.id === nextColorId && v.size?.id === nextSizeId)
+														) {
+															nextSizeId = null;
+														}
+														setSelectedColorId(nextColorId);
+														setSelectedSizeId(nextSizeId);
+														setSelectedVariant(findVariantId(nextColorId, nextSizeId));
+													}}
+												>
+													{color.color}
+												</button>
+											);
+										})}
 									</div>
 								</div>
 
@@ -189,23 +239,40 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 								<div>
 									<h4 className="mb-2 font-medium">Kích cỡ</h4>
 									<div className="flex gap-2">
-										{product.variants.map((v) => (
-											<button
-												key={v.id + "-size"}
-												className={`px-3 py-1 rounded-md border ${
-													selectedVariant === v.id ? "border-neutral-900" : "border-neutral-300"
-												}`}
-												onClick={() => setSelectedVariant(v.id)}
-											>
-												{v.size?.size}
-											</button>
-										))}
+										{uniqueSizes.map((size) => {
+											if (!size) return null;
+											const disabled = !isSizeAvailable(size.id);
+											return (
+												<button
+													key={size.id + "-size"}
+													className={`px-3 py-1 rounded-md border ${
+														selectedSizeId === size.id ? "border-neutral-900" : "border-neutral-300"
+													} ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+													disabled={disabled}
+													onClick={() => {
+														const nextSizeId = size.id;
+														let nextColorId = selectedColorId;
+														if (
+															nextColorId &&
+															!variants.some((v) => v.color?.id === nextColorId && v.size?.id === nextSizeId)
+														) {
+															nextColorId = null;
+														}
+														setSelectedSizeId(nextSizeId);
+														setSelectedColorId(nextColorId);
+														setSelectedVariant(findVariantId(nextColorId, nextSizeId));
+													}}
+												>
+													{size.size}
+												</button>
+											);
+										})}
 									</div>
 								</div>
 							</div>
 						)}
 
-						{/* QUANTITY */}
+							{/* QUANTITY */}
 						<div className="mt-4">
 							<label className="block text-sm text-neutral-700 mb-1">Số lượng</label>
 							<input
@@ -227,10 +294,18 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 							{/* Thêm vào giỏ (giữ như bạn) */}
 							<button
 								className="btn-primary flex-1 px-8 py-3"
-								onClick={async () => {
-									if (!selectedVariant) return alert("Vui lòng chọn màu / size!");
-									const token = localStorage.getItem("token");
-									if (!token) return alert("Bạn cần đăng nhập!");
+							onClick={async () => {
+								if (!selectedVariant) {
+									setActionMessage("Vui lòng chọn màu / size.");
+									setActionMessageTone("error");
+									return;
+								}
+								const token = localStorage.getItem("token");
+								if (!token) {
+									setActionMessage("Bạn cần đăng nhập.");
+									setActionMessageTone("error");
+									return;
+								}
 
 									try {
 										const res = await fetch("http://localhost:3000/api/v1/cart/add", {
@@ -245,28 +320,43 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 											}),
 										}).then((res) => res.json());
 
-										console.log("Added to cart:", res);
-										alert("Đã thêm vào giỏ!");
-									} catch (error) {
-										console.error(error);
-										alert("Thêm vào giỏ thất bại!");
-									}
-								}}
-							>
-								Thêm vào giỏ
-							</button>
+									console.log("Added to cart:", res);
+									setActionMessage("Đã thêm vào giỏ!");
+									setActionMessageTone("success");
+								} catch (error) {
+									console.error(error);
+									setActionMessage("Thêm vào giỏ thất bại.");
+									setActionMessageTone("error");
+								}
+							}}
+						>
+							Thêm vào giỏ
+						</button>
 
 							{/* Buy Now */}
-							<button
-								className="btn-secondary px-8 py-3"
-								onClick={handleBuyNow}
-							>
-								Mua ngay
-							</button>
-						</div>
+						<button
+							className="btn-secondary px-8 py-3"
+							onClick={handleBuyNow}
+						>
+							Mua ngay
+						</button>
 					</div>
+					{actionMessage && (
+						<p
+							className={`mt-3 text-sm ${
+								actionMessageTone === "success"
+									? "text-green-600"
+									: actionMessageTone === "error"
+										? "text-red-600"
+										: "text-neutral-600"
+							}`}
+						>
+							{actionMessage}
+						</p>
+					)}
 				</div>
-			</Container>
+			</div>
+		</Container>
 
 			{/* REVIEWS */}
 			<Container>

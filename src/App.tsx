@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -16,7 +16,6 @@ import ProfilePage from "./pages/ProfilePage.tsx";
 import MyOrdersPage from "./pages/MyOrdersPage.tsx";
 import OrderDetailPage from "./pages/OrderDetailPage.tsx";
 import OrderTrackingPage from "./pages/OrderTrackingPage.tsx";
-import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import AdminProducts from "./pages/admin/AdminProducts.tsx";
 import AdminVariants from "./pages/admin/AdminVariants.tsx";
 import AdminColors from "./pages/admin/AdminColors.tsx";
@@ -30,8 +29,10 @@ import AdminInventory from "./pages/admin/AdminInventory.tsx";
 import AdminShipping from "./pages/admin/AdminShipping.tsx";
 import AdminBestSelling from "./pages/admin/AdminBestSelling.tsx";
 import AdminRevenue from "./pages/admin/AdminRevenue.tsx";
+import ProductManage from "./pages/admin/ProductManage.tsx";
 import StaffFulfillment from "./pages/StaffFulfillment.tsx";
 import ChatbotWidget from "./components/ChatbotWidget.tsx";
+import ToastHost from "./components/ToastHost.tsx";
 
 function App() {
 	return (
@@ -144,7 +145,7 @@ function App() {
 				</div>
 			} />
 			{/* Admin/Staff routes without Header/Footer */}
-			<Route path="/admin" element={<AdminDashboard />} />
+			<Route path="/admin" element={<Navigate to="/admin/revenue" replace />} />
 			<Route path="/admin/categories" element={<AdminCategories />} />
 			<Route path="/admin/products" element={<AdminProducts />} />
 			<Route path="/admin/users" element={<AdminUsers />} />
@@ -153,7 +154,15 @@ function App() {
 			<Route path="/admin/shipping" element={<AdminShipping />} />
 			<Route path="/admin/best-selling" element={<AdminBestSelling />} />
 			<Route path="/admin/revenue" element={<AdminRevenue />} />
+			<Route path="/admin/products/:id/manage" element={<ProductManage />} />
 			<Route path="/staff/fulfillment" element={<StaffFulfillment />} />
+			<Route path="/staff/products/:id/manage" element={<ProductManage />} />
+			<Route path="/staff/categories" element={<AdminCategories />} />
+			<Route path="/staff/products" element={<AdminProducts />} />
+			<Route path="/staff/discounts" element={<AdminDiscounts />} />
+			<Route path="/staff/users" element={<AdminUsers />} />
+			<Route path="/staff/colors" element={<AdminColors />} />
+			<Route path="/staff/sizes" element={<AdminSizes />} />
 			{/* Legacy routes - can be removed if not needed */}
 			<Route path="/admin/variants" element={<AdminVariants />} />
 			<Route path="/admin/colors" element={<AdminColors />} />
@@ -161,6 +170,7 @@ function App() {
 			<Route path="/admin/images" element={<AdminImages />} />
 			<Route path="/admin/orders" element={<AdminOrders />} />
 		</Routes>
+		<ToastHost />
 		<ChatbotWidget />
 		</>
 	);

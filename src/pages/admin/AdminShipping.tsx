@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { getShippings, updateShipping } from "../../api/admin/shippingApi";
 import { Edit } from "lucide-react";
+import { toast } from "../../utils/toast";
 
 export default function AdminShipping() {
     const [shippings, setShippings] = useState<any[]>([]);
@@ -53,9 +54,9 @@ export default function AdminShipping() {
             setShowModal(false);
             resetForm();
             loadData();
-            alert("Thành công!");
+            toast("Thành công!");
         } catch (err: any) {
-            alert(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Có lỗi xảy ra!");
         }
     };
 
