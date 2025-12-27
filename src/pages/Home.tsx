@@ -24,7 +24,7 @@ export default function Home() {
 				// Lấy 8 sản phẩm mới nhất
 				setFeaturedProducts(products.slice(0, 8));
 			})
-			.catch((err) => console.error("Fetch products failed:", err));
+			.catch((err) => console.error("Tải sản phẩm thất bại:", err));
 	}, []);
 
 	useEffect(() => {

@@ -144,7 +144,7 @@ export default function AdminProducts() {
                             onClick={() => navigate(`${manageBasePath}/sizes`)}
                             className="px-3 py-2 rounded border border-neutral-300 hover:bg-neutral-100"
                         >
-                            Quản lý size
+							Quản lý kích thước
                         </button>
                         <button
                             onClick={() => {

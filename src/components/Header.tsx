@@ -97,7 +97,7 @@ export default function Header() {
 						<Link to="/" className="flex-shrink-0 block">
 							<img
 								src={logoShop}
-								alt="Fashion Shop"
+								alt="Cửa hàng thời trang"
 								className="h-12 w-auto object-contain"
 							/>
 						</Link>

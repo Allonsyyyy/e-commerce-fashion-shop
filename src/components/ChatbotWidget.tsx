@@ -63,7 +63,7 @@ export default function ChatbotWidget() {
 					<div className="px-4 py-3 border-b border-neutral-200 flex items-center justify-between">
 						<div>
 							<p className="font-semibold">Trợ lý mua sắm</p>
-							<p className="text-xs text-neutral-500">Chatbot hỗ trợ 24/7</p>
+							<p className="text-xs text-neutral-500">Trợ lý ảo hỗ trợ 24/7</p>
 						</div>
 						<button
 							onClick={() => setOpen(false)}
@@ -77,7 +77,7 @@ export default function ChatbotWidget() {
 					<div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 text-sm">
 						{messages.length === 0 && (
 							<p className="text-neutral-500 text-center">
-								Bạn cần hỗ trợ gì? Hãy đặt câu hỏi để chatbot giúp bạn.
+								Bạn cần hỗ trợ gì? Hãy đặt câu hỏi để trợ lý ảo giúp bạn.
 							</p>
 						)}
 						{messages.map((msg) => (
@@ -124,10 +124,10 @@ export default function ChatbotWidget() {
 				onClick={() => setOpen((prev) => !prev)}
 				className="rounded-full bg-neutral-900 text-white px-4 py-3 shadow-lg hover:bg-neutral-800 transition-colors flex items-center gap-2"
 			>
-				<span role="img" aria-label="chat">
+				<span role="img" aria-label="trò chuyện">
 					💬
 				</span>
-				<span>Chatbot</span>
+				<span>Trợ lý ảo</span>
 			</button>
 		</div>
 	);

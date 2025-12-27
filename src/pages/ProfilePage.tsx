@@ -44,10 +44,10 @@ export default function ProfilePage() {
 				<h1 className="heading-3 mb-6">Hồ sơ của tôi</h1>
 				<div className="card space-y-3">
 					<p>
-						<span className="font-semibold">Tên:</span> {profile.name || "N/A"}
+						<span className="font-semibold">Tên:</span> {profile.name || "Không có"}
 					</p>
 					<p>
-						<span className="font-semibold">Email:</span> {profile.email}
+						<span className="font-semibold">Địa chỉ email:</span> {profile.email}
 					</p>
 					<p>
 						<span className="font-semibold">Vai trò:</span> {profile.role}

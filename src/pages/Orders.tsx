@@ -32,7 +32,7 @@ export default function Orders() {
             setOrders(data.data);
             setTotal(data.total);
         } catch (err) {
-            console.error("Failed to load orders:", err);
+            console.error("Tải đơn hàng thất bại:", err);
         } finally {
             setLoading(false);
         }

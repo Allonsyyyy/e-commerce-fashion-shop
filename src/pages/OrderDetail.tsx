@@ -26,7 +26,7 @@ export default function OrderDetail() {
             const data = await getUserOrder(token, parseInt(id!));
             setOrder(data);
         } catch (err) {
-            console.error("Failed to load order:", err);
+            console.error("Tải đơn hàng thất bại:", err);
         } finally {
             setLoading(false);
         }

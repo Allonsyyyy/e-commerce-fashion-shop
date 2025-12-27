@@ -86,7 +86,7 @@ export default function OrderDetailPage() {
 								data: normalized,
 							};
 						} catch (err) {
-							console.error("Check review failed", err);
+							console.error("Kiểm tra đánh giá thất bại", err);
 							return { id: item.id, reviewed: false, canComment: undefined, data: null };
 						}
 					}),
@@ -100,7 +100,7 @@ export default function OrderDetailPage() {
 					return next;
 				});
 			} catch (err) {
-				console.error("Failed to check review status", err);
+				console.error("Kiểm tra trạng thái đánh giá thất bại", err);
 			} finally {
 				setCheckingReviews(false);
 			}
@@ -123,7 +123,7 @@ export default function OrderDetailPage() {
 				});
 				setReturnStatus(map);
 			} catch (err) {
-				console.error("Failed to load return requests", err);
+				console.error("Tải yêu cầu đổi trả thất bại", err);
 			}
 		};
 
@@ -313,7 +313,7 @@ export default function OrderDetailPage() {
 											<p className="text-sm font-medium text-neutral-800">
 												{item.variant?.product?.name} x {item.quantity}
 											</p>
-											<p className="text-xs text-neutral-500">SKU: {item.variant?.sku || "N/A"}</p>
+											<p className="text-xs text-neutral-500">Mã SKU: {item.variant?.sku || "Không có"}</p>
 										</div>
 										<div className="flex flex-wrap gap-2">
 											<button
@@ -425,7 +425,7 @@ export default function OrderDetailPage() {
 								<label className="block text-sm font-medium text-neutral-700 mb-1">Lý do</label>
 								<textarea
 									className="input min-h-[120px]"
-									placeholder="Mô tả lỗi / yêu cầu đổi size / màu..."
+									placeholder="Mô tả lỗi / yêu cầu đổi kích thước / màu..."
 									value={returnForm.reason}
 									onChange={(e) => setReturnForm((prev) => ({ ...prev, reason: e.target.value }))}
 									required

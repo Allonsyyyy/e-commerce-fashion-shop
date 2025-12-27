@@ -37,7 +37,7 @@ export default function AdminOrderDetail() {
                 shipmentStatus: data.shipmentStatus as any,
             });
         } catch (err) {
-            console.error("Failed to load order:", err);
+            console.error("Tải đơn hàng thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -52,9 +52,9 @@ export default function AdminOrderDetail() {
             const updated = await updateOrder(token, parseInt(id), formData);
             setOrder(updated);
             setEditing(false);
-            toast("Order updated successfully!");
+            toast("Cập nhật đơn hàng thành công!");
         } catch (err: any) {
-            toast(err.message || "An error occurred!");
+            toast(err.message || "Đã xảy ra lỗi!");
         } finally {
             setSaving(false);
         }
@@ -63,110 +63,110 @@ export default function AdminOrderDetail() {
     const getStatusBadge = (status: string, type: "order" | "payment" | "shipment") => {
         const statusConfig: Record<string, Record<string, { label: string; className: string }>> = {
             order: {
-                pending: { label: "Pending", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-                processing: { label: "Processing", className: "bg-blue-100 text-blue-800 border-blue-200" },
-                completed: { label: "Completed", className: "bg-green-100 text-green-800 border-green-200" },
-                cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800 border-red-200" },
+                pending: { label: "Chờ xử lý", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+                processing: { label: "Đang xử lý", className: "bg-blue-100 text-blue-800 border-blue-200" },
+                completed: { label: "Hoàn tất", className: "bg-green-100 text-green-800 border-green-200" },
+                cancelled: { label: "Đã hủy", className: "bg-red-100 text-red-800 border-red-200" },
             },
             payment: {
-                unpaid: { label: "Unpaid", className: "bg-orange-100 text-orange-800 border-orange-200" },
-                paid: { label: "Paid", className: "bg-green-100 text-green-800 border-green-200" },
-                failed: { label: "Failed", className: "bg-red-100 text-red-800 border-red-200" },
-                refunded: { label: "Refunded", className: "bg-neutral-100 text-neutral-800 border-neutral-200" },
+                unpaid: { label: "Chưa thanh toán", className: "bg-orange-100 text-orange-800 border-orange-200" },
+                paid: { label: "Đã thanh toán", className: "bg-green-100 text-green-800 border-green-200" },
+                failed: { label: "Thất bại", className: "bg-red-100 text-red-800 border-red-200" },
+                refunded: { label: "Đã hoàn tiền", className: "bg-neutral-100 text-neutral-800 border-neutral-200" },
             },
             shipment: {
                 ready_to_pick: {
-                    label: "Not Shipped",
+                    label: "Chưa giao hàng",
                     className: "bg-neutral-100 text-neutral-800 border-neutral-200",
                 },
 
                 picking: {
-                    label: "Picking",
+                    label: "Đang lấy hàng",
                     className: "bg-blue-100 text-blue-800 border-blue-200",
                 },
 
                 cancel: {
-                    label: "Cancelled",
+                    label: "Đã hủy",
                     className: "bg-red-100 text-red-800 border-red-200",
                 },
 
                 money_collect_picking: {
-                    label: "Picking (COD)",
+                    label: "Đang lấy hàng (COD)",
                     className: "bg-blue-100 text-blue-800 border-blue-200",
                 },
 
                 picked: {
-                    label: "Picked",
+                    label: "Đã lấy hàng",
                     className: "bg-blue-100 text-blue-800 border-blue-200",
                 },
 
                 storing: {
-                    label: "Storing",
+                    label: "Đang lưu kho",
                     className: "bg-blue-100 text-blue-800 border-blue-200",
                 },
 
                 transporting: {
-                    label: "Transporting",
+                    label: "Đang vận chuyển",
                     className: "bg-blue-100 text-blue-800 border-blue-200",
                 },
 
                 sorting: {
-                    label: "Sorting",
+                    label: "Đang phân loại",
                     className: "bg-blue-100 text-blue-800 border-blue-200",
                 },
 
                 delivering: {
-                    label: "Delivering",
+                    label: "Đang giao",
                     className: "bg-blue-100 text-blue-800 border-blue-200",
                 },
 
                 money_collect_delivering: {
-                    label: "Delivering (COD)",
+                    label: "Đang giao (COD)",
                     className: "bg-blue-100 text-blue-800 border-blue-200",
                 },
 
                 delivered: {
-                    label: "Delivered",
+                    label: "Đã giao",
                     className: "bg-green-100 text-green-800 border-green-200",
                 },
 
                 delivery_fail: {
-                    label: "Delivery Failed",
+                    label: "Giao thất bại",
                     className: "bg-red-100 text-red-800 border-red-200",
                 },
 
                 waiting_to_return: {
-                    label: "Waiting to Return",
+                    label: "Chờ hoàn hàng",
                     className: "bg-yellow-100 text-yellow-800 border-yellow-200",
                 },
 
                 return: {
-                    label: "Return",
+                    label: "Hoàn hàng",
                     className: "bg-yellow-100 text-yellow-800 border-yellow-200",
                 },
 
                 return_transporting: {
-                    label: "Returning (Transport)",
+                    label: "Hoàn hàng (vận chuyển)",
                     className: "bg-yellow-100 text-yellow-800 border-yellow-200",
                 },
 
                 return_sorting: {
-                    label: "Returning (Sorting)",
+                    label: "Hoàn hàng (phân loại)",
                     className: "bg-yellow-100 text-yellow-800 border-yellow-200",
                 },
 
                 returning: {
-                    label: "Returning",
+                    label: "Đang hoàn hàng",
                     className: "bg-yellow-100 text-yellow-800 border-yellow-200",
                 },
 
                 return_fail: {
-                    label: "Return Failed",
+                    label: "Hoàn hàng thất bại",
                     className: "bg-red-100 text-red-800 border-red-200",
                 },
 
                 returned: {
-                    label: "Returned",
+                    label: "Đã hoàn hàng",
                     className: "bg-purple-100 text-purple-800 border-purple-200",
                 },
             },
@@ -186,7 +186,7 @@ export default function AdminOrderDetail() {
             <AdminLayout>
                 <div className="text-center py-20">
                     <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900"></div>
-                    <p className="mt-4 text-neutral-600">Loading...</p>
+                    <p className="mt-4 text-neutral-600">Đang tải...</p>
                 </div>
             </AdminLayout>
         );
@@ -197,9 +197,9 @@ export default function AdminOrderDetail() {
             <AdminLayout>
                 <div className="text-center py-20">
                     <Package className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">Order Not Found</h2>
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">Không tìm thấy đơn hàng</h2>
                     <button onClick={() => navigate("/admin/orders")} className="btn-primary mt-4">
-                        Back to List
+                        Quay lại danh sách
                     </button>
                 </div>
             </AdminLayout>
@@ -214,13 +214,13 @@ export default function AdminOrderDetail() {
                     className="text-neutral-600 hover:text-neutral-900 mb-4 inline-flex items-center gap-2"
                 >
                     <X className="h-4 w-4" />
-                    <span>Back</span>
+                    <span>Quay lại</span>
                 </button>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-neutral-900 mb-2">Order #{order.id}</h1>
+                        <h1 className="text-3xl font-bold text-neutral-900 mb-2">Đơn #{order.id}</h1>
                         <p className="text-neutral-600">
-                            Created on {new Date(order.createdAt).toLocaleDateString("en-US", {
+                            Tạo lúc {new Date(order.createdAt).toLocaleDateString("vi-VN", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
@@ -235,7 +235,7 @@ export default function AdminOrderDetail() {
                             className="btn-secondary flex items-center gap-2"
                         >
                             <Edit className="h-4 w-4" />
-                            Edit
+                            Chỉnh sửa
                         </button>
                     ) : (
                         <div className="flex gap-2">
@@ -291,7 +291,7 @@ export default function AdminOrderDetail() {
                                             {item.variant.product.description}
                                         </p>
                                         <div className="flex items-center gap-4 text-sm text-neutral-600">
-                                            <span>SKU: {item.variant.sku}</span>
+                                            <span>Mã SKU: {item.variant.sku}</span>
                                             <span>Số lượng: {item.quantity}</span>
                                         </div>
                                     </div>
@@ -320,7 +320,7 @@ export default function AdminOrderDetail() {
                                 <p className="font-medium text-neutral-900 mt-1">{order.user.name}</p>
                             </div>
                             <div>
-                                <span className="text-sm text-neutral-600">Email:</span>
+                                <span className="text-sm text-neutral-600">Địa chỉ email:</span>
                                 <p className="font-medium text-neutral-900 mt-1">{order.user.email}</p>
                             </div>
                             <div>

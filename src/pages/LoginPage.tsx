@@ -56,13 +56,13 @@ export default function LoginPage() {
                             {/* Email */}
                             <div>
                                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                                    Email
+                                    Địa chỉ email
                                 </label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
                                     <input
                                         type="email"
-                                        placeholder="your@email.com"
+                                        placeholder="ban@email.com"
                                         className="input pl-10 w-full"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}

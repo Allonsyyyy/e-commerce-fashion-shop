@@ -9,19 +9,19 @@ interface Message {
 }
 
 const QUICK_REPLIES = [
-	"Product information",
-	"Order status",
-	"Shipping & returns",
-	"Payment methods",
-	"Contact support",
+	"Thông tin sản phẩm",
+	"Trạng thái đơn hàng",
+	"Giao hàng & đổi trả",
+	"Phương thức thanh toán",
+	"Liên hệ hỗ trợ",
 ];
 
 const BOT_RESPONSES: Record<string, string> = {
-	"product information": "We offer a wide range of fashion products including clothing, accessories, and more. You can browse our catalog in the Shop section. Is there a specific product you're looking for?",
-	"order status": "To check your order status, please visit the Orders page in your account. You'll need to be signed in to view your orders. Would you like help with anything else?",
-	"shipping & returns": "We offer free shipping on all orders! Returns are accepted within 30 days of purchase. Items must be unworn and in original packaging. Need more details?",
-	"payment methods": "We accept Cash on Delivery (COD) and VNPay for online payments. All transactions are secure and encrypted. Do you have questions about a specific payment method?",
-	"contact support": "Our support team is available 24/7. You can reach us through this chat, email us at support@shop.com, or call us at +84 123 456 789. How can we help you today?",
+	"product information": "Chúng tôi có nhiều sản phẩm thời trang như quần áo, phụ kiện và nhiều hơn nữa. Bạn có thể xem danh mục ở mục Cửa hàng. Bạn đang tìm sản phẩm cụ thể nào?",
+	"order status": "Để kiểm tra trạng thái đơn hàng, vui lòng vào trang Đơn hàng trong tài khoản của bạn. Bạn cần đăng nhập để xem đơn. Mình có thể hỗ trợ gì thêm không?",
+	"shipping & returns": "Chúng tôi hỗ trợ giao hàng miễn phí cho mọi đơn hàng! Đổi trả trong vòng 30 ngày kể từ khi mua. Sản phẩm cần còn nguyên tem và bao bì. Bạn muốn biết thêm chi tiết không?",
+	"payment methods": "Chúng tôi chấp nhận COD và VNPay cho thanh toán online. Mọi giao dịch đều an toàn và được mã hóa. Bạn muốn hỏi về phương thức nào?",
+	"contact support": "Đội ngũ hỗ trợ trực tuyến 24/7. Bạn có thể chat tại đây, email support@shop.com, hoặc gọi +84 123 456 789. Mình có thể giúp gì cho bạn?",
 };
 
 export default function ChatBot() {
@@ -29,7 +29,7 @@ export default function ChatBot() {
 	const [messages, setMessages] = useState<Message[]>([
 		{
 			id: 1,
-			text: "Hello! I'm your shopping assistant. How can I help you today?",
+			text: "Xin chào! Mình là trợ lý mua sắm. Mình có thể giúp gì cho bạn hôm nay?",
 			sender: "bot",
 			timestamp: new Date(),
 		},
@@ -92,19 +92,19 @@ export default function ChatBot() {
 
 		// Default responses
 		if (userInput.includes("hello") || userInput.includes("hi") || userInput.includes("hey")) {
-			return "Hello! I'm here to help you with your shopping needs. What would you like to know?";
+			return "Xin chào! Mình ở đây để hỗ trợ mua sắm. Bạn muốn tìm hiểu điều gì?";
 		}
 
 		if (userInput.includes("thank") || userInput.includes("thanks")) {
-			return "You're welcome! Is there anything else I can help you with?";
+			return "Rất vui được hỗ trợ! Bạn cần thêm gì nữa không?";
 		}
 
 		if (userInput.includes("bye") || userInput.includes("goodbye")) {
-			return "Goodbye! Feel free to come back anytime if you need assistance. Happy shopping!";
+			return "Tạm biệt! Khi cần hỗ trợ hãy quay lại nhé. Chúc bạn mua sắm vui vẻ!";
 		}
 
 		// Generic response
-		return "I understand you're asking about: \"" + userInput + "\". Let me help you with that. You can ask me about products, orders, shipping, payments, or contact support. What specific information do you need?";
+		return "Mình hiểu bạn đang hỏi về: \"" + userInput + "\". Mình có thể hỗ trợ về sản phẩm, đơn hàng, giao hàng, thanh toán hoặc liên hệ hỗ trợ. Bạn cần thông tin cụ thể nào?";
 	};
 
 	const handleQuickReply = (reply: string) => {
@@ -125,7 +125,7 @@ export default function ChatBot() {
 				<button
 					onClick={() => setIsOpen(true)}
 					className="fixed bottom-6 right-6 w-14 h-14 bg-neutral-900 text-white rounded-full shadow-lg hover:bg-neutral-800 transition-all duration-300 flex items-center justify-center z-50 hover:scale-110"
-					aria-label="Open chat"
+					aria-label="Mở chat"
 				>
 					<MessageCircle className="h-6 w-6" />
 					{/* Notification badge */}
@@ -143,14 +143,14 @@ export default function ChatBot() {
 								<Bot className="h-6 w-6" />
 							</div>
 							<div>
-								<h3 className="font-semibold">Customer Support</h3>
-								<p className="text-xs text-neutral-300">We're online</p>
+								<h3 className="font-semibold">Hỗ trợ khách hàng</h3>
+								<p className="text-xs text-neutral-300">Đang trực tuyến</p>
 							</div>
 						</div>
 						<button
 							onClick={() => setIsOpen(false)}
 							className="text-white hover:text-neutral-200 transition-colors p-1"
-							aria-label="Close chat"
+							aria-label="Đóng chat"
 						>
 							<X className="h-5 w-5" />
 						</button>
@@ -214,7 +214,7 @@ export default function ChatBot() {
 						{/* Quick Replies */}
 						{messages.length === 1 && !isTyping && (
 							<div className="space-y-2">
-								<p className="text-xs text-neutral-500 font-medium">Quick replies:</p>
+								<p className="text-xs text-neutral-500 font-medium">Gợi ý nhanh:</p>
 								<div className="flex flex-wrap gap-2">
 									{QUICK_REPLIES.map((reply, index) => (
 										<button
@@ -241,7 +241,7 @@ export default function ChatBot() {
 								value={inputValue}
 								onChange={(e) => setInputValue(e.target.value)}
 								onKeyPress={handleKeyPress}
-								placeholder="Type your message..."
+								placeholder="Nhập tin nhắn..."
 								className="flex-1 px-4 py-2 border border-neutral-300 rounded-full focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-sm"
 								disabled={isTyping}
 							/>
@@ -249,13 +249,13 @@ export default function ChatBot() {
 								onClick={() => handleSendMessage(inputValue)}
 								disabled={!inputValue.trim() || isTyping}
 								className="w-10 h-10 bg-neutral-900 text-white rounded-full flex items-center justify-center hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-								aria-label="Send message"
+								aria-label="Gửi tin nhắn"
 							>
 								<Send className="h-5 w-5" />
 							</button>
 						</div>
 						<p className="text-xs text-neutral-500 mt-2 text-center">
-							Press Enter to send
+							Nhấn Enter để gửi
 						</p>
 					</div>
 				</div>

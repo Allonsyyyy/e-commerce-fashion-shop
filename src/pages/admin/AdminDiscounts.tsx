@@ -27,7 +27,7 @@ export default function AdminDiscounts() {
             const data = await getDiscounts();
             setDiscounts(data);
         } catch (err) {
-            console.error("Failed to load discounts:", err);
+            console.error("Tải mã giảm giá thất bại:", err);
         } finally {
             setLoading(false);
         }

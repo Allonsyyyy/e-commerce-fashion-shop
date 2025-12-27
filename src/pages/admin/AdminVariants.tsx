@@ -53,7 +53,7 @@ export default function AdminVariants() {
             });
             setVariants(allVariants);
         } catch (err) {
-            console.error("Failed to load data:", err);
+            console.error("Tải dữ liệu thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -157,7 +157,7 @@ export default function AdminVariants() {
                             <thead className="bg-neutral-100">
                                 <tr>
                                     <th className="px-6 py-3 text-left">ID</th>
-                                    <th className="px-6 py-3 text-left">SKU</th>
+                                    <th className="px-6 py-3 text-left">Mã SKU</th>
                                     <th className="px-6 py-3 text-left">Giá</th>
                                     <th className="px-6 py-3 text-left">Tồn kho</th>
                                     <th className="px-6 py-3 text-left">Thao tác</th>
@@ -242,7 +242,7 @@ export default function AdminVariants() {
                                 </select>
                                 <input
                                     type="text"
-                                    placeholder="SKU"
+                                    placeholder="Mã SKU"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.sku}
                                     onChange={(e) => setFormData({ ...formData, sku: e.target.value })}

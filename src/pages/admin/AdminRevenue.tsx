@@ -37,7 +37,7 @@ export default function AdminRevenue() {
 			setStats(data);
 			setMonthlyRevenue(monthly);
 		} catch (err) {
-			console.error("Failed to load revenue stats:", err);
+			console.error("Tải thống kê doanh thu thất bại:", err);
 			setStats(null);
 			setMonthlyRevenue([]);
 		} finally {
@@ -121,9 +121,9 @@ export default function AdminRevenue() {
 						</div>
 
 						<div className="mt-8 bg-white p-6 rounded-lg shadow">
-							<h2 className="text-lg font-semibold mb-4">Monthly revenue</h2>
+							<h2 className="text-lg font-semibold mb-4">Doanh thu theo tháng</h2>
 							{monthlyRevenue.length === 0 ? (
-								<p className="text-sm text-neutral-500">No data available.</p>
+								<p className="text-sm text-neutral-500">Không có dữ liệu.</p>
 							) : (
 								<MonthlyRevenueChart data={monthlyRevenue} />
 							)}

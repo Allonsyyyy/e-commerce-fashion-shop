@@ -63,7 +63,7 @@ export default function ProductManage() {
 			setColors(colorsRes);
 			setSizes(sizesRes);
 		} catch (err) {
-			console.error("Failed to load product data:", err);
+			console.error("Tải dữ liệu sản phẩm thất bại:", err);
 			toast("Không thể tải dữ liệu sản phẩm.", "error");
 		} finally {
 			setLoading(false);
@@ -261,9 +261,9 @@ export default function ProductManage() {
 								<table className="w-full">
 									<thead className="bg-neutral-50">
 										<tr>
-											<th className="px-4 py-3 text-left">SKU</th>
+											<th className="px-4 py-3 text-left">Mã SKU</th>
 											<th className="px-4 py-3 text-left">Màu</th>
-											<th className="px-4 py-3 text-left">Size</th>
+											<th className="px-4 py-3 text-left">Kích thước</th>
 											<th className="px-4 py-3 text-left">Giá</th>
 											<th className="px-4 py-3 text-left">Kho</th>
 											<th className="px-4 py-3 text-left">Ảnh</th>
@@ -415,7 +415,7 @@ export default function ProductManage() {
 									onChange={(e) => setVariantForm({ ...variantForm, sizeId: e.target.value })}
 									required
 								>
-									<option value="">Chọn size</option>
+									<option value="">Chọn kích thước</option>
 									{sizes.map((size) => (
 										<option key={size.id} value={size.id}>
 											{size.size}
@@ -424,7 +424,7 @@ export default function ProductManage() {
 								</select>
 								<input
 									type="text"
-									placeholder="SKU"
+									placeholder="Mã SKU"
 									className="w-full border px-3 py-2 rounded"
 									value={variantForm.sku}
 									onChange={(e) => setVariantForm({ ...variantForm, sku: e.target.value })}

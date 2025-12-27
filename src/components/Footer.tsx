@@ -25,7 +25,7 @@ export default function Footer() {
 					setPolicies(data);
 				}
 			} catch (error) {
-				console.error("Failed to fetch policies:", error);
+				console.error("Tải chính sách thất bại:", error);
 			}
 		};
 
@@ -48,7 +48,7 @@ export default function Footer() {
 		{ icon: Facebook, href: SHOP_FACEBOOK, label: "Facebook" },
 		{ icon: Instagram, href: SHOP_FACEBOOK, label: "Instagram" },
 		{ icon: Twitter, href: SHOP_FACEBOOK, label: "Twitter" },
-		{ icon: Mail, href: SHOP_FACEBOOK, label: "Email" },
+		{ icon: Mail, href: SHOP_FACEBOOK, label: "Hộp thư" },
 	];
 
 	return (
@@ -56,7 +56,7 @@ export default function Footer() {
 			<Container>
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 py-12">
 					<div>
-						<h3 className="font-display text-2xl font-bold mb-4">Shop</h3>
+						<h3 className="font-display text-2xl font-bold mb-4">Cửa hàng</h3>
 						<p className="body-small text-neutral-400">
 							Sản phẩm tinh gọn, thoải mái và thời trang.
 						</p>
@@ -146,7 +146,7 @@ export default function Footer() {
 				<div className="border-t border-neutral-800 py-6">
 					<div className="flex flex-col sm:flex-row items-center justify-between gap-4">
 						<p className="body-small text-neutral-400">
-							© {currentYear} Shop. Giữ mọi quyền.
+							© {currentYear} Cửa hàng. Giữ mọi quyền.
 						</p>
 						<div className="flex items-center gap-6">
 							<Link
@@ -165,7 +165,7 @@ export default function Footer() {
 								to="#"
 								className="body-small text-neutral-400 hover:text-white transition-colors"
 							>
-								Cookie
+								Cookie trình duyệt
 							</Link>
 							<button
 								onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

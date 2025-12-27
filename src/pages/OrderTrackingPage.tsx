@@ -106,11 +106,11 @@ export default function OrderTrackingPage() {
 							<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
 								<div>
 									<p className="font-semibold text-neutral-900">Lô giao #{ship.shipmentOrderId}</p>
-									<p className="text-sm text-neutral-600">Loại: {ship.type || "N/A"}</p>
+									<p className="text-sm text-neutral-600">Loại: {ship.type || "Không có"}</p>
 								</div>
 								<div className="text-right">
-									<p className="text-sm text-neutral-600">GHN Code: {ship.ghnOrderCode || "N/A"}</p>
-									<p className="text-sm font-semibold text-neutral-800">Hiện tại: {ship.currentStatus || "N/A"}</p>
+									<p className="text-sm text-neutral-600">Mã GHN: {ship.ghnOrderCode || "Không có"}</p>
+									<p className="text-sm font-semibold text-neutral-800">Hiện tại: {ship.currentStatus || "Không có"}</p>
 								</div>
 							</div>
 							<div className="mt-2 space-y-1 text-sm text-neutral-700">

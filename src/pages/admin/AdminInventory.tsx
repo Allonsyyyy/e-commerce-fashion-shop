@@ -29,7 +29,7 @@ export default function AdminInventory() {
             setInventory(inventoryRes.data);
             setTotal(inventoryRes.total);
         } catch (err) {
-            console.error("Failed to load data:", err);
+            console.error("Tải dữ liệu thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -88,7 +88,7 @@ export default function AdminInventory() {
                                     <tr>
                                         <th className="px-6 py-3 text-left">ID</th>
                                         <th className="px-6 py-3 text-left">Sản phẩm</th>
-                                        <th className="px-6 py-3 text-left">SKU</th>
+                                        <th className="px-6 py-3 text-left">Mã SKU</th>
                                         <th className="px-6 py-3 text-left">Số lượng</th>
                                         <th className="px-6 py-3 text-left">Vị trí</th>
                                         <th className="px-6 py-3 text-left">Thao tác</th>
@@ -98,8 +98,8 @@ export default function AdminInventory() {
                                     {inventory.map((item) => (
                                         <tr key={item.id} className="border-t">
                                             <td className="px-6 py-4">{item.id}</td>
-                                            <td className="px-6 py-4">{item.product?.name || "N/A"}</td>
-                                            <td className="px-6 py-4">{item.variant?.sku || "N/A"}</td>
+                                            <td className="px-6 py-4">{item.product?.name || "Không có"}</td>
+                                            <td className="px-6 py-4">{item.variant?.sku || "Không có"}</td>
                                             <td className="px-6 py-4">
                                                 <span className={item.quantity < 10 ? "text-red-600 font-semibold" : ""}>
                                                     {item.quantity}

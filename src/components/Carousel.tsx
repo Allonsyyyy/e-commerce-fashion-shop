@@ -55,7 +55,7 @@ export default function Carousel() {
 					setGenderCategories([]);
 				}
 			})
-			.catch((err) => console.error("Fetch categories failed:", err));
+			.catch((err) => console.error("Tải danh mục thất bại:", err));
 	}, []);
 
 	const getCategoryImage = (name: string) => {

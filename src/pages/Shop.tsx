@@ -27,15 +27,15 @@ export default function Shop() {
 				if (!data.data) return;
 				setProducts(data.data);
 			})
-			.catch((err) => console.error("Fetch products failed:", err))
+			.catch((err) => console.error("Tải sản phẩm thất bại:", err))
 	}, [q]) // rất quan trọng: đổi q -> fetch lại
 
 	return (
 		<main className="py-12">
 			<Container>
 				<div className="flex items-end justify-between gap-4 mb-10">
-					<h1 className="heading-3">Shop</h1>
-					<div className="body-small">Showing {products.length} results</div>
+					<h1 className="heading-3">Cửa hàng</h1>
+					<div className="body-small">Hiển thị {products.length} kết quả</div>
 				</div>
 
 				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

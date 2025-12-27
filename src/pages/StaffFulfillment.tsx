@@ -126,7 +126,7 @@ useEffect(() => {
 	useEffect(() => {
 		fetchProvinces()
 			.then(setProvinces)
-			.catch((err) => console.error("Failed to load provinces list", err));
+			.catch((err) => console.error("Tải danh sách tỉnh/thành thất bại.", err));
 	}, []);
 
 const normalizeText = (value?: string | null) =>
@@ -204,7 +204,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			setDistrictCache((prev) => ({ ...prev, [provinceId]: list }));
 			return list;
 		} catch (err) {
-			console.error("Failed to load districts", err);
+			console.error("Tải danh sách quận/huyện thất bại.", err);
 			return [];
 		}
 	};
@@ -216,7 +216,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			setWardCache((prev) => ({ ...prev, [districtId]: list }));
 			return list;
 		} catch (err) {
-			console.error("Failed to load wards", err);
+			console.error("Tải danh sách phường/xã thất bại.", err);
 			return [];
 		}
 	};
@@ -235,7 +235,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 				provinceList = await fetchProvinces();
 				setProvinces(provinceList);
 			} catch (err) {
-				console.error("Failed to load provinces list", err);
+				console.error("Tải danh sách tỉnh/thành thất bại.", err);
 				return null;
 			}
 		}
@@ -314,7 +314,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			setOrders(res.data);
 		} catch (err) {
 			console.error(err);
-			setError("Failed to load orders list.");
+			setError("Không tải được danh sách đơn hàng.");
 		} finally {
 			setLoading(false);
 		}
@@ -323,7 +323,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 	const loadReviews = useCallback(async () => {
 		const token = localStorage.getItem("token");
 		if (!token) {
-			setReviewsError("Please log in as an admin to load reviews.");
+			setReviewsError("Vui lòng đăng nhập quản trị để tải đánh giá.");
 			setReviews([]);
 			return;
 		}
@@ -337,7 +337,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			setReviewTotal(typeof res.total === "number" ? res.total : list.length);
 		} catch (err) {
 			console.error(err);
-			setReviewsError("Failed to load reviews.");
+			setReviewsError("Không tải được đánh giá.");
 		} finally {
 			setReviewsLoading(false);
 		}
@@ -362,7 +362,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 	const loadReturns = useCallback(async () => {
 		const token = localStorage.getItem("token");
 		if (!token) {
-			setReturnsError("Please log in as an admin to load return requests.");
+			setReturnsError("Vui lòng đăng nhập quản trị để tải yêu cầu đổi trả.");
 			setReturns([]);
 			return;
 		}
@@ -380,7 +380,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			setReturnsTotal(total);
 		} catch (err) {
 			console.error(err);
-			setReturnsError("Failed to load return requests.");
+			setReturnsError("Không tải được yêu cầu đổi trả.");
 		} finally {
 			setReturnsLoading(false);
 		}
@@ -413,13 +413,13 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		e.preventDefault();
 		if (!replyingReview) return;
 		if (!replyMessage.trim()) {
-			toast("Please enter a reply before submitting.");
+			toast("Vui lòng nhập nội dung phản hồi trước khi gửi.");
 			return;
 		}
 
 		const token = localStorage.getItem("token");
 		if (!token) {
-			toast("Please log in as an admin to reply.");
+			toast("Vui lòng đăng nhập quản trị để phản hồi.");
 			return;
 		}
 
@@ -430,18 +430,25 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			closeReplyModal();
 		} catch (err) {
 			console.error(err);
-			toast("Failed to send reply. Please try again.");
+			toast("Gửi phản hồi thất bại. Vui lòng thử lại.");
 		} finally {
 			setReplySubmitting(false);
 		}
 	};
 
 	const formatReturnStatus = (status?: string | null) => {
-		if (!status) return "Unknown";
-		return status
-			.split("_")
-			.map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-			.join(" ");
+		if (!status) return "Không xác định";
+		const normalized = status.toLowerCase();
+		const labelMap: Record<string, string> = {
+			pending: "Chờ duyệt",
+			approved: "Đã duyệt",
+			shipping_new: "Đã duyệt",
+			receiving: "Đang nhận",
+			received: "Đang nhận",
+			completed: "Hoàn tất",
+			rejected: "Từ chối",
+		};
+		return labelMap[normalized] || "Khác";
 	};
 
 	const getReturnStatusStyle = (status?: string | null) => {
@@ -501,7 +508,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 	const handleReturnAction = async (request: AdminReturnRequest, action: ReturnAction) => {
 		const token = localStorage.getItem("token");
 		if (!token) {
-			toast("Please log in as an admin to update returns.");
+			toast("Vui lòng đăng nhập quản trị để cập nhật đổi trả.");
 			return;
 		}
 
@@ -510,7 +517,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			if (action === "approve") {
 				await approveReturnRequest(token, request.id);
 			} else if (action === "reject") {
-				const reason = window.prompt("Enter a rejection reason (optional)")?.trim();
+				const reason = window.prompt("Nhập lý do từ chối (không bắt buộc)")?.trim();
 				await rejectReturnRequest(token, request.id, reason || undefined);
 			} else if (action === "receive") {
 				await receiveReturnRequest(token, request.id);
@@ -520,7 +527,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			await loadReturns();
 		} catch (err) {
 			console.error(err);
-			toast("Failed to update the return request. Please try again.");
+			toast("Cập nhật yêu cầu đổi trả thất bại. Vui lòng thử lại.");
 		} finally {
 			setReturnActionLoading(null);
 		}
@@ -576,7 +583,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 				provinceList = await fetchProvinces();
 				setProvinces(provinceList);
 			} catch (err) {
-				console.error("Failed to load provinces list", err);
+				console.error("Tải danh sách tỉnh/thành thất bại.", err);
 				return { provinceMatch: undefined, districtMatch: undefined, wardMatch: undefined };
 			}
 		}
@@ -622,14 +629,14 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			pickStationId: null,
 			deliverStationId: null,
 			pickShift: [2],
-			content: `Order #${order.id}`,
+			content: `Đơn #${order.id}`,
 			returnPhone: "",
 			returnAddress: "",
 			returnDistrictId: null,
 			returnWardCode: "",
 			items:
 				order.items?.map((item) => ({
-					name: item.variant?.product?.name || "Product",
+					name: item.variant?.product?.name || "Sản phẩm",
 					code: item.variant?.sku,
 					quantity: item.quantity,
 					price: Number(item.variant?.price || item.price || 0),
@@ -688,7 +695,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		e.preventDefault();
 		if (!form) return;
 		if (!form.toWardCode || !form.toDistrictId) {
-			setError("Please fill in WardCode and District ID accurately.");
+			setError("Vui lòng điền đúng Mã phường và Mã quận/huyện.");
 			return;
 		}
 
@@ -707,12 +714,12 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 				deliverStationId: form.deliverStationId ? Number(form.deliverStationId) : null,
 			});
 
-			toast("GHN shipping order created successfully!");
+			toast("Tạo đơn giao hàng GHN thành công!");
 			closeForm();
 			await loadOrders();
 		} catch (err: any) {
 			console.error(err);
-			setError(err?.message || "Failed to create shipping order.");
+			setError(err?.message || "Tạo đơn giao hàng thất bại.");
 		} finally {
 			setSubmitting(false);
 		}
@@ -720,15 +727,15 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 
 	const handleCancelShipping = async (order: Order) => {
 		if (!order.ghnOrderCode) return;
-		if (!window.confirm("Are you sure you want to cancel this GHN shipping order?")) return;
+		if (!window.confirm("Bạn có chắc muốn hủy đơn giao hàng GHN này không?")) return;
 		setCancellingCode(order.ghnOrderCode);
 		try {
 			await cancelShippingOrder(order.ghnOrderCode);
-			toast("Cancel request sent successfully.");
+			toast("Đã gửi yêu cầu hủy.");
 			await loadOrders();
 		} catch (err: any) {
 			console.error(err);
-			toast(err?.message || "Failed to cancel shipping order.");
+			toast(err?.message || "Hủy đơn giao hàng thất bại.");
 		} finally {
 			setCancellingCode(null);
 		}
@@ -761,28 +768,28 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 	};
 
 	const tabs = [
-		{ id: "pending" as TabKey, label: "Pending Orders", icon: Package },
-		{ id: "shipping" as TabKey, label: "Shipping/Delivered", icon: Truck },
-		{ id: "cancelled" as TabKey, label: "Cancelled", icon: XCircle },
+		{ id: "pending" as TabKey, label: "Đơn chờ xử lý", icon: Package },
+		{ id: "shipping" as TabKey, label: "Đang giao/Đã giao", icon: Truck },
+		{ id: "cancelled" as TabKey, label: "Đã hủy", icon: XCircle },
 	];
 	const safeReviews = Array.isArray(reviews) ? reviews : [];
 	const safeReturns = Array.isArray(returns) ? returns : [];
 	const returnFilterLabels: Record<ReturnPhase | "all", string> = {
-		all: "All",
-		pending: "Pending",
-		approved: "Approved",
-		receiving: "Receiving",
-		completed: "Completed",
-		rejected: "Rejected",
-		other: "Other",
+		all: "Tất cả",
+		pending: "Chờ xử lý",
+		approved: "Đã duyệt",
+		receiving: "Đang nhận",
+		completed: "Hoàn tất",
+		rejected: "Từ chối",
+		other: "Khác",
 	};
 	const returnStatusFilters: Array<{ id: ReturnPhase | "all"; label: string; accent: string }> = [
-		{ id: "all", label: "All", accent: "ring-neutral-200" },
-		{ id: "pending", label: "Pending", accent: "ring-amber-200" },
-		{ id: "approved", label: "Approved", accent: "ring-blue-200" },
-		{ id: "receiving", label: "Receiving", accent: "ring-purple-200" },
-		{ id: "completed", label: "Completed", accent: "ring-emerald-200" },
-		{ id: "rejected", label: "Rejected", accent: "ring-error-200" },
+		{ id: "all", label: "Tất cả", accent: "ring-neutral-200" },
+		{ id: "pending", label: "Chờ xử lý", accent: "ring-amber-200" },
+		{ id: "approved", label: "Đã duyệt", accent: "ring-blue-200" },
+		{ id: "receiving", label: "Đang nhận", accent: "ring-purple-200" },
+		{ id: "completed", label: "Hoàn tất", accent: "ring-emerald-200" },
+		{ id: "rejected", label: "Từ chối", accent: "ring-error-200" },
 	];
 	const returnPhaseCounts = useMemo(() => {
 		const counts: Record<ReturnPhase | "all", number> = {
@@ -815,9 +822,9 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 								<MessageSquare className="w-6 h-6 text-white" />
 							</div>
 							<div>
-								<h1 className="heading-3">Review Management</h1>
+								<h1 className="heading-3">Quản lý đánh giá</h1>
 								<p className="text-sm text-neutral-600 mt-1">
-									Monitor customer reviews and send timely replies.
+									Theo dõi đánh giá của khách và phản hồi kịp thời.
 								</p>
 							</div>
 						</div>
@@ -830,16 +837,16 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							setReviewSearch(reviewSearchInput.trim());
 						}}
 					>
-						<p className="text-sm text-neutral-500">Total reviews: {reviewTotal}</p>
+						<p className="text-sm text-neutral-500">Tổng đánh giá: {reviewTotal}</p>
 						<div className="flex gap-2 w-full md:w-auto">
 							<input
 								className="input w-full md:w-72"
-								placeholder="Search by product or customer"
+								placeholder="Tìm theo sản phẩm hoặc khách hàng"
 								value={reviewSearchInput}
 								onChange={(e) => setReviewSearchInput(e.target.value)}
 							/>
 							<button type="submit" className="btn-secondary whitespace-nowrap">
-								Search
+								Tìm
 							</button>
 							{reviewSearch && (
 								<button
@@ -850,7 +857,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 										setReviewSearchInput("");
 									}}
 								>
-									Clear
+									X?a l?c
 								</button>
 							)}
 						</div>
@@ -859,7 +866,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 					{reviewsLoading ? (
 						<div className="flex flex-col items-center justify-center py-16">
 							<Loader2 className="w-8 h-8 text-neutral-400 animate-spin mb-4" />
-							<p className="text-neutral-600">Loading reviews...</p>
+							<p className="text-neutral-600">Đang tải đánh giá...</p>
 						</div>
 					) : reviewsError ? (
 						<div className="bg-error-50 border border-error-200 rounded-lg p-4">
@@ -870,8 +877,8 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							<div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
 								<MessageSquare className="w-8 h-8 text-neutral-400" />
 							</div>
-							<h3 className="text-lg font-semibold text-neutral-900 mb-2">No Reviews</h3>
-							<p className="text-neutral-600">There are no reviews matching your filters.</p>
+							<h3 className="text-lg font-semibold text-neutral-900 mb-2">Chưa có đánh giá</h3>
+							<p className="text-neutral-600">Không có đánh giá nào phù hợp với bộ lọc.</p>
 						</div>
 					) : (
 						<div className="space-y-4">
@@ -882,13 +889,13 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 										<div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
 											<div>
 												<p className="font-semibold text-neutral-900">
-													{review.product?.name || "Product"} • Review #{review.id}
+													{review.product?.name || "Sản phẩm"} • Đánh giá #{review.id}
 												</p>
 												<p className="text-sm text-neutral-500">
-													{review.user?.name || "Customer"} •{" "}
+													{review.user?.name || "Khách hàng"} •{" "}
 													{review.createdAt
 														? new Date(review.createdAt).toLocaleString()
-														: "Unknown date"}
+														: "Không rõ ngày"}
 												</p>
 											</div>
 											<div className="flex items-center gap-1 text-amber-500">
@@ -903,13 +910,13 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 
 										{(review.reply || review.sellerReply) && (
 											<div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3">
-												<p className="text-xs font-semibold text-neutral-500 mb-1">Your reply</p>
+												<p className="text-xs font-semibold text-neutral-500 mb-1">Phản hồi của shop</p>
 												<p className="text-sm text-neutral-700">
 													{review.reply || review.sellerReply}
 												</p>
 												{review.sellerRepliedAt && (
 													<p className="text-xs text-neutral-500 mt-1">
-														Updated {new Date(review.sellerRepliedAt).toLocaleString()}
+														Cập nhật {new Date(review.sellerRepliedAt).toLocaleString()}
 													</p>
 												)}
 											</div>
@@ -921,7 +928,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 												className="btn-primary"
 												onClick={() => openReplyModal(review)}
 											>
-												{review.reply || review.sellerReply ? "Edit Reply" : "Reply"}
+												{review.reply || review.sellerReply ? "Sửa phản hồi" : "Phản hồi"}
 											</button>
 										</div>
 									</div>
@@ -950,21 +957,21 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 										<RefreshCw className="w-6 h-6" />
 									</div>
 									<div>
-										<h1 className="text-2xl font-semibold text-neutral-900">Return Management</h1>
-										<p className="text-sm text-neutral-600">Review and process customer return requests with a clear summary.</p>
+										<h1 className="text-2xl font-semibold text-neutral-900">Quản lý đổi trả</h1>
+										<p className="text-sm text-neutral-600">Xem và xử lý yêu cầu đổi trả của khách hàng với phần tóm tắt rõ ràng.</p>
 									</div>
 								</div>
 								<div className="flex flex-wrap gap-6 text-sm text-neutral-600">
 									<div>
-										<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Total requests</p>
+										<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Tổng yêu cầu</p>
 										<p className="text-2xl font-bold text-neutral-900">{returnPhaseCounts.all}</p>
 									</div>
 									<div>
-										<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">In progress</p>
+										<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Đang xử lý</p>
 										<p className="text-2xl font-bold text-neutral-900">{pipelineCount}</p>
 									</div>
 									<div>
-										<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Completion rate</p>
+										<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Tỷ lệ hoàn trả</p>
 										<p className="text-2xl font-bold text-neutral-900">{completionRate}%</p>
 									</div>
 								</div>
@@ -973,11 +980,11 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 
 						<div className="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
 							{[
-								{ label: 'Waiting approval', value: returnPhaseCounts.pending, desc: 'Awaiting staff confirmation', badge: 'text-amber-700', bg: 'bg-amber-50' },
-								{ label: 'Approved', value: returnPhaseCounts.approved, desc: 'Ready to receive', badge: 'text-blue-700', bg: 'bg-blue-50' },
-								{ label: 'Receiving', value: returnPhaseCounts.receiving, desc: 'Items on the way', badge: 'text-purple-700', bg: 'bg-purple-50' },
-								{ label: 'Completed', value: returnPhaseCounts.completed, desc: 'Closed successfully', badge: 'text-emerald-700', bg: 'bg-emerald-50' },
-								{ label: 'Rejected', value: returnPhaseCounts.rejected, desc: 'Did not meet policy', badge: 'text-red-700', bg: 'bg-error-50' },
+								{ label: 'Chờ duyệt', value: returnPhaseCounts.pending, desc: 'Chờ nhân viên xác nhận', badge: 'text-amber-700', bg: 'bg-amber-50' },
+								{ label: 'Đã duyệt', value: returnPhaseCounts.approved, desc: 'Sẵn sàng nhận hàng', badge: 'text-blue-700', bg: 'bg-blue-50' },
+								{ label: 'Đang nhận', value: returnPhaseCounts.receiving, desc: 'Hàng đang vận chuyện', badge: 'text-purple-700', bg: 'bg-purple-50' },
+								{ label: 'Hoàn tất', value: returnPhaseCounts.completed, desc: 'Hoàn tất thành công', badge: 'text-emerald-700', bg: 'bg-emerald-50' },
+								{ label: 'Từ chối', value: returnPhaseCounts.rejected, desc: 'Không đáp ứng chính sách', badge: 'text-red-700', bg: 'bg-error-50' },
 							].map((card) => (
 								<div key={card.label} className={`rounded-2xl border border-neutral-100 p-4 shadow-sm ${card.bg}`}>
 									<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">{card.label}</p>
@@ -991,10 +998,10 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 					<div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-4 md:p-6 mb-6 space-y-4">
 						<div className="flex flex-wrap items-center justify-between gap-4">
 							<div>
-								<p className="text-sm font-semibold text-neutral-900">Filters & search</p>
-								<p className="text-xs text-neutral-500">Filter by status or keyword to find requests quickly.</p>
+								<p className="text-sm font-semibold text-neutral-900">Bộ lọc & tìm kiếm</p>
+								<p className="text-xs text-neutral-500">Lọc theo trạng thái hoặc từ khóa tìm nhanh.</p>
 							</div>
-							<p className="text-xs text-neutral-500">Showing {displayedReturns.length} / {returnPhaseCounts.all} requests</p>
+							<p className="text-xs text-neutral-500">Hiển thị {displayedReturns.length} / {returnPhaseCounts.all} yêu cầu</p>
 						</div>
 
 						<form
@@ -1007,14 +1014,14 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							<div className="relative flex-1 w-full md:max-w-md">
 								<input
 									className="input w-full pl-4 pr-24"
-									placeholder="Search by order, customer or SKU..."
+									placeholder="Tìm theo đơn, khách hàng hoặc mã SKU..."
 									value={returnSearchInput}
 									onChange={(e) => setReturnSearchInput(e.target.value)}
 								/>
 								<button
 									type="submit"
 									className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 rounded-lg text-sm font-semibold bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
-								>Search</button>
+								>Tìm</button>
 							</div>
 							{returnSearch && (
 								<button
@@ -1024,7 +1031,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 									setReturnSearch("");
 									setReturnSearchInput("");
 								}}
-								>Clear</button>
+								>Xóa lọc</button>
 							)}
 						</form>
 
@@ -1055,7 +1062,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 					{returnsLoading ? (
 						<div className="flex flex-col items-center justify-center py-16">
 							<Loader2 className="w-8 h-8 text-neutral-400 animate-spin mb-4" />
-							<p className="text-neutral-600">Loading return requests...</p>
+							<p className="text-neutral-600">Đang tải yêu cầu đổi trả...</p>
 						</div>
 					) : returnsError ? (
 						<div className="bg-error-50 border border-error-200 rounded-2xl p-5">
@@ -1066,9 +1073,9 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							<div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
 								<RefreshCw className="w-8 h-8 text-neutral-400" />
 							</div>
-							<h3 className="text-lg font-semibold text-neutral-900 mb-2">No matching requests</h3>
+							<h3 className="text-lg font-semibold text-neutral-900 mb-2">Không có yêu cầu phù hợp</h3>
 							<p className="text-neutral-600">
-								{returnStatusFilter === 'all' ? 'There are no return requests yet.' : `No requests found with status "${returnFilterLabels[returnStatusFilter]}".`}
+								{returnStatusFilter === 'all' ? 'Chưa có yêu cầu đổi/trả.' : `Không tìm thấy yêu cầu với trạng thái "${returnFilterLabels[returnStatusFilter]}".`}
 							</p>
 						</div>
 					) : (
@@ -1084,11 +1091,11 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 										<div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
 											<div>
 												<p className="font-semibold text-neutral-900">
-													Order #{request.orderItem?.order?.id ?? "N/A"} - Item #{request.orderItemId}
+													Đơn #{request.orderItem?.order?.id ?? "Không có"} - Mục #{request.orderItemId}
 												</p>
 												<p className="text-sm text-neutral-500">
-													{request.user?.name || "Customer"} -
-													{request.createdAt ? ` ${new Date(request.createdAt).toLocaleString()}` : " Unknown date"}
+													{request.user?.name || "Khách hàng"} -
+													{request.createdAt ? ` ${new Date(request.createdAt).toLocaleString()}` : " Không rõ ngày"}
 												</p>
 											</div>
 											<div className="flex flex-col gap-1 items-start md:items-end">
@@ -1099,7 +1106,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 												</span>
 												{request.rejectReason && (
 													<span className="text-xs text-error-600 bg-error-50 border border-error-100 px-2 py-1 rounded-lg">
-														Rejected: {request.rejectReason}
+														Từ chối: {request.rejectReason}
 													</span>
 												)}
 											</div>
@@ -1107,41 +1114,41 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 
 										<div className="grid gap-3 md:grid-cols-3">
 											<div className="rounded-xl border border-neutral-100 bg-neutral-50/60 p-4">
-												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Product</p>
+												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Sản phẩm</p>
 												<p className="text-sm text-neutral-900 font-medium mt-1">
-													{request.orderItem?.variant?.product?.name || "N/A"}
+													{request.orderItem?.variant?.product?.name || "Không có"}
 												</p>
 												{request.orderItem?.variant?.sku && (
-													<p className="text-xs text-neutral-500">SKU: {request.orderItem.variant.sku}</p>
+													<p className="text-xs text-neutral-500">Mã SKU: {request.orderItem.variant.sku}</p>
 												)}
 											</div>
 											<div className="rounded-xl border border-neutral-100 bg-neutral-50/60 p-4">
-												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Quantity & price</p>
+												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Số lượng & giá</p>
 												<p className="text-sm text-neutral-900 font-medium mt-1">
-													Qty {request.orderItem?.quantity || 0} - {Number(request.orderItem?.price || 0).toLocaleString("en-US")}
+													SL {request.orderItem?.quantity || 0} - {Number(request.orderItem?.price || 0).toLocaleString("vi-VN")}
 												</p>
 											</div>
 											<div className="md:col-span-1 rounded-xl border border-neutral-100 bg-white p-4">
-												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Customer reason</p>
-												<p className="text-sm text-neutral-700 mt-1">{request.reason || "Not provided."}</p>
+												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Lý do khách hàng</p>
+												<p className="text-sm text-neutral-700 mt-1">{request.reason || "Chưa cung cấp."}</p>
 											</div>
 										</div>
 
 										{evidenceImages.length ? (
 											<div className="rounded-xl border border-dashed border-neutral-200 p-4">
-												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Evidence</p>
+												<p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Bằng chứng</p>
 												<div className="flex flex-wrap gap-3">
 													{evidenceImages.map((image, idx) => (
 														<img
 															key={`${request.id}-${idx}`}
 															src={image}
-															alt={`Return ${request.id} evidence ${idx + 1}`}
+															alt={`Minh chứng đổi trả ${request.id} ảnh ${idx + 1}`}
 															className="h-18 w-18 rounded-xl object-cover border border-neutral-200"
 														/>
 													))}
 													{request.images!.length > evidenceImages.length && (
 														<span className="text-xs text-neutral-500">
-															+{request.images!.length - evidenceImages.length} more
+															+{request.images!.length - evidenceImages.length} ảnh nữa
 														</span>
 													)}
 												</div>
@@ -1150,11 +1157,11 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 
 										<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between pt-4 border-t border-neutral-100">
 											<div className="text-xs text-neutral-500 flex flex-wrap gap-4">
-												<span className="font-semibold text-neutral-900">Request #{request.id}</span>
-												<span>Created at {request.createdAt ? new Date(request.createdAt).toLocaleString() : "Unknown"}</span>
+												<span className="font-semibold text-neutral-900">Yêu cầu #{request.id}</span>
+												<span>Tạo lúc {request.createdAt ? new Date(request.createdAt).toLocaleString() : "Không xác định"}</span>
 											</div>
 											{actions.length === 0 ? (
-												<p className="text-sm text-neutral-500">No further actions.</p>
+												<p className="text-sm text-neutral-500">Không có hành động tiếp theo.</p>
 											) : (
 												<div className="flex flex-wrap gap-2">
 													{actions.map((action) => (
@@ -1167,7 +1174,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 															{returnActionLoading === request.id ? (
 																<>
 																	<Loader2 className="w-4 h-4 animate-spin" />
-																	Updating...
+																	?ang c?p nh?t...
 																</>
 															) : (
 																actionLabels[action]
@@ -1195,9 +1202,9 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							<Truck className="w-6 h-6 text-white" />
 						</div>
 						<div>
-							<h1 className="heading-3">Shipping Management</h1>
+							<h1 className="heading-3">Quản lý giao hàng</h1>
 							<p className="text-sm text-neutral-600 mt-1">
-								Track and process orders, create GHN shipping orders
+							Theo dõi và xử lý đơn hàng, tạo đơn giao hàng GHN
 							</p>
 						</div>
 					</div>
@@ -1236,15 +1243,15 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 				{loading ? (
 					<div className="flex flex-col items-center justify-center py-16">
 						<Loader2 className="w-8 h-8 text-neutral-400 animate-spin mb-4" />
-						<p className="text-neutral-600">Loading orders list...</p>
+						<p className="text-neutral-600">Đang tải danh sách đơn hàng...</p>
 					</div>
 				) : filteredOrders.length === 0 ? (
 					<div className="card text-center py-16">
 						<div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
 							<Package className="w-8 h-8 text-neutral-400" />
 						</div>
-						<h3 className="text-lg font-semibold text-neutral-900 mb-2">No Orders</h3>
-						<p className="text-neutral-600">There are currently no orders in this section.</p>
+						<h3 className="text-lg font-semibold text-neutral-900 mb-2">Không có đơn hàng</h3>
+						<p className="text-neutral-600">Hiện chưa có đơn hàng nào trong mục này.</p>
 					</div>
 				) : (
 					<div className="space-y-4">
@@ -1258,7 +1265,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 													<FileText className="w-5 h-5 text-neutral-600" />
 												</div>
 												<div>
-													<h3 className="font-semibold text-lg text-neutral-900">Order #{order.id}</h3>
+													<h3 className="font-semibold text-lg text-neutral-900">Đơn #{order.id}</h3>
 													{order.ghnOrderCode && (
 														<div className="flex items-center gap-1 mt-1">
 															<Truck className="w-3 h-3 text-neutral-500" />
@@ -1273,18 +1280,18 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 											<div className="flex flex-wrap items-center gap-4 mb-3 text-sm">
 												<div className="flex items-center gap-2 text-neutral-600">
 													<User className="w-4 h-4 text-neutral-400" />
-													<span className="font-medium">{order.user?.name || "N/A"}</span>
+													<span className="font-medium">{order.user?.name || "Không có"}</span>
 												</div>
 												<div className="flex items-center gap-2 text-neutral-600">
 													<Phone className="w-4 h-4 text-neutral-400" />
-													<span>{order.user?.phone || "N/A"}</span>
+													<span>{order.user?.phone || "Không có"}</span>
 												</div>
 												<div className="flex items-center gap-2 text-neutral-600">
 													<Calendar className="w-4 h-4 text-neutral-400" />
 													<span>
 														{order.createdAt
-															? new Date(order.createdAt).toLocaleDateString("en-US")
-															: "N/A"}
+															? new Date(order.createdAt).toLocaleDateString("vi-VN")
+															: "Không có"}
 													</span>
 												</div>
 											</div>
@@ -1300,21 +1307,21 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 												)}
 												<span>
 													{order.shipmentStatus === "delivered"
-														? "Delivered"
+														? "Đã giao"
 														: order.shipmentStatus === "shipping" || order.shipmentStatus === "shipped"
-															? "Shipping"
+															? "Đang giao"
 															: order.shipmentStatus === "cancelled" ||
 																	order.orderStatus?.toLowerCase() === "cancelled"
-																? "Cancelled"
-																: "Pending"}
+																? "Đã hủy"
+																: "Chờ xử lý"}
 												</span>
 											</div>
 										</div>
 
 										<div className="lg:text-right">
-											<p className="text-xs text-neutral-500 mb-1">Total Amount</p>
+											<p className="text-xs text-neutral-500 mb-1">Tổng tiền</p>
 											<p className="text-2xl font-bold text-neutral-900">
-												{Number(order.totalAmount).toLocaleString("en-US")}
+												{Number(order.totalAmount).toLocaleString("vi-VN")}
 											</p>
 										</div>
 									</div>
@@ -1327,19 +1334,19 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 									</div>
 
 									<div className="mb-4">
-										<p className="text-xs font-medium text-neutral-500 mb-2">Products</p>
+										<p className="text-xs font-medium text-neutral-500 mb-2">Sản phẩm</p>
 										<div className="space-y-1">
 											{order.items?.slice(0, 3).map((item) => (
 												<div key={item.id} className="flex items-center justify-between text-sm">
 													<span className="text-neutral-700">
-														{item.variant?.product?.name || "Product"}
+														{item.variant?.product?.name || "Sản phẩm"}
 													</span>
 													<span className="text-neutral-500 font-medium">x{item.quantity}</span>
 												</div>
 											))}
 											{(order.items?.length || 0) > 3 && (
 												<p className="text-xs text-neutral-500 mt-2">
-													...and {order.items!.length - 3} more products
+													...và {order.items!.length - 3} sản phẩm nữa
 												</p>
 											)}
 										</div>
@@ -1350,7 +1357,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 											isOrderCancelled(order) ? (
 												<div className="flex items-center gap-2 text-sm text-error-600">
 													<XCircle className="w-4 h-4" />
-													<span>Order Cancelled</span>
+													<span>Đơn đã hủy</span>
 												</div>
 											) : (
 												<button
@@ -1358,7 +1365,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 													onClick={() => openCreateForm(order)}
 												>
 													<Truck className="w-4 h-4" />
-													Create GHN Order
+													Tạo đơn GHN
 												</button>
 											)
 										) : activeTab === "shipping" ? (
@@ -1371,25 +1378,25 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 													{cancellingCode === order.ghnOrderCode ? (
 														<>
 															<Loader2 className="w-4 h-4 animate-spin" />
-															Cancelling...
+															Đang hủy...
 														</>
 													) : (
 														<>
 															<XCircle className="w-4 h-4" />
-															Cancel Shipping
+															Hủy giao hàng
 														</>
 													)}
 												</button>
 											) : (
 												<div className="flex items-center gap-2 text-sm text-neutral-500">
 													<AlertCircle className="w-4 h-4" />
-													<span>No GHN Code</span>
+													<span>Không có mã GHN</span>
 												</div>
 											)
 										) : (
 											<div className="flex items-center gap-2 text-sm text-error-600 font-medium">
 												<XCircle className="w-4 h-4" />
-												<span>Shipping Cancelled</span>
+												<span>Đã hủy giao hàng</span>
 											</div>
 										)}
 									</div>
@@ -1491,8 +1498,8 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 									<Truck className="w-5 h-5 text-white" />
 								</div>
 								<div>
-									<h2 className="heading-4">Create GHN Shipping Order</h2>
-									<p className="text-sm text-neutral-600">Order #{selectedOrder.id}</p>
+									<h2 className="heading-4">Tạo đơn giao hàng GHN</h2>
+									<p className="text-sm text-neutral-600">Đơn #{selectedOrder.id}</p>
 								</div>
 							</div>
 							<button
@@ -1509,16 +1516,16 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							<div className="space-y-4">
 								<h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
 									<User className="w-4 h-4" />
-									Recipient Information
+									Thông tin người nhận
 								</h3>
 								<div className="grid md:grid-cols-2 gap-4">
 									<div>
 										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
-											Recipient Name <span className="text-error-500">*</span>
+											Tên người nhận <span className="text-error-500">*</span>
 										</label>
 										<input
 											className="input"
-											placeholder="Enter recipient name"
+											placeholder="Nhập tên người nhận"
 											value={form.toName}
 											onChange={(e) => setForm({ ...form, toName: e.target.value })}
 											required
@@ -1526,11 +1533,11 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 									</div>
 									<div>
 										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
-											Phone Number <span className="text-error-500">*</span>
+											Số điện thoại <span className="text-error-500">*</span>
 										</label>
 										<input
 											className="input"
-											placeholder="Enter phone number"
+											placeholder="Nhập số điện thoại"
 											value={form.toPhone}
 											onChange={(e) => setForm({ ...form, toPhone: e.target.value })}
 											required
@@ -1543,15 +1550,15 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							<div className="space-y-4">
 								<h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
 									<MapPin className="w-4 h-4" />
-									Shipping Address
+									Địa chỉ giao hàng
 								</h3>
 								<div>
 									<label className="block text-sm font-medium text-neutral-700 mb-1.5">
-										Detailed Address <span className="text-error-500">*</span>
+										Địa chỉ chi tiết <span className="text-error-500">*</span>
 									</label>
 									<textarea
 										className="input min-h-[80px] resize-none"
-										placeholder="House number, street name..."
+										placeholder="Số nhà, tên đường..."
 										value={form.toAddress}
 										onChange={(e) => setForm({ ...form, toAddress: e.target.value })}
 										required
@@ -1560,52 +1567,52 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 								<div className="grid md:grid-cols-3 gap-4">
 									<div>
 										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
-											Ward
+											Phường/Xã
 										</label>
 										<input
 											className="input"
-											placeholder="Enter ward"
+											placeholder="Nhập phường/xã"
 											value={wardName}
 											onChange={(e) => handleWardInputChange(e.target.value)}
 										/>
 										{matchedNames.ward && (
 											<p className="text-xs text-success-600 mt-1 flex items-center gap-1">
 												<CheckCircle2 className="w-3 h-3" />
-												Matched: {matchedNames.ward}
+												Khớp: {matchedNames.ward}
 											</p>
 										)}
 									</div>
 									<div>
 										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
-											District
+											Quận/Huyện
 										</label>
 										<input
 											className="input"
-											placeholder="Enter district"
+											placeholder="Nhập quận/huyện"
 											value={districtName}
 											onChange={(e) => handleDistrictInputChange(e.target.value)}
 										/>
 										{matchedNames.district && (
 											<p className="text-xs text-success-600 mt-1 flex items-center gap-1">
 												<CheckCircle2 className="w-3 h-3" />
-												Matched: {matchedNames.district}
+												Khớp: {matchedNames.district}
 											</p>
 										)}
 									</div>
 									<div>
 										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
-											Province / City
+											Tỉnh/Thành phố
 										</label>
 										<input
 											className="input"
-											placeholder="Enter province/city"
+											placeholder="Nhập tỉnh/thành phố"
 											value={form.toProvinceName || ""}
 											onChange={(e) => handleProvinceInputChange(e.target.value)}
 										/>
 										{matchedNames.province && (
 											<p className="text-xs text-success-600 mt-1 flex items-center gap-1">
 												<CheckCircle2 className="w-3 h-3" />
-												Matched: {matchedNames.province}
+												Khớp: {matchedNames.province}
 											</p>
 										)}
 									</div>
@@ -1614,30 +1621,30 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							{/* Debug Info (Collapsible) */}
 							{Boolean(parsedAddress || matchedNames.ward || matchedNames.district || matchedNames.province) && (
 								<div className="bg-neutral-50 rounded-lg p-4 border border-neutral-200">
-									<p className="text-xs font-semibold text-neutral-700 mb-2">Address Matching Info</p>
+									<p className="text-xs font-semibold text-neutral-700 mb-2">Thông tin đối chiếu địa chỉ</p>
 									<div className="space-y-1.5 text-xs">
 										<div className="flex items-center gap-2">
-											<span className="text-neutral-500">Customer entered:</span>
+											<span className="text-neutral-500">Khách hàng nhập:</span>
 											<span className="text-neutral-700 font-mono">
 												{parsedAddress?.ward || "?"}, {parsedAddress?.district || "?"},{" "}
 												{parsedAddress?.province || "?"}
 											</span>
 										</div>
 										<div className="flex items-center gap-2">
-											<span className="text-neutral-500">Matched:</span>
+											<span className="text-neutral-500">Khớp:</span>
 											<span className="text-success-600 font-medium">
 												{matchedNames.ward || "?"}, {matchedNames.district || "?"}, {matchedNames.province || "?"}
 											</span>
 										</div>
 										<div className="flex items-center gap-2">
-											<span className="text-neutral-500">GHN Code:</span>
+											<span className="text-neutral-500">Mã GHN:</span>
 											<span className="font-mono text-neutral-700">
-												{form.toWardCode || "Not determined"}
+												{form.toWardCode || "Chưa xác định"}
 											</span>
 											<span className="text-neutral-400">·</span>
-											<span className="text-neutral-500">District ID:</span>
+											<span className="text-neutral-500">Mã quận/huyện:</span>
 											<span className="font-mono text-neutral-700">
-												{form.toDistrictId ? form.toDistrictId : "Not determined"}
+												{form.toDistrictId ? form.toDistrictId : "Chưa xác định"}
 											</span>
 										</div>
 									</div>
@@ -1648,14 +1655,14 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							<div className="space-y-4">
 								<h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
 									<Box className="w-4 h-4" />
-									Dimensions & Weight
+									Kích thước & Khối lượng
 								</h3>
 								<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 									{([
-										{ field: "weight" as const, label: "Weight (g)", icon: Weight },
-										{ field: "length" as const, label: "Length (cm)", icon: Ruler },
-										{ field: "width" as const, label: "Width (cm)", icon: Ruler },
-										{ field: "height" as const, label: "Height (cm)", icon: Ruler },
+										{ field: "weight" as const, label: "Khối lượng (g)", icon: Weight },
+										{ field: "length" as const, label: "Dài (cm)", icon: Ruler },
+										{ field: "width" as const, label: "Rộng (cm)", icon: Ruler },
+										{ field: "height" as const, label: "Cao (cm)", icon: Ruler },
 									] as const).map(({ field, label, icon: Icon }) => (
 										<div key={field}>
 											<label className="block text-sm font-medium text-neutral-700 mb-1.5">
@@ -1685,12 +1692,12 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 							<div className="space-y-4">
 								<h3 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
 									<DollarSign className="w-4 h-4" />
-									Payment Information
+									Thông tin thanh toán
 								</h3>
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<div>
 										<label className="block text-sm font-medium text-neutral-700 mb-1.5">
-											COD Amount (₫)
+											Tiền thu hộ (₫)
 										</label>
 										<input
 											className="input"
@@ -1703,7 +1710,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 									<div>
 										<label className="block text-sm font-medium text-neutral-700 mb-1.5 flex items-center gap-2">
 											<Shield className="w-4 h-4" />
-											Insurance Value (₫)
+											Giá trị bảo hiểm (₫)
 										</label>
 										<input
 											className="input"
@@ -1717,11 +1724,11 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 								<div>
 									<label className="block text-sm font-medium text-neutral-700 mb-1.5 flex items-center gap-2">
 										<MessageSquare className="w-4 h-4" />
-										Note
+										Ghi chú
 									</label>
 									<textarea
 										className="input min-h-[80px] resize-none"
-										placeholder="Enter note (optional)..."
+										placeholder="Nhập ghi chú (không bắt buộc)..."
 										value={form.note || ""}
 										onChange={(e) => setForm({ ...form, note: e.target.value })}
 									/>
@@ -1733,7 +1740,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 								<div className="bg-error-50 border border-error-200 rounded-lg p-4 flex items-start gap-3">
 									<AlertCircle className="w-5 h-5 text-error-600 flex-shrink-0 mt-0.5" />
 									<div>
-										<p className="text-sm font-medium text-error-900">An error occurred</p>
+										<p className="text-sm font-medium text-error-900">Đã xảy ra lỗi</p>
 										<p className="text-sm text-error-700 mt-1">{error}</p>
 									</div>
 								</div>
@@ -1748,7 +1755,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 									disabled={submitting}
 								>
 									<X className="w-4 h-4" />
-									Cancel
+									Hủy
 								</button>
 								<button
 									type="submit"
@@ -1758,12 +1765,12 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 									{submitting ? (
 										<>
 											<Loader2 className="w-4 h-4 animate-spin" />
-											Creating...
+											Đang tạo...
 										</>
 									) : (
 										<>
 											<CheckCircle2 className="w-4 h-4" />
-											Create Shipping Order
+											Tạo đơn giao hàng
 										</>
 									)}
 								</button>
@@ -1777,9 +1784,9 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 					<div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden">
 						<div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
 							<div>
-								<p className="text-xs text-neutral-500">Responding to review #{replyingReview.id}</p>
+								<p className="text-xs text-neutral-500">Đang phản hồi đánh giá #{replyingReview.id}</p>
 								<h3 className="text-lg font-semibold text-neutral-900">
-									{replyingReview.user?.name || "Customer"}
+									{replyingReview.user?.name || "Khách hàng"}
 								</h3>
 							</div>
 							<button
@@ -1791,18 +1798,18 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 						</div>
 						<form onSubmit={handleSubmitReply} className="p-6 space-y-4">
 							<div className="space-y-1">
-								<p className="text-xs font-semibold text-neutral-500">Customer comment</p>
+								<p className="text-xs font-semibold text-neutral-500">Bình luận của khách</p>
 								<div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-sm text-neutral-700">
 									{replyingReview.comment}
 								</div>
 							</div>
 							<div>
 								<label className="block text-sm font-medium text-neutral-700 mb-1.5">
-									Your reply <span className="text-error-500">*</span>
+									Phản hồi của bạn <span className="text-error-500">*</span>
 								</label>
 								<textarea
 									className="input min-h-[120px] resize-none"
-									placeholder="Type your reply..."
+									placeholder="Nhập phản hồi..."
 									value={replyMessage}
 									onChange={(e) => setReplyMessage(e.target.value)}
 									required
@@ -1815,18 +1822,18 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 									onClick={closeReplyModal}
 									disabled={replySubmitting}
 								>
-									Cancel
+									Hủy
 								</button>
 								<button type="submit" className="btn-primary flex items-center gap-2" disabled={replySubmitting}>
 									{replySubmitting ? (
 										<>
 											<Loader2 className="w-4 h-4 animate-spin" />
-											Sending...
+											Đang gửi...
 										</>
 									) : (
 										<>
 											<CheckCircle2 className="w-4 h-4" />
-											Send Reply
+											Gửi phản hồi
 										</>
 									)}
 								</button>

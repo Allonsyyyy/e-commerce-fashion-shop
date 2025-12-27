@@ -342,31 +342,43 @@ export default function Checkout() {
 				...(appliedDiscountCode ? { discountCode: appliedDiscountCode } : {}),
 			};
 
-			const response = isBuyNowMode && buyNowItem
-				? await buyNow(token, {
-						variantId: buyNowItem.variantId,
-						quantity: buyNowItem.quantity,
-						...commonPayload,
-				  })
-				: await checkoutFromCart(token, commonPayload);
+		const response = isBuyNowMode && buyNowItem
+			? await buyNow(token, {
+					variantId: buyNowItem.variantId,
+					quantity: buyNowItem.quantity,
+					...commonPayload,
+			  })
+			: await checkoutFromCart(token, commonPayload);
 
-			const orderPayload = response.order ?? response;
+		const orderPayload = response.order ?? response;
+		const clientTotals = {
+			originalSubtotal: subtotal,
+			discountAmount: appliedDiscountCode ? discountAmount : 0,
+			discountedSubtotal,
+			shippingFee: normalizedShippingFee,
+			total,
+		};
+		const checkoutSnapshot = {
+			...clientTotals,
+			createdAt: Date.now(),
+		};
 
-			if (paymentMethod === "vnpay" && response.payUrl) {
-				sessionStorage.removeItem("buyNowItem");
-				window.location.href = response.payUrl;
-				return;
-			}
-
-			const clientTotals = {
-				originalSubtotal: subtotal,
-				discountAmount: appliedDiscountCode ? discountAmount : 0,
-				discountedSubtotal,
-				shippingFee: normalizedShippingFee,
-				total,
+		if (paymentMethod === "vnpay" && response.payUrl) {
+			const storedTotals = {
+				...clientTotals,
+				orderId: orderPayload?.id ?? null,
+				createdAt: Date.now(),
 			};
-
+			localStorage.setItem("orderTotals", JSON.stringify(storedTotals));
+			sessionStorage.setItem("orderTotals", JSON.stringify(storedTotals));
+			localStorage.setItem("checkoutTotals", JSON.stringify(checkoutSnapshot));
 			sessionStorage.removeItem("buyNowItem");
+			window.location.href = response.payUrl;
+			return;
+		}
+
+		sessionStorage.removeItem("buyNowItem");
+		localStorage.setItem("checkoutTotals", JSON.stringify(checkoutSnapshot));
 			const orderId = orderPayload?.id;
 			const url = orderId ? `/order-success?orderId=${orderId}` : "/order-success";
 			navigate(url, {

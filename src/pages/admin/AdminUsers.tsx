@@ -33,7 +33,7 @@ export default function AdminUsers() {
             setUsers(data.data);
             setTotal(data.total);
         } catch (err) {
-            console.error("Failed to load users:", err);
+            console.error("Tải danh sách người dùng thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -110,9 +110,14 @@ export default function AdminUsers() {
             staff: "bg-blue-100 text-blue-800",
             user: "bg-neutral-100 text-neutral-800",
         };
+        const labels: Record<string, string> = {
+            admin: "Quản trị",
+            staff: "Nhân viên",
+            user: "Người dùng",
+        };
         return (
             <span className={`px-2 py-1 rounded text-sm ${colors[role] || "bg-neutral-100 text-neutral-800"}`}>
-                {role}
+                {labels[role] || role}
             </span>
         );
     };
@@ -132,7 +137,7 @@ export default function AdminUsers() {
                                     <tr>
                                         <th className="px-6 py-3 text-left">ID</th>
                                         <th className="px-6 py-3 text-left">Tên</th>
-                                        <th className="px-6 py-3 text-left">Email</th>
+                                        <th className="px-6 py-3 text-left">Địa chỉ email</th>
                                         <th className="px-6 py-3 text-left">Số điện thoại</th>
                                         <th className="px-6 py-3 text-left">Vai trò</th>
                                         <th className="px-6 py-3 text-left">Xác thực</th>
@@ -216,7 +221,7 @@ export default function AdminUsers() {
                                 />
                                 <input
                                     type="email"
-                                    placeholder="Email"
+                                    placeholder="Địa chỉ email"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -243,9 +248,9 @@ export default function AdminUsers() {
                                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                     required
                                 >
-                                    <option value="user">User</option>
-                                    <option value="staff">Staff</option>
-                                    <option value="admin">Admin</option>
+                                    <option value="user">Người dùng</option>
+                                    <option value="staff">Nhân viên</option>
+                                    <option value="admin">Quản trị</option>
                                 </select>
                                 <label className="flex items-center gap-2">
                                     <input

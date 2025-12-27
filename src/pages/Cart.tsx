@@ -27,7 +27,7 @@ export default function Cart() {
 		);
 	}, [cart?.items]);
 
-	if (!cart) return <div className="py-20 text-center">Loading...</div>;
+	if (!cart) return <div className="py-20 text-center">Đang tải...</div>;
 
 	const handleCheckout = () => {
 		const token = localStorage.getItem("token");
@@ -80,7 +80,7 @@ export default function Cart() {
 												// Update cart state - totalPrice will be calculated automatically
 												setCart(updated);
 											} catch (error) {
-												console.error("Failed to update cart item:", error);
+												console.error("Cập nhật sản phẩm trong giỏ thất bại:", error);
 												toast("Cập nhật số lượng thất bại. Vui lòng thử lại.");
 											}
 										}}
@@ -102,7 +102,7 @@ export default function Cart() {
 												items: prevCart.items.filter((it: any) => it.id !== item.id),
 											}));
 										} catch (error) {
-											console.error("Failed to remove cart item:", error);
+											console.error("Xóa sản phẩm khỏi giỏ thất bại:", error);
 											toast("Xóa sản phẩm thất bại. Vui lòng thử lại.");
 										}
 									}}
@@ -116,7 +116,7 @@ export default function Cart() {
 					<div className="card h-fit">
 						<h2 className="heading-4">Tổng tiền</h2>
 						<p className="mt-4 font-bold text-lg text-neutral-900">
-							Total: {totalPrice.toLocaleString()}₫
+							Tổng: {totalPrice.toLocaleString()}₫
 						</p>
 
 						<button className="btn-primary mt-6 w-full" onClick={handleCheckout}>
@@ -138,7 +138,7 @@ export default function Cart() {
 										items: [],
 									}));
 								} catch (error) {
-									console.error("Failed to clear cart:", error);
+									console.error("Xóa giỏ hàng thất bại:", error);
 									toast("Xóa giỏ hàng thất bại. Vui lòng thử lại.");
 								}
 							}}

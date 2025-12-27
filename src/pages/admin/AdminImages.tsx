@@ -37,7 +37,7 @@ export default function AdminImages() {
             });
             setImages(allImages);
         } catch (err) {
-            console.error("Failed to load data:", err);
+            console.error("Tải dữ liệu thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -140,7 +140,7 @@ export default function AdminImages() {
                                 {images.map((image) => (
                                     <tr key={image.id} className="border-t">
                                         <td className="px-6 py-4">{image.id}</td>
-                                        <td className="px-6 py-4">{image.productName || "N/A"}</td>
+                                        <td className="px-6 py-4">{image.productName || "Không có"}</td>
                                         <td className="px-6 py-4">
                                             <img src={image.imageUrl} alt="" className="w-16 h-16 object-cover rounded" />
                                         </td>

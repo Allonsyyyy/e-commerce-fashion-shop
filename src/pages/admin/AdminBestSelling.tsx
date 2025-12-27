@@ -27,7 +27,7 @@ export default function AdminBestSelling() {
 			});
 			setProducts(data);
 		} catch (err) {
-			console.error("Failed to load best sellers:", err);
+			console.error("Tải danh sách bán chạy thất bại:", err);
 			setProducts([]);
 		} finally {
 			setLoading(false);

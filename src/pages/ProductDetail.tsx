@@ -42,7 +42,7 @@ export default function ProductDetail() {
 				setQuantity(1);
 				setActionMessage(null);
 			})
-			.catch((err) => console.error("Fetch product failed:", err));
+			.catch((err) => console.error("Tải sản phẩm thất bại:", err));
 	}, [id]);
 
 	useEffect(() => {
@@ -56,7 +56,7 @@ export default function ProductDetail() {
 				setReviews(res.data);
 				setReviewsTotal(res.total);
 			} catch (err: any) {
-				console.error("Failed to load reviews", err);
+				console.error("Tải đánh giá thất bại", err);
 				setReviewsError("Không tải được đánh giá.");
 			} finally {
 				setReviewsLoading(false);
@@ -107,7 +107,7 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 
 	const handleBuyNow = () => {
 		if (!selectedVariant) {
-			setActionMessage("Vui lòng chọn màu / size.");
+			setActionMessage("Vui lòng chọn màu / kích thước.");
 			setActionMessageTone("error");
 			return;
 		}
@@ -296,7 +296,7 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 								className="btn-primary flex-1 px-8 py-3"
 							onClick={async () => {
 								if (!selectedVariant) {
-									setActionMessage("Vui lòng chọn màu / size.");
+									setActionMessage("Vui lòng chọn màu / kích thước.");
 									setActionMessageTone("error");
 									return;
 								}
@@ -320,7 +320,7 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 											}),
 										}).then((res) => res.json());
 
-									console.log("Added to cart:", res);
+									console.log("Đã thêm vào giỏ:", res);
 									setActionMessage("Đã thêm vào giỏ!");
 									setActionMessageTone("success");
 								} catch (error) {

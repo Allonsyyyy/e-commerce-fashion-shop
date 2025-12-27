@@ -31,7 +31,7 @@ export default function AdminShipping() {
             setShippings(data.data);
             setTotal(data.total);
         } catch (err) {
-            console.error("Failed to load shippings:", err);
+            console.error("Tải danh sách giao hàng thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -88,9 +88,15 @@ export default function AdminShipping() {
             delivered: "bg-green-100 text-green-800",
             cancelled: "bg-red-100 text-red-800",
         };
+        const labels: Record<string, string> = {
+            pending: "Đang chờ",
+            shipped: "Đã gửi",
+            delivered: "Đã giao",
+            cancelled: "Đã hủy",
+        };
         return (
             <span className={`px-2 py-1 rounded text-sm ${colors[status] || "bg-neutral-100 text-neutral-800"}`}>
-                {status}
+                {labels[status] || status}
             </span>
         );
     };
