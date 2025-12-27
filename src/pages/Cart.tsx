@@ -62,6 +62,13 @@ export default function Cart() {
 								/>
 								<div className="flex-1">
 									<p className="font-medium">{item.variant.product.name}</p>
+									{(item.variant.color || item.variant.size) && (
+										<p className="mt-1 text-sm text-neutral-600">
+											{item.variant.color?.color ? `Màu sắc: ${item.variant.color.color}` : ""}
+											{item.variant.color?.color && item.variant.size?.size ? " | " : ""}
+											{item.variant.size?.size ? `Kích cỡ: ${item.variant.size.size}` : ""}
+										</p>
+									)}
 									<p className="font-semibold mt-1">
 										{Number(item.price).toLocaleString()}
 									</p>

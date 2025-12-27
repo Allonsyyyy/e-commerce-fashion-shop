@@ -65,9 +65,7 @@ export default function ProductDetail() {
 		loadReviews();
 	}, [id]);
 
-if (!product) return <div className="py-20 text-center">Đang tải...</div>;
-
-	const variants = product.variants ?? [];
+	const variants = product?.variants ?? [];
 	const uniqueColors = Array.from(
 		new Map(variants.filter((v) => v.color).map((v) => [v.color?.id, v.color])).values(),
 	);
@@ -92,11 +90,26 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 	};
 
 	const activeVariant = variants.find((v) => v.id === selectedVariant);
+	const rawStock = Number(activeVariant?.stock ?? product?.stock ?? 0);
+	const availableStock = Math.max(0, Number.isFinite(rawStock) ? rawStock : 0);
+	const outOfStock = availableStock <= 0;
+	const canPurchase =
+		Boolean(selectedVariant) && !outOfStock && quantity > 0 && quantity <= availableStock;
+
+	useEffect(() => {
+		if (outOfStock) return;
+		if (quantity > availableStock) {
+			setQuantity(availableStock);
+		}
+	}, [availableStock, outOfStock, quantity]);
+	if (!product) return <div className="py-20 text-center">Dang tai...</div>;
+
+
 	const price = Number(activeVariant?.price ?? product.price);
 	const discount = Number(product.discount);
-	const finalPrice = price.toLocaleString("vi-VN") + "₫";
+	const finalPrice = price.toLocaleString("vi-VN") + "d";
 	const originalPrice =
-		discount > 0 ? (price / (1 - discount / 100)).toLocaleString("vi-VN") + "₫" : null;
+		discount > 0 ? (price / (1 - discount / 100)).toLocaleString("vi-VN") + "d" : null;
 
 	const mainImage =
 		selectedImage ||
@@ -108,6 +121,11 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 	const handleBuyNow = () => {
 		if (!selectedVariant) {
 			setActionMessage("Vui lòng chọn màu / kích thước.");
+			setActionMessageTone("error");
+			return;
+		}
+		if (outOfStock || quantity <= 0 || quantity > availableStock) {
+			setActionMessage("San phẩm đã hết hàng.");
 			setActionMessageTone("error");
 			return;
 		}
@@ -272,31 +290,50 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 							</div>
 						)}
 
-							{/* QUANTITY */}
-						<div className="mt-4">
-							<label className="block text-sm text-neutral-700 mb-1">Số lượng</label>
-							<input
-								type="number"
-								min={1}
-								value={quantity}
-								onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
-								className="w-24 border rounded px-3 py-2"
-							/>
-						</div>
+																	{/* QUANTITY */}
+					<div className="mt-4">
+						<label className="block text-sm text-neutral-700 mb-1">So luong</label>
+						<input
+							type="number"
+							min={1}
+							max={availableStock || 1}
+							value={quantity}
+							disabled={outOfStock}
+							onChange={(e) => {
+								const next = Number(e.target.value);
+								if (!Number.isFinite(next)) return;
+								const clamped = Math.max(1, Math.min(availableStock || 1, next));
+								setQuantity(clamped);
+							}}
+							className="w-24 border rounded px-3 py-2"
+						/>
+					</div>
 
-						{/* STOCK */}
+					{!outOfStock && (
 						<div className="mt-4 text-sm text-neutral-600">
-							Tồn kho: {activeVariant?.stock ?? product.stock} sản phẩm
+							{`Ton kho: ${availableStock} san pham`}
 						</div>
+					)}
+					{outOfStock && (
+						<div className="mt-2 text-sm text-red-600">
+							Mẫu đã hết hàng hãy chọn mẫu khác
+						</div>
+					)}
 
-						{/* ACTION BUTTONS */}
-						<div className="mt-8 flex flex-col sm:flex-row gap-4">
-							{/* Thêm vào giỏ (giữ như bạn) */}
-							<button
-								className="btn-primary flex-1 px-8 py-3"
+										{/* ACTION BUTTONS */}
+					<div className="mt-8 flex flex-col sm:flex-row gap-4">
+						{/* Them vao gio */}
+						<button
+							className="btn-primary flex-1 px-8 py-3"
+							disabled={!canPurchase}
 							onClick={async () => {
 								if (!selectedVariant) {
-									setActionMessage("Vui lòng chọn màu / kích thước.");
+									setActionMessage("Vui lòng chon màu / kích thước.");
+									setActionMessageTone("error");
+									return;
+								}
+								if (outOfStock || quantity <= 0 || quantity > availableStock) {
+									setActionMessage("Sản phẩm đã hết hàng.");
 									setActionMessageTone("error");
 									return;
 								}
@@ -307,21 +344,21 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 									return;
 								}
 
-									try {
-										const res = await fetch("http://localhost:3000/api/v1/cart/add", {
-											method: "POST",
-											headers: {
-												"Content-Type": "application/json",
-												Authorization: `Bearer ${token}`,
-											},
-											body: JSON.stringify({
-												variantId: selectedVariant,
-												quantity: 1,
-											}),
-										}).then((res) => res.json());
+								try {
+									const res = await fetch("http://localhost:3000/api/v1/cart/add", {
+										method: "POST",
+										headers: {
+											"Content-Type": "application/json",
+											Authorization: `Bearer ${token}`,
+										},
+										body: JSON.stringify({
+											variantId: selectedVariant,
+											quantity,
+										}),
+									}).then((res) => res.json());
 
-									console.log("Đã thêm vào giỏ:", res);
-									setActionMessage("Đã thêm vào giỏ!");
+									console.log("Da them vao gio?:", res);
+									setActionMessage("Đã thêm vào giỏ hàng!");
 									setActionMessageTone("success");
 								} catch (error) {
 									console.error(error);
@@ -330,12 +367,13 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 								}
 							}}
 						>
-							Thêm vào giỏ
+							Thêm vào giỏ hàng
 						</button>
 
-							{/* Buy Now */}
+						{/* Buy Now */}
 						<button
 							className="btn-secondary px-8 py-3"
+							disabled={!canPurchase}
 							onClick={handleBuyNow}
 						>
 							Mua ngay
@@ -422,3 +460,22 @@ if (!product) return <div className="py-20 text-center">Đang tải...</div>;
 		</main>
 	);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
