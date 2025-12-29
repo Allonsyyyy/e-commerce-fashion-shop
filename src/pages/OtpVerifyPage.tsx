@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShieldCheck, ArrowRight, RefreshCw } from "lucide-react";
 import Container from "../components/Container";
 import { forgotPassword, verifyOtp } from "../api/authApi";
+import {toast} from "../utils/toast.ts";
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 300;
