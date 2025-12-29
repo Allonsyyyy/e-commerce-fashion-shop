@@ -57,6 +57,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const adminMenuItems = [
         { path: "/admin/best-selling", icon: TrendingUp, label: "Bán chạy" },
         { path: "/admin/revenue", icon: DollarSign, label: "Doanh thu" },
+        { path: "/admin/staff-users", icon: Users, label: "Nhân viên" },
     ];
 
     const isAdmin = userRole === "admin";

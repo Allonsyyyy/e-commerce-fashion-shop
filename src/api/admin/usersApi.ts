@@ -39,11 +39,13 @@ export async function getUsers(token: string, params?: {
     page?: number;
     limit?: number;
     sort?: string;
+    role?: string;
 }): Promise<UsersResponse> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append("page", params.page.toString());
     if (params?.limit) queryParams.append("limit", params.limit.toString());
     if (params?.sort) queryParams.append("sort", params.sort);
+    if (params?.role) queryParams.append("role", params.role);
 
     const url = `${API_BASE}/users${queryParams.toString() ? `?${queryParams}` : ""}`;
     const res = await fetch(url, {

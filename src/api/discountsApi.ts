@@ -7,6 +7,32 @@ export type DiscountApplyResponse = {
 	newTotal: number;
 };
 
+export type Discount = {
+	id: number;
+	code: string;
+	description?: string | null;
+	discountPercent: number;
+	startDate: string;
+	endDate: string;
+	usageLimit: number;
+	usedCount: number;
+	createdAt?: string;
+	updatedAt?: string;
+};
+
+export async function getAllDiscounts(): Promise<Discount[]> {
+	const res = await fetch(`${API_BASE}/discounts`, {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
+	if (!res.ok) {
+		throw new Error(await res.text());
+	}
+	return (await res.json()) as Discount[];
+}
+
 export async function applyDiscount(code: string, totalAmount: number) {
 	const res = await fetch(`${API_BASE}/discounts/apply`, {
 		method: "POST",

@@ -1,5 +1,5 @@
-﻿import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+﻿import { useEffect, useState } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { login } from "../api/authApi";
 import Container from "../components/Container";
 import { LogIn, Mail, Lock, ArrowRight } from "lucide-react";
@@ -9,7 +9,22 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        const state = location.state as { verified?: boolean; resetSuccess?: boolean } | null;
+        if (state?.verified) {
+            setSuccess("Xác thực thành công, hãy đăng nhập lại.");
+            navigate("/login", { replace: true });
+            return;
+        }
+        if (state?.resetSuccess) {
+            setSuccess("Đổi mật khẩu thành công, hãy đăng nhập lại.");
+            navigate("/login", { replace: true });
+        }
+    }, [location.state, navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,7 +37,27 @@ export default function LoginPage() {
             navigate("/");
             window.location.reload();
         } catch (err: any) {
-            setError(err.message || "Đăng nhập thất bại! Vui lòng kiểm tra thông tin.");
+            const rawMessage = (err?.message || "").toString();
+            let message = rawMessage;
+            let statusCode = err?.status;
+            try {
+                const parsed = JSON.parse(rawMessage);
+                message = parsed?.message || rawMessage;
+                statusCode = parsed?.statusCode || statusCode;
+            } catch {
+                // ignore JSON parse errors
+            }
+            const normalized = message.toLowerCase();
+            const isUnverified =
+                statusCode === 403 &&
+                (normalized.includes("xac thuc") || normalized.includes("xác thực") || normalized.includes("xac thực"));
+            if (isUnverified) {
+                sessionStorage.setItem("otpEmail", email);
+                sessionStorage.setItem("otpMode", "verify");
+                navigate("/verify-otp", { state: { email, mode: "verify" } });
+                return;
+            }
+            setError(message || "Đăng nhập thất bại! Vui lòng kiểm tra thông tin.");
         } finally {
             setLoading(false);
         }
@@ -87,6 +122,21 @@ export default function LoginPage() {
                                         required
                                     />
                                 </div>
+                            </div>
+
+                            {success && (
+                                <div className="text-sm text-emerald-600 font-medium">
+                                    {success}
+                                </div>
+                            )}
+
+                            <div className="flex items-center justify-end">
+                                <Link
+                                    to="/forgot-password"
+                                    className="text-sm font-semibold text-neutral-900 hover:underline"
+                                >
+                                    Quên mật khẩu?
+                                </Link>
                             </div>
 
                             {/* Submit Button */}

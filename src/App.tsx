@@ -11,6 +11,10 @@ import Contact from './pages/Contact'
 import CategoryPage from "./pages/CategoryPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
+import OtpVerifyPage from "./pages/OtpVerifyPage.tsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
+import VouchersPage from "./pages/VouchersPage.tsx";
 import OrderSuccess from "./pages/OrderSuccess.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import MyOrdersPage from "./pages/MyOrdersPage.tsx";
@@ -33,6 +37,7 @@ import ProductManage from "./pages/admin/ProductManage.tsx";
 import StaffFulfillment from "./pages/StaffFulfillment.tsx";
 import ChatbotWidget from "./components/ChatbotWidget.tsx";
 import ToastHost from "./components/ToastHost.tsx";
+import AdminStaffUsers from "./pages/admin/AdminStaffUsers.tsx";
 
 function App() {
 	return (
@@ -102,6 +107,27 @@ function App() {
 					<Footer />
 				</div>
 			} />
+			<Route path="/forgot-password" element={
+				<div className="min-h-full flex flex-col">
+					<Header />
+					<div className="flex-1"><ForgotPasswordPage /></div>
+					<Footer />
+				</div>
+			} />
+			<Route path="/verify-otp" element={
+				<div className="min-h-full flex flex-col">
+					<Header />
+					<div className="flex-1"><OtpVerifyPage /></div>
+					<Footer />
+				</div>
+			} />
+			<Route path="/reset-password" element={
+				<div className="min-h-full flex flex-col">
+					<Header />
+					<div className="flex-1"><ResetPasswordPage /></div>
+					<Footer />
+				</div>
+			} />
 			<Route path="/register" element={
 				<div className="min-h-full flex flex-col">
 					<Header />
@@ -144,6 +170,13 @@ function App() {
 					<Footer />
 				</div>
 			} />
+			<Route path="/vouchers" element={
+				<div className="min-h-full flex flex-col">
+					<Header />
+					<div className="flex-1"><VouchersPage /></div>
+					<Footer />
+				</div>
+			} />
 			{/* Admin/Staff routes without Header/Footer */}
 			<Route path="/admin" element={<Navigate to="/admin/revenue" replace />} />
 			<Route path="/admin/categories" element={<AdminCategories />} />
@@ -154,6 +187,7 @@ function App() {
 			<Route path="/admin/shipping" element={<AdminShipping />} />
 			<Route path="/admin/best-selling" element={<AdminBestSelling />} />
 			<Route path="/admin/revenue" element={<AdminRevenue />} />
+			<Route path="/admin/staff-users" element={<AdminStaffUsers />} />
 			<Route path="/admin/products/:id/manage" element={<ProductManage />} />
 			<Route path="/staff/fulfillment" element={<StaffFulfillment />} />
 			<Route path="/staff/products/:id/manage" element={<ProductManage />} />

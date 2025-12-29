@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { getUsers, updateUser, deleteUser } from "../../api/admin/usersApi";
-import { getProfile } from "../../api/authApi";
 import { Edit, Trash2 } from "lucide-react";
 import { toast } from "../../utils/toast";
 
-export default function AdminUsers() {
+export default function AdminStaffUsers() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -15,43 +14,26 @@ export default function AdminUsers() {
         email: "",
         phone: "",
         address: "",
-        role: "user",
+        role: "staff",
         isVerified: false,
     });
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
-    const [userRole, setUserRole] = useState<string>("");
-
-    useEffect(() => {
-        loadRole();
-    }, []);
 
     useEffect(() => {
         loadData();
     }, [page]);
-
-    const loadRole = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        try {
-            const profile = await getProfile(token);
-            setUserRole(profile.role);
-        } catch (err) {
-            console.error("Tải hồ sơ người dùng thất bại:", err);
-        }
-    };
 
     const loadData = async () => {
         const token = localStorage.getItem("token");
         if (!token) return;
 
         try {
-            const data = await getUsers(token, { page, limit: 10, sort: "id,-createdAt" });
+            const data = await getUsers(token, { page, limit: 10, sort: "id,-createdAt", role: "staff" });
             setUsers(data.data);
             setTotal(data.total);
         } catch (err) {
-            console.error("Tải danh sách người dùng thất bại:", err);
+            console.error("Tải danh sách nhân viên thất bại:", err);
         } finally {
             setLoading(false);
         }
@@ -60,21 +42,18 @@ export default function AdminUsers() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const token = localStorage.getItem("token");
-        if (!token) return;
+        if (!token || !editingUser) return;
 
         try {
-            const payload: any = {
+            await updateUser(token, {
                 id: editingUser.id,
                 name: formData.name,
                 email: formData.email,
                 phone: formData.phone,
                 address: formData.address,
+                role: "staff",
                 isVerified: formData.isVerified,
-            };
-            if (userRole === "admin") {
-                payload.role = formData.role;
-            }
-            await updateUser(token, payload);
+            });
 
             setShowModal(false);
             resetForm();
@@ -92,14 +71,14 @@ export default function AdminUsers() {
             email: user.email,
             phone: user.phone,
             address: user.address || "",
-            role: userRole === "admin" ? user.role : "user",
+            role: "staff",
             isVerified: user.isVerified,
         });
         setShowModal(true);
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Bạn có chắc muốn xóa người dùng này?")) return;
+        if (!confirm("Bạn chắc chắn muốn xóa nhân viên này?")) return;
 
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -119,34 +98,16 @@ export default function AdminUsers() {
             email: "",
             phone: "",
             address: "",
-            role: "user",
+            role: "staff",
             isVerified: false,
         });
         setEditingUser(null);
     };
 
-    const getRoleBadge = (role: string) => {
-        const colors: Record<string, string> = {
-            admin: "bg-purple-100 text-purple-800",
-            staff: "bg-blue-100 text-blue-800",
-            user: "bg-neutral-100 text-neutral-800",
-        };
-        const labels: Record<string, string> = {
-            admin: "Quản trị",
-            staff: "Nhân viên",
-            user: "Người dùng",
-        };
-        return (
-            <span className={`px-2 py-1 rounded text-sm ${colors[role] || "bg-neutral-100 text-neutral-800"}`}>
-                {labels[role] || role}
-            </span>
-        );
-    };
-
     return (
         <AdminLayout>
             <div>
-                <h1 className="text-3xl font-bold mb-6">Quản lý người dùng</h1>
+                <h1 className="text-3xl font-bold mb-6">Quản lý nhân viên</h1>
 
                 {loading ? (
                     <div className="text-center py-12">Đang tải...</div>
@@ -158,9 +119,8 @@ export default function AdminUsers() {
                                     <tr>
                                         <th className="px-6 py-3 text-left">ID</th>
                                         <th className="px-6 py-3 text-left">Tên</th>
-                                        <th className="px-6 py-3 text-left">Địa chỉ email</th>
+                                        <th className="px-6 py-3 text-left">Email</th>
                                         <th className="px-6 py-3 text-left">Số điện thoại</th>
-                                        <th className="px-6 py-3 text-left">Vai trò</th>
                                         <th className="px-6 py-3 text-left">Xác thực</th>
                                         <th className="px-6 py-3 text-left">Thao tác</th>
                                     </tr>
@@ -172,7 +132,6 @@ export default function AdminUsers() {
                                             <td className="px-6 py-4 font-medium">{user.name}</td>
                                             <td className="px-6 py-4">{user.email}</td>
                                             <td className="px-6 py-4">{user.phone}</td>
-                                            <td className="px-6 py-4">{getRoleBadge(user.role)}</td>
                                             <td className="px-6 py-4">
                                                 {user.isVerified ? (
                                                     <span className="text-green-600">Đã xác thực</span>
@@ -226,11 +185,10 @@ export default function AdminUsers() {
                     </>
                 )}
 
-                {/* Modal */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                            <h2 className="text-2xl font-bold mb-4">Sửa người dùng</h2>
+                            <h2 className="text-2xl font-bold mb-4">Sửa nhân viên</h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <input
                                     type="text"
@@ -242,7 +200,7 @@ export default function AdminUsers() {
                                 />
                                 <input
                                     type="email"
-                                    placeholder="Địa chỉ email"
+                                    placeholder="Email"
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -263,22 +221,6 @@ export default function AdminUsers() {
                                     value={formData.address}
                                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                 />
-                                {userRole === "admin" ? (
-                                <select
-                                    className="w-full border px-3 py-2 rounded"
-                                    value={formData.role}
-                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                    required
-                                >
-                                    <option value="user">Người dùng</option>
-                                    <option value="staff">Nhân viên</option>
-                                    <option value="admin">Quản trị</option>
-                                </select>
-                            ) : (
-                                <div className="w-full border px-3 py-2 rounded bg-neutral-50 text-neutral-600 text-sm">
-                                    Vai trò: Người dùng
-                                </div>
-                            )}
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="checkbox"
@@ -313,4 +255,3 @@ export default function AdminUsers() {
         </AdminLayout>
     );
 }
-

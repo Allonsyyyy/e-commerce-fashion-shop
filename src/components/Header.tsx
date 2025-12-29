@@ -147,6 +147,9 @@ export default function Header() {
 												<button className="w-full text-left px-4 py-2 hover:bg-neutral-50" onClick={() => { setProfileOpen(false); navigate('/profile') }}>
 													Thông tin cá nhân
 												</button>
+							<button className="w-full text-left px-4 py-2 hover:bg-neutral-50" onClick={() => { setProfileOpen(false); navigate('/vouchers') }}>
+								Voucher của tôi
+							</button>
 												<button className="w-full text-left px-4 py-2 hover:bg-neutral-50" onClick={() => { setProfileOpen(false); navigate('/orders') }}>
 													Đơn hàng của tôi
 												</button>
