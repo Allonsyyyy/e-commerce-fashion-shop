@@ -30,11 +30,11 @@ export default function ToastHost() {
 	}, []);
 
 	return (
-		<div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 w-[min(92vw,420px)]">
+		<div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-3 w-[min(94vw,520px)]">
 			{toasts.map((toastItem) => (
 				<div
 					key={toastItem.id}
-					className={`px-4 py-3 rounded-lg shadow-lg text-white text-sm text-center ${typeStyles[toastItem.type]}`}
+					className={`px-5 py-4 rounded-xl shadow-lg text-white text-base text-center ${typeStyles[toastItem.type]}`}
 				>
 					{toastItem.message}
 				</div>

@@ -200,12 +200,12 @@ export default function OrderSuccess() {
 								<h1 className="text-xl font-bold uppercase">TÊN CỬA HÀNG</h1>
 								<div className="mt-2 space-y-1 text-sm">
 									<div className="flex items-end gap-2">
-										<span className="whitespace-nowrap">Địa chỉ:</span>
-										<span className="flex-1 border-b border-dotted border-neutral-500"></span>
+										<span className="whitespace-nowrap">Địa chỉ: 96A Đ. Trần Phú, P. Mộ Lao, Hà Đông, Hà Nội</span>
+										{/*<span className="flex-1 border-b border-dotted border-neutral-500"></span>*/}
 									</div>
 									<div className="flex items-end gap-2">
-										<span className="whitespace-nowrap">ĐT:</span>
-										<span className="flex-1 border-b border-dotted border-neutral-500"></span>
+										<span className="whitespace-nowrap">ĐT: 0368895036</span>
+										{/*<span className="flex-1 border-b border-dotted border-neutral-500"></span>*/}
 									</div>
 								</div>
 							</div>

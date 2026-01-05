@@ -97,7 +97,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                             className="flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors hover:bg-neutral-800"
                         >
                             <RefreshCw size={20} />
-                            <span>Quản lý đổi trả</span>
+                            <span>Quản lý đổi hàng</span>
                         </Link>
                     </div>
                 )}

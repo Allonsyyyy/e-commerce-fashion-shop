@@ -46,7 +46,7 @@ export default function Home() {
 
 	const features = [
 		{ icon: Truck, title: "Miễn phí giao hàng", desc: "Cho đơn từ 100k" },
-		{ icon: RefreshCw, title: "Đổi trả dễ dàng", desc: "Chính sách 30 ngày" },
+		{ icon: RefreshCw, title: "Đổi hàng dễ dàng", desc: "Chính sách 30 ngày" },
 		{ icon: Shield, title: "Thanh toán an toàn", desc: "Bảo mật 100%" },
 		{ icon: Star, title: "Chất lượng cao", desc: "Chỉ sản phẩm chọn lọc" },
 	];

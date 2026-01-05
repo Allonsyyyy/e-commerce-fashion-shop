@@ -443,8 +443,8 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 			pending: "Chờ duyệt",
 			approved: "Đã duyệt",
 			shipping_new: "Đã duyệt",
-			receiving: "Đang nhận",
-			received: "Đang nhận",
+			receiving: "Hết hàng gửi",
+			received: "Hết hàng gửi",
 			completed: "Hoàn tất",
 			rejected: "Từ chối",
 		};
@@ -477,7 +477,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		const normalized = status?.toLowerCase();
 		if (normalized === "pending") return ["approve", "reject"];
 		if (normalized === "approved" || normalized === "shipping_new") return ["receive", "reject"];
-		if (normalized === "receiving" || normalized === "received") return ["complete"];
+		if (normalized === "receiving" || normalized === "received") return ["receive"];
 		return [];
 	};
 
@@ -520,7 +520,10 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 				const reason = window.prompt("Nhập lý do từ chối (không bắt buộc)")?.trim();
 				await rejectReturnRequest(token, request.id, reason || undefined);
 			} else if (action === "receive") {
-				await receiveReturnRequest(token, request.id);
+				const res = await receiveReturnRequest(token, request.id);
+				if (res?.message) {
+					toast(res.message);
+				}
 			} else if (action === "complete") {
 				await completeReturnRequest(token, request.id);
 			}
@@ -778,7 +781,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		all: "Tất cả",
 		pending: "Chờ xử lý",
 		approved: "Đã duyệt",
-		receiving: "Đang nhận",
+		receiving: "Hết hàng gửi",
 		completed: "Hoàn tất",
 		rejected: "Từ chối",
 		other: "Khác",
@@ -787,7 +790,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 		{ id: "all", label: "Tất cả", accent: "ring-neutral-200" },
 		{ id: "pending", label: "Chờ xử lý", accent: "ring-amber-200" },
 		{ id: "approved", label: "Đã duyệt", accent: "ring-blue-200" },
-		{ id: "receiving", label: "Đang nhận", accent: "ring-purple-200" },
+		{ id: "receiving", label: "Hết hàng gửi", accent: "ring-purple-200" },
 		{ id: "completed", label: "Hoàn tất", accent: "ring-emerald-200" },
 		{ id: "rejected", label: "Từ chối", accent: "ring-error-200" },
 	];
@@ -957,8 +960,8 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 										<RefreshCw className="w-6 h-6" />
 									</div>
 									<div>
-										<h1 className="text-2xl font-semibold text-neutral-900">Quản lý đổi trả</h1>
-										<p className="text-sm text-neutral-600">Xem và xử lý yêu cầu đổi trả của khách hàng với phần tóm tắt rõ ràng.</p>
+										<h1 className="text-2xl font-semibold text-neutral-900">Quản lý đổi hàng</h1>
+										<p className="text-sm text-neutral-600">Xem và xử lý yêu cầu đổi hàng của khách hàng với phần tóm tắt rõ ràng.</p>
 									</div>
 								</div>
 								<div className="flex flex-wrap gap-6 text-sm text-neutral-600">
@@ -1174,10 +1177,13 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 															{returnActionLoading === request.id ? (
 																<>
 																	<Loader2 className="w-4 h-4 animate-spin" />
-																	?ang c?p nh?t...
+																	Đang cập nhật...
 																</>
 															) : (
-																actionLabels[action]
+																action === "receive" &&
+																request.status?.toLowerCase() === "received"
+																	? "Gửi đơn hàng"
+																	: actionLabels[action]
 															)}
 														</button>
 													))}
@@ -1442,7 +1448,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 						onClick={() => setSectionTab("returns")}
 					>
 						<RefreshCw className="w-5 h-5" />
-						Quản lý đổi trả
+						Quản lý đổi hàng
 					</button>
 					<div className="mt-4 pt-4 border-t border-white/10">
 						<p className="text-xs uppercase tracking-wide text-neutral-400 mb-3">Quản lý</p>

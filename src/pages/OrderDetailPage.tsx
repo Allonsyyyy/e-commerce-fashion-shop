@@ -303,7 +303,7 @@ export default function OrderDetailPage() {
 											: returnReq.status === "rejected"
 												? "Bị từ chối - gửi lại"
 												: "Đã gửi yêu cầu"
-									: "Đổi / trả";
+									: "Đổi hàng";
 								return (
 									<div
 										key={item.id}
@@ -412,7 +412,7 @@ export default function OrderDetailPage() {
 					<div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6">
 						<div className="flex items-start justify-between mb-4">
 							<div>
-								<p className="text-xs text-neutral-500">Yêu cầu đổi / trả</p>
+								<p className="text-xs text-neutral-500">Yêu cầu đổi hàng</p>
 								<h3 className="text-lg font-semibold text-neutral-900">{returnModal.productName}</h3>
 							</div>
 							<button className="text-neutral-500 hover:text-neutral-800" onClick={closeReturnModal}>
