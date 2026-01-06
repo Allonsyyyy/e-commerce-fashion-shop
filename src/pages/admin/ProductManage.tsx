@@ -7,6 +7,7 @@ import { getColors } from "../../api/admin/colorsApi";
 import { getSizes } from "../../api/admin/sizesApi";
 import { createVariant, updateVariant, deleteVariant } from "../../api/admin/variantsApi";
 import { uploadImage, updateImage, deleteImage } from "../../api/admin/imagesApi";
+import { uploadFile } from "../../api/uploadApi";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { toast } from "../../utils/toast";
 
@@ -24,6 +25,8 @@ export default function ProductManage() {
 
 	const [showVariantModal, setShowVariantModal] = useState(false);
 	const [editingVariant, setEditingVariant] = useState<ProductVariant | null>(null);
+	const [variantImageFile, setVariantImageFile] = useState<File | null>(null);
+	const [isUploadingVariantImage, setIsUploadingVariantImage] = useState(false);
 	const [variantForm, setVariantForm] = useState({
 		sizeId: "",
 		colorId: "",
@@ -35,6 +38,8 @@ export default function ProductManage() {
 
 	const [showImageModal, setShowImageModal] = useState(false);
 	const [editingImage, setEditingImage] = useState<ProductImage | null>(null);
+	const [extraImageFile, setExtraImageFile] = useState<File | null>(null);
+	const [isUploadingExtraImage, setIsUploadingExtraImage] = useState(false);
 	const [imageForm, setImageForm] = useState({
 		imageUrl: "",
 		isMain: false,
@@ -82,6 +87,7 @@ export default function ProductManage() {
 			stock: "",
 			imageUrl: "",
 		});
+		setVariantImageFile(null);
 		setEditingVariant(null);
 	};
 
@@ -90,6 +96,7 @@ export default function ProductManage() {
 			imageUrl: "",
 			isMain: false,
 		});
+		setExtraImageFile(null);
 		setEditingImage(null);
 	};
 
@@ -126,6 +133,26 @@ export default function ProductManage() {
 			toast("Thành công!", "success");
 		} catch (err: any) {
 			toast(err.message || "Có lỗi xảy ra.", "error");
+		}
+	};
+
+	const handleVariantImageUpload = async () => {
+		const token = localStorage.getItem("token");
+		if (!token) return;
+		if (!variantImageFile) {
+			toast("Vui long chon anh truoc khi upload.", "error");
+			return;
+		}
+		setIsUploadingVariantImage(true);
+		try {
+			const { url } = await uploadFile(token, variantImageFile);
+			setVariantForm((prev) => ({ ...prev, imageUrl: url }));
+			setVariantImageFile(null);
+			toast("Upload anh thanh cong!", "success");
+		} catch (err: any) {
+			toast(err.message || "Upload anh that bai.", "error");
+		} finally {
+			setIsUploadingVariantImage(false);
 		}
 	};
 
@@ -178,6 +205,26 @@ export default function ProductManage() {
 			toast("Thành công!", "success");
 		} catch (err: any) {
 			toast(err.message || "Có lỗi xảy ra.", "error");
+		}
+	};
+
+	const handleExtraImageUpload = async () => {
+		const token = localStorage.getItem("token");
+		if (!token) return;
+		if (!extraImageFile) {
+			toast("Vui long chon anh truoc khi upload.", "error");
+			return;
+		}
+		setIsUploadingExtraImage(true);
+		try {
+			const { url } = await uploadFile(token, extraImageFile);
+			setImageForm((prev) => ({ ...prev, imageUrl: url }));
+			setExtraImageFile(null);
+			toast("Upload anh thanh cong!", "success");
+		} catch (err: any) {
+			toast(err.message || "Upload anh that bai.", "error");
+		} finally {
+			setIsUploadingExtraImage(false);
 		}
 	};
 
@@ -453,6 +500,22 @@ export default function ProductManage() {
 									value={variantForm.imageUrl}
 									onChange={(e) => setVariantForm({ ...variantForm, imageUrl: e.target.value })}
 								/>
+					<div className="flex items-center gap-2">
+						<input
+							type="file"
+							accept="image/*"
+							className="w-full border px-3 py-2 rounded"
+							onChange={(e) => setVariantImageFile(e.target.files?.[0] ?? null)}
+						/>
+						<button
+							type="button"
+							onClick={handleVariantImageUpload}
+							disabled={isUploadingVariantImage}
+							className="whitespace-nowrap bg-neutral-800 text-white px-3 py-2 rounded hover:bg-neutral-900 disabled:opacity-60"
+						>
+							{isUploadingVariantImage ? "Dang upload..." : "Upload anh"}
+						</button>
+					</div>
 								<div className="flex gap-2 pt-2">
 									<button
 										type="submit"
@@ -492,6 +555,22 @@ export default function ProductManage() {
 									onChange={(e) => setImageForm({ ...imageForm, imageUrl: e.target.value })}
 									required
 								/>
+					<div className="flex items-center gap-2">
+						<input
+							type="file"
+							accept="image/*"
+							className="w-full border px-3 py-2 rounded"
+							onChange={(e) => setExtraImageFile(e.target.files?.[0] ?? null)}
+						/>
+						<button
+							type="button"
+							onClick={handleExtraImageUpload}
+							disabled={isUploadingExtraImage}
+							className="whitespace-nowrap bg-neutral-800 text-white px-3 py-2 rounded hover:bg-neutral-900 disabled:opacity-60"
+						>
+							{isUploadingExtraImage ? "Dang upload..." : "Upload anh"}
+						</button>
+					</div>
 								<label className="flex items-center gap-2">
 									<input
 										type="checkbox"

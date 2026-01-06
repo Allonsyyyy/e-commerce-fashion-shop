@@ -33,7 +33,17 @@ export async function createProduct(token: string, payload: CreateProductPayload
         headers: authHeaders(token),
         body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        let message = text;
+        try {
+            const parsed = JSON.parse(text);
+            message = parsed?.message || message;
+        } catch {
+            // ignore JSON parse errors
+        }
+        throw new Error(message);
+    }
     return res.json();
 }
 
@@ -43,7 +53,17 @@ export async function updateProduct(token: string, payload: UpdateProductPayload
         headers: authHeaders(token),
         body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        let message = text;
+        try {
+            const parsed = JSON.parse(text);
+            message = parsed?.message || message;
+        } catch {
+            // ignore JSON parse errors
+        }
+        throw new Error(message);
+    }
     return res.json();
 }
 
@@ -52,7 +72,17 @@ export async function deleteProduct(token: string, id: number): Promise<{ messag
         method: "DELETE",
         headers: authHeaders(token),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        let message = text;
+        try {
+            const parsed = JSON.parse(text);
+            message = parsed?.message || message;
+        } catch {
+            // ignore JSON parse errors
+        }
+        throw new Error(message);
+    }
     return res.json();
 }
 

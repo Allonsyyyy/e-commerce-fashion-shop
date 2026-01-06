@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { getCategories } from "../../api/categoriesApi";
 import { createProduct, deleteProduct, updateProduct } from "../../api/admin/productsApi";
+import { uploadFile } from "../../api/uploadApi";
 import { getProducts } from "../../api/productsApi";
 import type { Category } from "../../types/category";
 import type { Product } from "../../types/product";
@@ -16,6 +17,8 @@ export default function AdminProducts() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -84,6 +87,26 @@ export default function AdminProducts() {
         }
     };
 
+    const handleMainImageUpload = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        if (!mainImageFile) {
+            toast("Vui long chon anh truoc khi upload.", "error");
+            return;
+        }
+        setIsUploading(true);
+        try {
+            const { url } = await uploadFile(token, mainImageFile);
+            setFormData((prev) => ({ ...prev, mainImageUrl: url }));
+            setMainImageFile(null);
+            toast("Upload anh thanh cong!", "success");
+        } catch (err: any) {
+            toast(err.message || "Upload anh that bai.", "error");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const handleEdit = (product: Product) => {
         setEditingProduct(product);
         setFormData({
@@ -123,6 +146,7 @@ export default function AdminProducts() {
             categoryId: "",
             mainImageUrl: "",
         });
+        setMainImageFile(null);
         setEditingProduct(null);
     };
 
@@ -278,6 +302,22 @@ export default function AdminProducts() {
                                     onChange={(e) => setFormData({ ...formData, mainImageUrl: e.target.value })}
                                     required
                                 />
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="w-full border px-3 py-2 rounded"
+                                        onChange={(e) => setMainImageFile(e.target.files?.[0] ?? null)}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleMainImageUpload}
+                                        disabled={isUploading}
+                                        className="whitespace-nowrap bg-neutral-800 text-white px-3 py-2 rounded hover:bg-neutral-900 disabled:opacity-60"
+                                    >
+                                        {isUploading ? "Dang upload..." : "Upload anh"}
+                                    </button>
+                                </div>
                                 <div className="flex gap-2">
                                     <button
                                         type="submit"

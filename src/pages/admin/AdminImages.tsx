@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { getProducts } from "../../api/productsApi";
 import { uploadImage, updateImage, deleteImage } from "../../api/admin/imagesApi";
+import { uploadFile } from "../../api/uploadApi";
 import type { Product } from "../../types/product";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { toast } from "../../utils/toast";
@@ -12,6 +13,8 @@ export default function AdminImages() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingImage, setEditingImage] = useState<any | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState({
         productId: "",
         imageUrl: "",
@@ -71,6 +74,26 @@ export default function AdminImages() {
         }
     };
 
+    const handleImageUpload = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        if (!imageFile) {
+            toast("Vui long chon anh truoc khi upload.", "error");
+            return;
+        }
+        setIsUploading(true);
+        try {
+            const { url } = await uploadFile(token, imageFile);
+            setFormData((prev) => ({ ...prev, imageUrl: url }));
+            setImageFile(null);
+            toast("Upload anh thanh cong!", "success");
+        } catch (err: any) {
+            toast(err.message || "Upload anh that bai.", "error");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const handleEdit = (image: any) => {
         setEditingImage(image);
         setFormData({
@@ -102,6 +125,7 @@ export default function AdminImages() {
             imageUrl: "",
             isMain: false,
         });
+        setImageFile(null);
         setEditingImage(null);
     };
 
@@ -198,6 +222,22 @@ export default function AdminImages() {
                                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                                     required
                                 />
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="w-full border px-3 py-2 rounded"
+                                        onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleImageUpload}
+                                        disabled={isUploading}
+                                        className="whitespace-nowrap bg-neutral-800 text-white px-3 py-2 rounded hover:bg-neutral-900 disabled:opacity-60"
+                                    >
+                                        {isUploading ? "Dang upload..." : "Upload anh"}
+                                    </button>
+                                </div>
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="checkbox"

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { getProducts } from "../../api/productsApi";
 import { createVariant, updateVariant, deleteVariant } from "../../api/admin/variantsApi";
+import { uploadFile } from "../../api/uploadApi";
 import { getColors } from "../../api/admin/colorsApi";
 import { getSizes } from "../../api/admin/sizesApi";
 import type { ProductVariant } from "../../types/product";
@@ -17,6 +18,8 @@ export default function AdminVariants() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingVariant, setEditingVariant] = useState<ProductVariant | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState({
         productId: "",
         sizeId: "",
@@ -90,6 +93,26 @@ export default function AdminVariants() {
         }
     };
 
+    const handleImageUpload = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        if (!imageFile) {
+            toast("Vui long chon anh truoc khi upload.", "error");
+            return;
+        }
+        setIsUploading(true);
+        try {
+            const { url } = await uploadFile(token, imageFile);
+            setFormData((prev) => ({ ...prev, imageUrl: url }));
+            setImageFile(null);
+            toast("Upload anh thanh cong!", "success");
+        } catch (err: any) {
+            toast(err.message || "Upload anh that bai.", "error");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const handleEdit = (variant: ProductVariant) => {
         setEditingVariant(variant);
         setFormData({
@@ -129,6 +152,7 @@ export default function AdminVariants() {
             stock: "",
             imageUrl: "",
         });
+        setImageFile(null);
         setEditingVariant(null);
     };
 
@@ -272,6 +296,22 @@ export default function AdminVariants() {
                                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                                     required
                                 />
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="w-full border px-3 py-2 rounded"
+                                        onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleImageUpload}
+                                        disabled={isUploading}
+                                        className="whitespace-nowrap bg-neutral-800 text-white px-3 py-2 rounded hover:bg-neutral-900 disabled:opacity-60"
+                                    >
+                                        {isUploading ? "Dang upload..." : "Upload anh"}
+                                    </button>
+                                </div>
                                 <div className="flex gap-2">
                                     <button
                                         type="submit"
