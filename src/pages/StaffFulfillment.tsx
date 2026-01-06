@@ -844,7 +844,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 						<div className="flex gap-2 w-full md:w-auto">
 							<input
 								className="input w-full md:w-72"
-								placeholder="Tìm theo sản phẩm hoặc khách hàng"
+								placeholder="Tìm theo bình luận hoặc phản hồi"
 								value={reviewSearchInput}
 								onChange={(e) => setReviewSearchInput(e.target.value)}
 							/>
@@ -860,7 +860,7 @@ const isNameMatch = (keyword: string, target: string, extensions?: string[]) => 
 										setReviewSearchInput("");
 									}}
 								>
-									X?a l?c
+									Xóa lọc
 								</button>
 							)}
 						</div>
