@@ -55,6 +55,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     // Menu items for Admin (only analytics)
     const adminMenuItems = [
+        { path: "/admin/product-sales", icon: Package, label: "Sản phẩm" },
         { path: "/admin/best-selling", icon: TrendingUp, label: "Bán chạy" },
         { path: "/admin/revenue", icon: DollarSign, label: "Doanh thu" },
         { path: "/admin/staff-users", icon: Users, label: "Nhân viên" },

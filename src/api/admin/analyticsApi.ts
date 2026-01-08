@@ -59,6 +59,18 @@ export async function getBestSellingProducts(token: string, params?: {
     return res.json();
 }
 
+export async function getProductSales(token: string, params?: {
+    startDate?: string;
+    endDate?: string;
+}): Promise<BestSellingProduct[]> {
+    const url = `${API_BASE}/reports/product-sales${buildQuery(params)}`;
+    const res = await fetch(url, {
+        headers: authHeaders(token),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
 export async function getRevenueByMonth(token: string, params?: {
     startDate?: string;
     endDate?: string;

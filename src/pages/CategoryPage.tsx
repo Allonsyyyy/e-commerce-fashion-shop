@@ -12,10 +12,13 @@ export default function CategoryPage() {
     const [tabCategories, setTabCategories] = useState<Category[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [page, setPage] = useState(1);
+    const limit = 8;
 
     useEffect(() => {
         if (!id) return;
         setLoading(true);
+        setPage(1);
 
         (async () => {
             try {
@@ -59,6 +62,10 @@ export default function CategoryPage() {
 
     if (loading) return <div className="py-20 text-center text-neutral-500">Đang tải danh mục...</div>;
     if (!category) return <div className="py-20 text-center text-red-500">Không tìm thấy danh mục.</div>;
+
+    const totalPages = Math.max(1, Math.ceil(products.length / limit));
+    const start = (page - 1) * limit;
+    const pagedProducts = products.slice(start, start + limit);
 
     // Determine if ROOT NAV should be shown
     const showRootNav = category.parent && rootCategories.length > 1;
@@ -115,6 +122,9 @@ export default function CategoryPage() {
                     {category.description && (
                         <p className="body-text text-neutral-600">{category.description}</p>
                     )}
+                    <p className="body-small text-neutral-600 mt-2">
+                        Hiển thị {pagedProducts.length} / {products.length} kết quả
+                    </p>
                 </div>
 
                 {/* PRODUCT GRID */}
@@ -124,7 +134,7 @@ export default function CategoryPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {products.map((p) => (
+                        {pagedProducts.map((p) => (
                             <ProductCard
                                 key={p.id}
                                 title={p.name}
@@ -134,6 +144,28 @@ export default function CategoryPage() {
                                 to={`/product/${p.id}`}
                             />
                         ))}
+                    </div>
+                )}
+
+                {totalPages > 1 && (
+                    <div className="mt-10 flex items-center justify-center gap-4">
+                        <button
+                            className="btn-secondary px-4 py-2"
+                            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                            disabled={page === 1}
+                        >
+                            Trước
+                        </button>
+                        <span className="body-small">
+                            Trang {page} / {totalPages}
+                        </span>
+                        <button
+                            className="btn-secondary px-4 py-2"
+                            onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                            disabled={page >= totalPages}
+                        >
+                            Sau
+                        </button>
                     </div>
                 )}
 

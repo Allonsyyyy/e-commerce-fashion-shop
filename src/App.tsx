@@ -32,6 +32,7 @@ import AdminUsers from "./pages/admin/AdminUsers.tsx";
 import AdminInventory from "./pages/admin/AdminInventory.tsx";
 import AdminShipping from "./pages/admin/AdminShipping.tsx";
 import AdminBestSelling from "./pages/admin/AdminBestSelling.tsx";
+import AdminProductSales from "./pages/admin/AdminProductSales.tsx";
 import AdminRevenue from "./pages/admin/AdminRevenue.tsx";
 import ProductManage from "./pages/admin/ProductManage.tsx";
 import StaffFulfillment from "./pages/StaffFulfillment.tsx";
@@ -186,6 +187,7 @@ function App() {
 			<Route path="/admin/discounts" element={<AdminDiscounts />} />
 			<Route path="/admin/shipping" element={<AdminShipping />} />
 			<Route path="/admin/best-selling" element={<AdminBestSelling />} />
+			<Route path="/admin/product-sales" element={<AdminProductSales />} />
 			<Route path="/admin/revenue" element={<AdminRevenue />} />
 			<Route path="/admin/staff-users" element={<AdminStaffUsers />} />
 			<Route path="/admin/products/:id/manage" element={<ProductManage />} />

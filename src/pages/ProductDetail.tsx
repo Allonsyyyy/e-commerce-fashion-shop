@@ -311,7 +311,7 @@ export default function ProductDetail() {
 
 					{!outOfStock && (
 						<div className="mt-4 text-sm text-neutral-600">
-							{`Ton kho: ${availableStock} san pham`}
+							{`Tồn kho: ${availableStock} sản phẩm`}
 						</div>
 					)}
 					{outOfStock && (

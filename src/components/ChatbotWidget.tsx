@@ -28,13 +28,29 @@ export default function ChatbotWidget() {
 		setLoading(true);
 
 		try {
+			const getGuestId = () => {
+				let guestId = localStorage.getItem("guestId");
+				if (!guestId) {
+					guestId = crypto.randomUUID();
+					localStorage.setItem("guestId", guestId);
+				}
+				return guestId;
+			};
+
+			const guestId = getGuestId();
+
+			const token = localStorage.getItem("token");
+
 			const res = await fetch("http://localhost:3000/api/v1/chatbot/message", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Accept: "*/*",
+					...(token && {
+						Authorization: `Bearer ${token}`,
+					}),
 				},
-				body: JSON.stringify({ message: userMessage.text }),
+				body: JSON.stringify({ message: userMessage.text , guestId}),
 			});
 
 			const data = await res.json();
