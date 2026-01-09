@@ -299,7 +299,7 @@ export default function OrderDetailPage() {
 										? "Sản phẩm đang tạm hết hàng. Vui lòng đợi 1-2 ngày."
 										: exchangeStatus === "SHIPPING_NEW"
 											? "Đơn hàng đang được giao vui lòng chú ý điện thoại."
-											: null;
+											:exchangeStatus === "COMPLETED"? "Đổi hàng thành công" :null;
 								const returnDisabled =
 									!canReturn || (returnReq?.hasRequest && returnReq.status !== "rejected") || returnSubmitting;
 								const returnLabel = returnReq?.hasRequest
