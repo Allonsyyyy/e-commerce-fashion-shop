@@ -191,7 +191,6 @@ export default function Header() {
 							<Link to="/cart" className="relative inline-flex items-center gap-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors">
 								<ShoppingCart className="h-5 w-5" />
 								<span className="hidden sm:inline">Giỏ hàng</span>
-								<span className="absolute -right-2 -top-2 h-5 min-w-5 px-1.5 rounded-full bg-neutral-900 text-white text-[10px] font-semibold flex items-center justify-center">0</span>
 							</Link>
 
 							<button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-neutral-700 hover:text-neutral-900">
