@@ -228,7 +228,7 @@ export default function ProfilePage() {
 							{isEditing && (
 								<div className="w-full">
 									<label className="block text-sm font-medium text-neutral-700 mb-2">
-										Anh dai dien
+										Ảnh đại diện
 									</label>
 									<input
 										type="file"
@@ -305,7 +305,7 @@ export default function ProfilePage() {
 											className="btn-secondary"
 											onClick={cancelEdit}
 										>
-											Huy
+											Hủy
 										</button>
 									</div>
 								</form>

@@ -148,9 +148,9 @@ export default function ProductManage() {
 			const { url } = await uploadFile(token, variantImageFile);
 			setVariantForm((prev) => ({ ...prev, imageUrl: url }));
 			setVariantImageFile(null);
-			toast("Upload anh thanh cong!", "success");
+			toast("Upload ảnh thành công!", "success");
 		} catch (err: any) {
-			toast(err.message || "Upload anh that bai.", "error");
+			toast(err.message || "Upload ảnh thất bại.", "error");
 		} finally {
 			setIsUploadingVariantImage(false);
 		}
@@ -220,9 +220,9 @@ export default function ProductManage() {
 			const { url } = await uploadFile(token, extraImageFile);
 			setImageForm((prev) => ({ ...prev, imageUrl: url }));
 			setExtraImageFile(null);
-			toast("Upload anh thanh cong!", "success");
+			toast("Upload ảnh thành công!", "success");
 		} catch (err: any) {
-			toast(err.message || "Upload anh that bai.", "error");
+			toast(err.message || "Upload ảnh thất bại.", "error");
 		} finally {
 			setIsUploadingExtraImage(false);
 		}
@@ -437,8 +437,8 @@ export default function ProductManage() {
 
 				{/* Variant Modal */}
 				{showVariantModal && (
-					<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-						<div className="bg-white rounded-lg p-6 w-full max-w-md">
+					<div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
+						<div className="bg-white rounded-lg p-6 w-full max-w-md border border-neutral-200 shadow-2xl">
 							<h2 className="text-xl font-bold mb-4">
 								{editingVariant ? "Sửa biến thể" : "Thêm biến thể"}
 							</h2>
@@ -513,7 +513,7 @@ export default function ProductManage() {
 							disabled={isUploadingVariantImage}
 							className="whitespace-nowrap bg-neutral-800 text-white px-3 py-2 rounded hover:bg-neutral-900 disabled:opacity-60"
 						>
-							{isUploadingVariantImage ? "Dang upload..." : "Upload anh"}
+							{isUploadingVariantImage ? "Đang upload..." : "Upload ảnh"}
 						</button>
 					</div>
 								<div className="flex gap-2 pt-2">
@@ -541,8 +541,8 @@ export default function ProductManage() {
 
 				{/* Image Modal */}
 				{showImageModal && (
-					<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-						<div className="bg-white rounded-lg p-6 w-full max-w-md">
+					<div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
+						<div className="bg-white rounded-lg p-6 w-full max-w-md border border-neutral-200 shadow-2xl">
 							<h2 className="text-xl font-bold mb-4">
 								{editingImage ? "Sửa ảnh" : "Thêm ảnh"}
 							</h2>
@@ -568,7 +568,7 @@ export default function ProductManage() {
 							disabled={isUploadingExtraImage}
 							className="whitespace-nowrap bg-neutral-800 text-white px-3 py-2 rounded hover:bg-neutral-900 disabled:opacity-60"
 						>
-							{isUploadingExtraImage ? "Dang upload..." : "Upload anh"}
+							{isUploadingExtraImage ? "Đang upload..." : "Upload ảnh"}
 						</button>
 					</div>
 								<label className="flex items-center gap-2">

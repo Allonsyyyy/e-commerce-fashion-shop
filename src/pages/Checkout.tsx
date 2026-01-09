@@ -4,6 +4,7 @@ import Container from "../components/Container";
 import { getCart } from "../api/cartApi";
 import { buyNow, checkoutFromCart } from "../api/ordersApi";
 import { applyDiscount } from "../api/discountsApi";
+import { toast } from "../utils/toast";
 import {
 	calculateShippingFee,
 	fetchDistricts,
@@ -31,6 +32,8 @@ const currencyFormatter = new Intl.NumberFormat("vi-VN", {
 });
 
 const formatCurrency = (value: number) => currencyFormatter.format(Number(value) || 0);
+const normalizePhone = (value: string) => value.replace(/\D/g, "").slice(0, 11);
+const isPhoneValid = (value: string) => /^0\d{9,10}$/.test(value);
 
 export default function Checkout() {
 	const navigate = useNavigate();
@@ -38,7 +41,6 @@ export default function Checkout() {
 	const isBuyNowMode = searchParams.get("mode") === "buy-now";
 	const [cart, setCart] = useState<any | null>(null);
 	const [loadingCart, setLoadingCart] = useState(true);
-	const [globalError, setGlobalError] = useState<string | null>(null);
 	const [buyNowItem, setBuyNowItem] = useState<BuyNowSession | null>(null);
 
 	const [provinces, setProvinces] = useState<Province[]>([]);
@@ -99,13 +101,12 @@ export default function Checkout() {
 		}
 
 		setLoadingCart(true);
-		setGlobalError(null);
 
 		getCart(token)
 			.then((data) => setCart(data))
 			.catch((err: unknown) => {
 				console.error(err);
-				setGlobalError("Không tải được giỏ hàng. Vui lòng thử lại.");
+				toast("Không tải được giỏ hàng. Vui lòng thử lại.");
 			})
 			.finally(() => setLoadingCart(false));
 	}, [navigate, isBuyNowMode]);
@@ -115,7 +116,7 @@ export default function Checkout() {
 			.then(setProvinces)
 			.catch((err: unknown) => {
 				console.error(err);
-				setGlobalError("Không tải được danh sách tỉnh/thành.");
+				toast("Không tải được danh sách tỉnh/thành.");
 			});
 	}, []);
 
@@ -133,7 +134,7 @@ export default function Checkout() {
 			.then(setDistricts)
 			.catch((err: unknown) => {
 				console.error(err);
-				setGlobalError("Không tải được danh sách quận/huyện.");
+				toast("Không tải được danh sách quận/huyện.");
 			});
 	}, [provinceId]);
 
@@ -149,7 +150,7 @@ export default function Checkout() {
 			.then(setWards)
 			.catch((err: unknown) => {
 				console.error(err);
-				setGlobalError("Không tải được danh sách phường/xã.");
+				toast("Không tải được danh sách phường/xã.");
 			});
 	}, [districtId]);
 
@@ -244,9 +245,15 @@ export default function Checkout() {
 	}, [subtotal]);
 
 	const cartIsEmpty = isBuyNowMode ? !buyNowItem : !cart?.items?.length;
+	const phoneError =
+		form.phone && !isPhoneValid(form.phone)
+			? "Số điện thoại không hợp lệ"
+			: null;
+	const isPhoneOk = Boolean(form.phone) && !phoneError;
 	const canPlaceOrder =
 		!cartIsEmpty &&
-		Boolean(form.fullName && form.phone && form.street && wardCode) &&
+		Boolean(form.fullName && form.street && wardCode) &&
+		isPhoneOk &&
 		shippingFee !== null &&
 		!isSubmitting;
 
@@ -304,12 +311,16 @@ export default function Checkout() {
 	};
 
 	const handlePlaceOrder = async () => {
+		if (phoneError) {
+			toast(phoneError);
+			return;
+		}
 		if (!canPlaceOrder) {
-			setGlobalError("Vui lòng điền đủ thông tin và chờ tính phí vận chuyển.");
+			toast("Vui lòng điền đủ thông tin và chờ tính phí vận chuyển.");
 			return;
 		}
 		if (isBuyNowMode && !buyNowItem) {
-			setGlobalError("Sản phẩm bạn chọn không còn khả dụng. Vui lòng thử lại.");
+			toast("Sản phẩm bạn chọn không còn khả dụng. Vui lòng thử lại.");
 			return;
 		}
 
@@ -333,7 +344,6 @@ export default function Checkout() {
 
 		try {
 			setIsSubmitting(true);
-			setGlobalError(null);
 
 			const commonPayload = {
 				paymentMethod,
@@ -390,7 +400,7 @@ export default function Checkout() {
 		} catch (err: any) {
 			console.error(err);
 			const message = err?.message || "Thanh toán thất bại. Vui lòng thử lại.";
-			setGlobalError(message);
+			toast(message);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -432,11 +442,6 @@ export default function Checkout() {
 		<main className="py-12">
 			<Container>
 				<h1 className="heading-3">Thanh toán</h1>
-				{globalError && (
-					<div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-						{globalError}
-					</div>
-				)}
 				<div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
 					<form
 						className="lg:col-span-2 space-y-6"
@@ -455,13 +460,19 @@ export default function Checkout() {
 									onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))}
 									required
 								/>
-								<input
-									className="input"
-									placeholder="Số điện thoại"
-									value={form.phone}
-									onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
-									required
-								/>
+								<div>
+									<input
+										className={phoneError ? "input border-red-500 focus:border-red-500" : "input"}
+										placeholder="Số điện thoại"
+										value={form.phone}
+										onChange={(e) =>
+											setForm((prev) => ({ ...prev, phone: normalizePhone(e.target.value) }))
+										}
+										inputMode="numeric"
+										required
+									/>
+									{phoneError && <p className="mt-1 text-sm text-red-600">{phoneError}</p>}
+								</div>
 							</div>
 							<div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
 								<select

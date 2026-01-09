@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
-import { getUsers, updateUser, deleteUser } from "../../api/admin/usersApi";
+import { getUsers, updateUser, deleteUser, createStaffUser } from "../../api/admin/usersApi";
 import { Edit, Trash2 } from "lucide-react";
 import { toast } from "../../utils/toast";
 
@@ -14,8 +14,8 @@ export default function AdminStaffUsers() {
         email: "",
         phone: "",
         address: "",
+        password: "",
         role: "staff",
-        isVerified: false,
     });
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
@@ -42,25 +42,38 @@ export default function AdminStaffUsers() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const token = localStorage.getItem("token");
-        if (!token || !editingUser) return;
+        if (!token) return;
 
         try {
-            await updateUser(token, {
-                id: editingUser.id,
-                name: formData.name,
-                email: formData.email,
-                phone: formData.phone,
-                address: formData.address,
-                role: "staff",
-                isVerified: formData.isVerified,
-            });
+            if (editingUser) {
+                const payload: any = {
+                    id: editingUser.id,
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    address: formData.address,
+                    role: "staff",
+                };
+                if (formData.password) {
+                    payload.password = formData.password;
+                }
+                await updateUser(token, payload);
+            } else {
+                await createStaffUser(token, {
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password,
+                    phone: formData.phone,
+                    address: formData.address,
+                });
+            }
 
             setShowModal(false);
             resetForm();
             loadData();
-            toast("Thành công!");
+            toast("Thanh cong!");
         } catch (err: any) {
-            toast(err.message || "Có lỗi xảy ra!");
+            toast(err.message || "Co loi xay ra!");
         }
     };
 
@@ -71,8 +84,8 @@ export default function AdminStaffUsers() {
             email: user.email,
             phone: user.phone,
             address: user.address || "",
+            password: "",
             role: "staff",
-            isVerified: user.isVerified,
         });
         setShowModal(true);
     };
@@ -98,8 +111,8 @@ export default function AdminStaffUsers() {
             email: "",
             phone: "",
             address: "",
+            password: "",
             role: "staff",
-            isVerified: false,
         });
         setEditingUser(null);
     };
@@ -107,7 +120,18 @@ export default function AdminStaffUsers() {
     return (
         <AdminLayout>
             <div>
-                <h1 className="text-3xl font-bold mb-6">Quản lý nhân viên</h1>
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-3xl font-bold">Quản lý nhân viên</h1>
+                    <button
+                        onClick={() => {
+                            resetForm();
+                            setShowModal(true);
+                        }}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                        Thêm nhân viên
+                    </button>
+                </div>
 
                 {loading ? (
                     <div className="text-center py-12">Đang tải...</div>
@@ -186,9 +210,11 @@ export default function AdminStaffUsers() {
                 )}
 
                 {showModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                            <h2 className="text-2xl font-bold mb-4">Sửa nhân viên</h2>
+                    <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-md border border-neutral-200 shadow-2xl">
+                            <h2 className="text-2xl font-bold mb-4">
+                                {editingUser ? "Sửa nhân viên" : "Thêm nhân viên"}
+                            </h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <input
                                     type="text"
@@ -221,20 +247,22 @@ export default function AdminStaffUsers() {
                                     value={formData.address}
                                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                 />
-                                <label className="flex items-center gap-2">
+                                {!editingUser && (
                                     <input
-                                        type="checkbox"
-                                        checked={formData.isVerified}
-                                        onChange={(e) => setFormData({ ...formData, isVerified: e.target.checked })}
+                                        type="password"
+                                        placeholder="Mat khau"
+                                        className="w-full border px-3 py-2 rounded"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        required
                                     />
-                                    <span>Đã xác thực</span>
-                                </label>
+                                )}
                                 <div className="flex gap-2">
                                     <button
                                         type="submit"
                                         className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
                                     >
-                                        Cập nhật
+                                        {editingUser ? "Cap nhat" : "Tao moi"}
                                     </button>
                                     <button
                                         type="button"

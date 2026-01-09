@@ -87,7 +87,7 @@ export default function AdminProductSales() {
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-12">Dang tai...</div>
+                    <div className="text-center py-12">Đang tải...</div>
                 ) : products.length === 0 ? (
                     <div className="bg-white rounded-lg shadow p-8 text-center text-neutral-500">
                         Không có dữ liệu trong khoảng thời gian đã chọn.

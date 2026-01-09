@@ -105,9 +105,9 @@ export default function AdminVariants() {
             const { url } = await uploadFile(token, imageFile);
             setFormData((prev) => ({ ...prev, imageUrl: url }));
             setImageFile(null);
-            toast("Upload anh thanh cong!", "success");
+            toast("Upload ảnh thành công!", "success");
         } catch (err: any) {
-            toast(err.message || "Upload anh that bai.", "error");
+            toast(err.message || "Upload ảnh thất bại.", "error");
         } finally {
             setIsUploading(false);
         }
@@ -219,8 +219,8 @@ export default function AdminVariants() {
 
                 {/* Modal */}
                 {showModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                    <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-md border border-neutral-200 shadow-2xl">
                             <h2 className="text-2xl font-bold mb-4">
                                 {editingVariant ? "Sửa biến thể" : "Thêm biến thể"}
                             </h2>
@@ -309,7 +309,7 @@ export default function AdminVariants() {
                                         disabled={isUploading}
                                         className="whitespace-nowrap bg-neutral-800 text-white px-3 py-2 rounded hover:bg-neutral-900 disabled:opacity-60"
                                     >
-                                        {isUploading ? "Dang upload..." : "Upload anh"}
+                                        {isUploading ? "Đang upload..." : "Upload ảnh"}
                                     </button>
                                 </div>
                                 <div className="flex gap-2">

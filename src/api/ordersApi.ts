@@ -21,6 +21,22 @@ const authHeaders = (token: string) => ({
     Authorization: `Bearer ${token}`,
 });
 
+const parseErrorMessage = (text: string) => {
+    try {
+        const parsed = JSON.parse(text);
+        const message = parsed?.message ?? parsed?.error;
+        if (Array.isArray(message)) {
+            return message.join(", ");
+        }
+        if (typeof message === "string" && message.trim()) {
+            return message;
+        }
+    } catch {
+        // ignore parse errors
+    }
+    return text;
+};
+
 export type OrderItem = {
     id: number;
     quantity: number;
@@ -84,7 +100,10 @@ export async function getUserOrders(
             Authorization: `Bearer ${token}`,
         },
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseErrorMessage(text));
+    }
     return res.json();
 }
 
@@ -94,7 +113,10 @@ export async function getUserOrder(token: string, id: number): Promise<Order> {
             Authorization: `Bearer ${token}`,
         },
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseErrorMessage(text));
+    }
     return res.json();
 }
 
@@ -107,7 +129,10 @@ export async function buyNow(
         headers: authHeaders(token),
         body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseErrorMessage(text));
+    }
     return res.json();
 }
 
@@ -120,6 +145,9 @@ export async function checkoutFromCart(
         headers: authHeaders(token),
         body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseErrorMessage(text));
+    }
     return res.json();
 }

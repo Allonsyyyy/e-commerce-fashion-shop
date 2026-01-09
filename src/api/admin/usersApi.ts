@@ -5,6 +5,22 @@ const authHeaders = (token: string) => ({
     Authorization: `Bearer ${token}`,
 });
 
+const parseErrorMessage = (text: string) => {
+    try {
+        const parsed = JSON.parse(text);
+        const message = parsed?.message ?? parsed?.error;
+        if (Array.isArray(message)) {
+            return message.join(", ");
+        }
+        if (typeof message === "string" && message.trim()) {
+            return message;
+        }
+    } catch {
+        // ignore parse errors
+    }
+    return text;
+};
+
 export type User = {
     id: number;
     name: string;
@@ -35,6 +51,14 @@ export type UpdateUserPayload = {
     isVerified?: boolean;
 };
 
+export type CreateStaffUserPayload = {
+    name: string;
+    email: string;
+    password: string;
+    phone: string;
+    address?: string;
+};
+
 export async function getUsers(token: string, params?: {
     page?: number;
     limit?: number;
@@ -51,7 +75,10 @@ export async function getUsers(token: string, params?: {
     const res = await fetch(url, {
         headers: authHeaders(token),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseErrorMessage(text));
+    }
     return res.json();
 }
 
@@ -59,7 +86,10 @@ export async function getUser(token: string, id: number): Promise<User> {
     const res = await fetch(`${API_BASE}/users/${id}`, {
         headers: authHeaders(token),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseErrorMessage(text));
+    }
     return res.json();
 }
 
@@ -69,7 +99,10 @@ export async function updateUser(token: string, payload: UpdateUserPayload): Pro
         headers: authHeaders(token),
         body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseErrorMessage(text));
+    }
     return res.json();
 }
 
@@ -78,7 +111,23 @@ export async function deleteUser(token: string, id: number): Promise<{ message: 
         method: "DELETE",
         headers: authHeaders(token),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseErrorMessage(text));
+    }
+    return res.json();
+}
+
+export async function createStaffUser(token: string, payload: CreateStaffUserPayload): Promise<User> {
+    const res = await fetch(`${API_BASE}/users/staff/create`, {
+        method: "POST",
+        headers: authHeaders(token),
+        body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(parseErrorMessage(text));
+    }
     return res.json();
 }
 

@@ -293,6 +293,13 @@ export default function OrderDetailPage() {
 								const reviewed = status?.hasReview;
 								const canCommentFlag = status?.canComment;
 								const returnReq = returnStatus[item.id];
+								const exchangeStatus = item.exchange?.status ? String(item.exchange.status).toUpperCase() : "";
+								const exchangeMessage =
+									exchangeStatus === "RECEIVED"
+										? "Sản phẩm đang tạm hết hàng. Vui lòng đợi 1-2 ngày."
+										: exchangeStatus === "SHIPPING_NEW"
+											? "Đơn hàng đang được giao vui lòng chú ý điện thoại."
+											: null;
 								const returnDisabled =
 									!canReturn || (returnReq?.hasRequest && returnReq.status !== "rejected") || returnSubmitting;
 								const returnLabel = returnReq?.hasRequest
@@ -314,6 +321,9 @@ export default function OrderDetailPage() {
 												{item.variant?.product?.name} x {item.quantity}
 											</p>
 											<p className="text-xs text-neutral-500">Mã SKU: {item.variant?.sku || "Không có"}</p>
+											{exchangeMessage && (
+												<p className="text-xs text-amber-700 mt-1">{exchangeMessage}</p>
+											)}
 										</div>
 										<div className="flex flex-wrap gap-2">
 											<button
@@ -436,7 +446,7 @@ export default function OrderDetailPage() {
 								<div className="border border-dashed border-neutral-300 rounded-lg p-4 bg-neutral-50">
 									<label className="flex flex-col gap-2 text-sm text-neutral-700 cursor-pointer">
 										<span className="inline-flex items-center justify-center px-3 py-2 bg-white border border-neutral-300 rounded-md hover:bg-neutral-100">
-											Chọn ảnh (có thể chọn nhiều ảnh)
+											Chọn ảnh
 										</span>
 										<input
 											type="file"

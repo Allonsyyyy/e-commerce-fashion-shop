@@ -225,17 +225,19 @@ export default function ProductDetail() {
 										{uniqueColors.map((color) => {
 											if (!color) return null;
 											const disabled = !isColorAvailable(color.id);
+											const isSelected = selectedColorId === color.id;
 											return (
 												<button
 													key={color.id}
 													className={`px-3 py-1 rounded-md border ${
-														selectedColorId === color.id ? "border-neutral-900" : "border-neutral-300"
+														isSelected ? "border-neutral-900" : "border-neutral-300"
 													} ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
 													disabled={disabled}
 													onClick={() => {
-														const nextColorId = color.id;
+														const nextColorId = isSelected ? null : color.id;
 														let nextSizeId = selectedSizeId;
 														if (
+															!isSelected &&
 															nextSizeId &&
 															!variants.some((v) => v.color?.id === nextColorId && v.size?.id === nextSizeId)
 														) {
@@ -260,17 +262,19 @@ export default function ProductDetail() {
 										{uniqueSizes.map((size) => {
 											if (!size) return null;
 											const disabled = !isSizeAvailable(size.id);
+											const isSelected = selectedSizeId === size.id;
 											return (
 												<button
 													key={size.id + "-size"}
 													className={`px-3 py-1 rounded-md border ${
-														selectedSizeId === size.id ? "border-neutral-900" : "border-neutral-300"
+														isSelected ? "border-neutral-900" : "border-neutral-300"
 													} ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
 													disabled={disabled}
 													onClick={() => {
-														const nextSizeId = size.id;
+														const nextSizeId = isSelected ? null : size.id;
 														let nextColorId = selectedColorId;
 														if (
+															!isSelected &&
 															nextColorId &&
 															!variants.some((v) => v.color?.id === nextColorId && v.size?.id === nextSizeId)
 														) {
@@ -292,7 +296,7 @@ export default function ProductDetail() {
 
 																	{/* QUANTITY */}
 					<div className="mt-4">
-						<label className="block text-sm text-neutral-700 mb-1">So luong</label>
+						<label className="block text-sm text-neutral-700 mb-1">Số lượng</label>
 						<input
 							type="number"
 							min={1}
