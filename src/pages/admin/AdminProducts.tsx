@@ -24,7 +24,6 @@ export default function AdminProducts() {
         description: "",
         price: "",
         discount: "",
-        stock: "",
         categoryId: "",
         mainImageUrl: "",
     });
@@ -67,7 +66,6 @@ export default function AdminProducts() {
                 description: formData.description,
                 price: parseFloat(formData.price),
                 discount: parseFloat(formData.discount),
-                stock: parseInt(formData.stock),
                 categoryId: parseInt(formData.categoryId),
                 mainImageUrl: formData.mainImageUrl,
             };
@@ -114,7 +112,6 @@ export default function AdminProducts() {
             description: product.description,
             price: product.price,
             discount: product.discount,
-            stock: product.stock.toString(),
             categoryId: product.categoryId.toString(),
             mainImageUrl: product.mainImageUrl || "",
         });
@@ -142,7 +139,6 @@ export default function AdminProducts() {
             description: "",
             price: "",
             discount: "",
-            stock: "",
             categoryId: "",
             mainImageUrl: "",
         });
@@ -271,14 +267,6 @@ export default function AdminProducts() {
                                     className="w-full border px-3 py-2 rounded"
                                     value={formData.discount}
                                     onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
-                                    required
-                                />
-                                <input
-                                    type="number"
-                                    placeholder="Tồn kho"
-                                    className="w-full border px-3 py-2 rounded"
-                                    value={formData.stock}
-                                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                                     required
                                 />
                                 <select

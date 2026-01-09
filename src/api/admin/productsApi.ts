@@ -11,7 +11,6 @@ export type CreateProductPayload = {
     description: string;
     price: number;
     discount: number;
-    stock: number;
     categoryId: number;
     mainImageUrl: string;
 };
@@ -22,7 +21,6 @@ export type UpdateProductPayload = {
     description?: string;
     price?: number;
     discount?: number;
-    stock?: number;
     categoryId?: number;
     mainImageUrl?: string;
 };
@@ -85,4 +83,3 @@ export async function deleteProduct(token: string, id: number): Promise<{ messag
     }
     return res.json();
 }
-
